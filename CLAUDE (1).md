@@ -29,10 +29,15 @@ src/
 
 ## Codebase Rules — Follow These Always
 
+**Build this like a professional developer would.** The codebase should be clean enough that Zach can maintain and extend it indefinitely — and if a professional developer ever joins, they should be able to understand the structure in 10 minutes and build on top of it. The bar is professional-grade code, not "good enough for now."
+
 1. Name everything descriptively — BoxProfilePage.jsx not Page2.jsx
 2. One job per file — components render UI, hooks fetch data, utils calculate/format
 3. Never put data fetching logic in components — use hooks
 4. Never put calculations in components — use utils
+5. No hacky workarounds — find the right solution, not a clever shortcut
+6. Comment non-obvious code — explain what it does and why
+7. Keep dependencies minimal — don't install packages for things that can be done simply
 
 ## About the Developer
 
