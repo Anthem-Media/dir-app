@@ -5,7 +5,7 @@
 }
 
 .price-chart__tooltip {
-  background: #0a0a0a;
+  background: var(--color-text-primary);
   border-radius: 6px;
   padding: 8px 12px;
   display: flex;
@@ -15,11 +15,11 @@
 
 .price-chart__tooltip-label {
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
 }
 
 .price-chart__tooltip-value {
   font-size: 14px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--color-bg);
 }

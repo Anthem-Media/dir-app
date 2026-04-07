@@ -21,14 +21,14 @@
   justify-content: center;
   min-height: 60vh;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .box-profile-page__spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #16a34a;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-green);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -60,13 +60,13 @@
 .box-profile-page__image-placeholder {
   width: 180px;
   height: 240px;
-  background: #f3f4f6;
-  border: 2px dashed #d1d5db;
+  background: var(--color-bg-subtle);
+  border: 2px dashed var(--color-border-strong);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   font-size: 12px;
 }
 
@@ -89,20 +89,20 @@
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.5px;
-  color: #0a0a0a;
+  color: var(--color-text-primary);
   margin: 0;
   line-height: 1.2;
 }
 
 .box-profile-page__subtitle {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .box-profile-page__config {
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   margin: 0;
 }
 
@@ -131,13 +131,13 @@
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.3px;
-  color: #0a0a0a;
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .box-profile-page__section-subtitle {
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   margin: 0;
 }
 
@@ -158,7 +158,7 @@
 /* ── CHECKLIST ─────────────────────────────────────────────────────────── */
 
 .box-profile-page__checklist {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 0 20px;
   overflow: hidden;

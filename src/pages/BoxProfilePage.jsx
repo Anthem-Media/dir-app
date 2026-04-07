@@ -16,7 +16,7 @@ import { TopChaseRow } from '../components/TopChaseRow';
 import { PullRateCard } from '../components/PullRateCard';
 import { PriceTrendChart } from '../components/PriceTrendChart';
 import { ChecklistTier } from '../components/ChecklistTier';
-import { formatCurrency, formatPercent } from '../utils/formatters';
+import { formatCurrency, formatPercent, getRoiSentiment } from '../utils/formatters';
 import './BoxProfilePage.css';
 
 // Hardcoded for now — will come from the URL (e.g. /boxes/:id) once routing is added
@@ -42,8 +42,7 @@ export function BoxProfilePage() {
     );
   }
 
-  // Determine ROI sentiment so the MetricCard knows which color to use
-  const roiSentiment = box.pricing.roi >= 0 ? 'positive' : 'negative';
+  const roiSentiment = getRoiSentiment(box.pricing.roi);
 
   return (
     <div className="box-profile-page">

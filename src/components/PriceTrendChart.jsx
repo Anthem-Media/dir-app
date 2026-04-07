@@ -19,6 +19,17 @@ import {
 import { formatCurrency } from '../utils/formatters';
 import './PriceTrendChart.css';
 
+// Recharts prop values are plain strings passed directly to SVG elements,
+// so CSS custom properties (var(--color-green)) can't be used here.
+// Centralizing them as constants means changing the brand color is still one edit.
+const CHART_COLORS = {
+  line:     '#16a34a',
+  gradient: '#16a34a',
+  grid:     '#f3f4f6',
+  axis:     '#9ca3af',
+  cursor:   '#e5e7eb',
+};
+
 /**
  * Custom tooltip shown when hovering over the chart.
  * Recharts passes `active`, `payload`, and `label` automatically.
@@ -46,41 +57,41 @@ export function PriceTrendChart({ data }) {
           {/* Gradient definition for the area fill */}
           <defs>
             <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#16a34a" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
+              <stop offset="5%" stopColor={CHART_COLORS.gradient} stopOpacity={0.15} />
+              <stop offset="95%" stopColor={CHART_COLORS.gradient} stopOpacity={0} />
             </linearGradient>
           </defs>
 
           {/* Subtle horizontal grid lines only */}
-          <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
 
           <XAxis
             dataKey="date"
-            tick={{ fontSize: 11, fill: '#9ca3af' }}
+            tick={{ fontSize: 11, fill: CHART_COLORS.axis }}
             axisLine={false}
             tickLine={false}
           />
 
           <YAxis
             tickFormatter={(v) => `$${v}`}
-            tick={{ fontSize: 11, fill: '#9ca3af' }}
+            tick={{ fontSize: 11, fill: CHART_COLORS.axis }}
             axisLine={false}
             tickLine={false}
             width={48}
-            // Only show ticks at even round numbers to keep it clean
+            // Only show ticks at round numbers to keep the axis clean
             tickCount={5}
           />
 
-          <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#e5e7eb', strokeWidth: 1 }} />
+          <Tooltip content={<ChartTooltip />} cursor={{ stroke: CHART_COLORS.cursor, strokeWidth: 1 }} />
 
           <Area
             type="monotone"
             dataKey="price"
-            stroke="#16a34a"
+            stroke={CHART_COLORS.line}
             strokeWidth={2}
             fill="url(#priceGradient)"
             dot={false}
-            activeDot={{ r: 4, fill: '#16a34a', strokeWidth: 0 }}
+            activeDot={{ r: 4, fill: CHART_COLORS.line, strokeWidth: 0 }}
           />
         </AreaChart>
       </ResponsiveContainer>

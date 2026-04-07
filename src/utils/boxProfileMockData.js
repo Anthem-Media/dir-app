@@ -4,6 +4,8 @@
  * so wiring it up later is a straightforward swap in useBoxProfile.js.
  */
 
+import { calculateRoi } from './formatters';
+
 export const MOCK_BOX = {
   id: 'topps-chrome-2023-hobby',
   name: '2023 Topps Chrome Baseball',
@@ -23,8 +25,8 @@ export const MOCK_BOX = {
     msrp: 149.99,
     // Expected value: probability-weighted sum of all pull values
     expectedValue: 162.5,
-    // ROI as a decimal: (EV - marketPrice) / marketPrice
-    roi: (162.5 - 189.99) / 189.99,
+    // ROI calculated via the shared formula in utils/formatters.js
+    roi: calculateRoi(162.5, 189.99),
   },
 };
 

@@ -1,5 +1,5 @@
 .checklist-tier {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .checklist-tier:last-child {
@@ -20,12 +20,12 @@
 }
 
 .checklist-tier__header:hover .checklist-tier__label {
-  color: #16a34a;
+  color: var(--color-green);
 }
 
 /* Chevron rotates 180° when the tier is open */
 .checklist-tier__chevron {
-  color: #9ca3af;
+  color: var(--color-text-muted);
   flex-shrink: 0;
   transition: transform 0.2s ease;
 }
@@ -37,7 +37,7 @@
 .checklist-tier__label {
   font-size: 14px;
   font-weight: 600;
-  color: #0a0a0a;
+  color: var(--color-text-primary);
   flex: 1;
   transition: color 0.15s ease;
 }
@@ -50,12 +50,12 @@
 
 .checklist-tier__count {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .checklist-tier__avg {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   min-width: 80px;
   text-align: right;
 }
@@ -70,25 +70,25 @@
   align-items: center;
   gap: 16px;
   padding: 8px 0 8px 28px; /* indent to align under the label */
-  border-top: 1px solid #f9fafb;
+  border-top: 1px solid var(--color-bg-subtle);
 }
 
 .checklist-tier__card-name {
   flex: 1;
   font-size: 13px;
-  color: #0a0a0a;
+  color: var(--color-text-primary);
 }
 
 .checklist-tier__card-category {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   min-width: 160px;
 }
 
 .checklist-tier__card-value {
   font-size: 13px;
   font-weight: 600;
-  color: #0a0a0a;
+  color: var(--color-text-primary);
   min-width: 72px;
   text-align: right;
 }
