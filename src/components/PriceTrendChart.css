@@ -1,0 +1,25 @@
+.price-chart {
+  width: 100%;
+  /* Recharts needs a defined height on the container when using ResponsiveContainer */
+  min-height: 240px;
+}
+
+.price-chart__tooltip {
+  background: #0a0a0a;
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.price-chart__tooltip-label {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.price-chart__tooltip-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}

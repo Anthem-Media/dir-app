@@ -1,0 +1,32 @@
+.pull-rate-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 24px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  flex: 1;
+}
+
+.pull-rate-card__category {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+
+.pull-rate-card__odds {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #0a0a0a;
+  line-height: 1;
+}
+
+.pull-rate-card__percent {
+  font-size: 13px;
+  color: #16a34a;
+  font-weight: 500;
+}

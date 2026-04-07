@@ -1,0 +1,192 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   BoxProfilePage — layout and page-level styles
+   Component-level styles (MetricCard, TopChaseRow, etc.) live in their
+   own CSS files alongside each component.
+───────────────────────────────────────────────────────────────────────── */
+
+.box-profile-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+/* Loading state */
+.box-profile-page--loading,
+.box-profile-page--error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.box-profile-page__spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #16a34a;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── HERO ──────────────────────────────────────────────────────────────── */
+
+.box-profile-page__hero {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+/* Box image column */
+.box-profile-page__hero-image {
+  flex-shrink: 0;
+  width: 180px;
+}
+
+.box-profile-page__hero-image img {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+
+.box-profile-page__image-placeholder {
+  width: 180px;
+  height: 240px;
+  background: #f3f4f6;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* Info column */
+.box-profile-page__hero-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.box-profile-page__hero-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.box-profile-page__title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #0a0a0a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.box-profile-page__subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.box-profile-page__config {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* Metric cards row */
+.box-profile-page__metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+/* ── SHARED SECTION LAYOUT ─────────────────────────────────────────────── */
+
+.box-profile-page__section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.box-profile-page__section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.box-profile-page__section-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: #0a0a0a;
+  margin: 0;
+}
+
+.box-profile-page__section-subtitle {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* ── TOP CHASES ────────────────────────────────────────────────────────── */
+
+.box-profile-page__card-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── PULL RATES ────────────────────────────────────────────────────────── */
+
+.box-profile-page__pull-rate-grid {
+  display: flex;
+  gap: 16px;
+}
+
+/* ── CHECKLIST ─────────────────────────────────────────────────────────── */
+
+.box-profile-page__checklist {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0 20px;
+  overflow: hidden;
+}
+
+/* ── RESPONSIVE ────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .box-profile-page__hero {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .box-profile-page__hero-image {
+    width: 140px;
+  }
+
+  .box-profile-page__image-placeholder {
+    width: 140px;
+    height: 190px;
+  }
+
+  .box-profile-page__metrics {
+    /* Stack into 2x2 grid on small screens */
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .box-profile-page__pull-rate-grid {
+    flex-direction: column;
+  }
+}
