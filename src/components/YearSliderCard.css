@@ -1,0 +1,42 @@
+.year-slider-card {
+  width: 172px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+  outline: none;
+}
+
+.year-slider-card:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+}
+
+.year-slider-card:focus-visible {
+  outline: 2px solid var(--color-green);
+  outline-offset: 2px;
+}
+
+/* ── Year display area ──────────────────────────────────────────────────── */
+
+/* Same portrait ratio as BoxSliderCard for visual consistency in the row */
+.year-slider-card__display {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  /* Dark background — the year number pops against it */
+  background: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.year-slider-card__year {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--color-bg);
+  letter-spacing: -2px;
+  line-height: 1;
+  user-select: none;
+}

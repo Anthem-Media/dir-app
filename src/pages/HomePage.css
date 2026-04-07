@@ -1,0 +1,48 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   HomePage — content area layout
+   Chrome (top bar, nav bar, footer) is styled in their own component files.
+   This file handles the spacing between slider rows.
+───────────────────────────────────────────────────────────────────────── */
+
+.home-page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 40px 40px 64px;
+  display: flex;
+  flex-direction: column;
+  /* Each slider row is a section — give them comfortable breathing room */
+  gap: 48px;
+}
+
+/* Loading / error states */
+.home-page--loading,
+.home-page--error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.home-page__spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-green);
+  border-radius: 50%;
+  animation: home-spin 0.7s linear infinite;
+}
+
+@keyframes home-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .home-page {
+    padding: 28px 20px 48px;
+    gap: 40px;
+  }
+}

@@ -1,0 +1,86 @@
+.box-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Header ────────────────────────────────────────────────────────────── */
+
+.box-slider-row__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.box-slider-row__header-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Matches BoxProfilePage section title exactly */
+.box-slider-row__title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* Matches BoxProfilePage section subtitle exactly */
+.box-slider-row__subtitle {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ── Arrow buttons ─────────────────────────────────────────────────────── */
+
+.box-slider-row__arrows {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.box-slider-row__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: background 0.1s ease, border-color 0.1s ease, color 0.1s ease;
+}
+
+.box-slider-row__arrow:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+/* Disabled state — arrows grey out at scroll limits */
+.box-slider-row__arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ── Track ─────────────────────────────────────────────────────────────── */
+
+.box-slider-row__track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  /* Hide the scrollbar — navigation is handled by the arrow buttons */
+  scrollbar-width: none;
+  /* Small bottom padding so card shadows aren't clipped */
+  padding-bottom: 8px;
+}
+
+.box-slider-row__track::-webkit-scrollbar {
+  display: none;
+}

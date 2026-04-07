@@ -1,0 +1,227 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   SiteNavBar — dark green secondary navigation with mega-menu dropdowns
+   Sits below the top bar (64px), sticky so it stays visible on scroll.
+───────────────────────────────────────────────────────────────────────── */
+
+.site-nav-bar {
+  width: 100%;
+  background: var(--color-nav-bg);
+  position: sticky;
+  /* Sits directly below the top bar (height: 64px) */
+  top: 64px;
+  z-index: 199;
+}
+
+/* ── Tab row ────────────────────────────────────────────────────────────── */
+
+.site-nav-bar__inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  align-items: stretch;
+  /* Horizontal scroll on very small screens so tabs never wrap */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.site-nav-bar__inner::-webkit-scrollbar {
+  display: none;
+}
+
+.site-nav-bar__tab {
+  height: 48px;
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--color-nav-text);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  opacity: 0.82;
+  transition: opacity 0.12s ease, background 0.12s ease;
+  /* Negative margin so the bottom border overlaps the nav's bottom edge */
+  margin-bottom: -1px;
+  letter-spacing: 0.01em;
+}
+
+.site-nav-bar__tab:hover {
+  background: var(--color-nav-hover);
+  opacity: 1;
+}
+
+/* Active tab — white bottom border, full opacity */
+.site-nav-bar__tab--active {
+  opacity: 1;
+  border-bottom-color: var(--color-nav-text);
+}
+
+/* Open tab (dropdown showing) — slightly darker bg */
+.site-nav-bar__tab--open {
+  background: var(--color-nav-active);
+  opacity: 1;
+}
+
+/* ── Dropdown panel ─────────────────────────────────────────────────────── */
+
+.site-nav-bar__dropdown {
+  /* Overlay the page content — does not push it down */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.09);
+  /* Ensure it appears above page content */
+  z-index: 1;
+}
+
+.site-nav-bar__dropdown-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  /* Match horizontal padding of the tab row */
+  padding: 20px 40px 24px;
+}
+
+/* ── Shared column styles ───────────────────────────────────────────────── */
+
+.nav-dropdown__col {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 160px;
+}
+
+.nav-dropdown__col--wide {
+  /* Popular boxes column gets more space since box names are long */
+  flex: 1;
+  min-width: 240px;
+}
+
+.nav-dropdown__col-heading {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin: 0 0 8px 8px;
+}
+
+/* ── Dropdown item buttons ──────────────────────────────────────────────── */
+
+.nav-dropdown__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+
+.nav-dropdown__item:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
+}
+
+/* Highlighted state — used for cascade selections */
+.nav-dropdown__item--active {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+/* Dense variant — for long box names that need tighter vertical spacing */
+.nav-dropdown__item--dense {
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.nav-dropdown__chevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  margin-left: 4px;
+}
+
+/* ── Cascade layout (All tab) ───────────────────────────────────────────── */
+/* Three progressive columns appear side by side as the user drills down */
+
+.nav-dropdown__cascade {
+  display: flex;
+  gap: 0;
+}
+
+.nav-dropdown__cascade .nav-dropdown__col {
+  padding-right: 24px;
+  margin-right: 24px;
+  /* Vertical divider between cascade levels */
+  border-right: 1px solid var(--color-border-subtle);
+}
+
+.nav-dropdown__cascade .nav-dropdown__col:last-child {
+  border-right: none;
+  padding-right: 0;
+  margin-right: 0;
+}
+
+/* ── Trending layout ────────────────────────────────────────────────────── */
+/* Four equal columns — one per sport */
+
+.nav-dropdown__trending {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+
+/* ── List layout (Brands / Sports / Year tabs) ──────────────────────────── */
+/* Auto-flow grid so items wrap into however many columns fit */
+
+.nav-dropdown__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 2px 12px;
+  max-width: 640px;
+}
+
+/* ── Sport layout (Baseball / Football / Basketball / Hockey tabs) ──────── */
+/* Brands and Years are narrow; Popular Boxes column fills remaining space */
+
+.nav-dropdown__sport {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .site-nav-bar__inner {
+    padding: 0 20px;
+  }
+
+  .site-nav-bar__tab {
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .site-nav-bar__dropdown-inner {
+    padding: 16px 20px 20px;
+  }
+
+  .nav-dropdown__trending {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

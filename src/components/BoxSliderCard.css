@@ -1,0 +1,76 @@
+.box-slider-card {
+  /* Fixed width so the slider track width is predictable */
+  width: 172px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+  outline: none;
+}
+
+.box-slider-card:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.09);
+}
+
+.box-slider-card:focus-visible {
+  outline: 2px solid var(--color-green);
+  outline-offset: 2px;
+}
+
+/* ── Image ─────────────────────────────────────────────────────────────── */
+
+/* Portrait ratio — matches the proportions of a real card box */
+.box-slider-card__image-wrap {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.box-slider-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Clean placeholder — simple subtle background, no visual noise */
+.box-slider-card__placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--color-bg-subtle);
+}
+
+/* ── Body ──────────────────────────────────────────────────────────────── */
+
+.box-slider-card__body {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.box-slider-card__name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  line-height: 1.4;
+  margin: 0;
+  /* Two-line clamp — long names don't push the price out of alignment */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.box-slider-card__price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.3px;
+  margin: 0;
+}

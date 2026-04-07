@@ -26,9 +26,17 @@
   --color-border-subtle:  #f3f4f6;
   --color-border-strong:  #d1d5db;
 
-  /* Green badge/tag tints (used for the RC rookie tag) */
+  /* Nav bar */
+  --color-nav-bg:         #166534;
+  --color-nav-text:       #ffffff;
+  --color-nav-hover:      rgba(255, 255, 255, 0.12);
+  --color-nav-active:     rgba(255, 255, 255, 0.20);
+
+  /* Badge/tag tints — used for ROI badges, RC tags, etc. */
   --color-green-bg:       #dcfce7;
   --color-green-border:   #bbf7d0;
+  --color-red-bg:         #fee2e2;
+  --color-red-border:     #fecaca;
 
   /* Typography */
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;

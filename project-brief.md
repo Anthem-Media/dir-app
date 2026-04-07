@@ -57,7 +57,6 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - User-submitted pull rate data (permanent kill — data integrity risk)
 - AI price predictions / future valuations
 - Entertainment / TCG categories (Pokemon, Magic, Yu-Gi-Oh, Disney, etc.)
-- Any sport beyond baseball
 - Box break data aggregation from external sources
 
 ---
@@ -158,12 +157,12 @@ Tier system:
 
 ## Sport Expansion Roadmap
 
-Launch: Baseball only
-Phase 2: Football, Basketball, Hockey
-Phase 3: UFC, Soccer, F1
-Phase 4 (if ever): Entertainment/TCG (Disney, Marvel, Pokemon, Magic, Yu-Gi-Oh, etc.)
+Beta: Baseball data only (building the formula and automation pipeline)
+Launch: Baseball, Football, Basketball, Hockey
+Phase 2: UFC, Soccer, F1
+Phase 3 (if ever): Entertainment/TCG (Disney, Marvel, Pokemon, Magic, Yu-Gi-Oh, etc.)
 
-The database schema supports all sports from day one. Adding a new sport is a data entry task, not a rebuild.
+The database schema supports all sports from day one. The UI supports all sports from day one. Adding a new sport is a data entry task, not a rebuild.
 
 ---
 

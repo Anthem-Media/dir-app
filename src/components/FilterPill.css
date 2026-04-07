@@ -1,0 +1,32 @@
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 11px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.1s ease, background 0.1s ease, border-color 0.1s ease;
+}
+
+.filter-pill:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+
+/* Active state — solid dark fill, high contrast */
+.filter-pill--active {
+  color: var(--color-bg);
+  background: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+}
+
+.filter-pill--active:hover {
+  opacity: 0.85;
+}
