@@ -2,19 +2,22 @@
  * Hook: useHomePage
  *
  * Responsible for fetching all data needed by the HomePage.
- * Returns the slider categories (each with their list of boxes) and nav tab labels.
+ * Returns the slider categories — each with their type and items array.
  * When the backend is ready, replace the mock import with a real API call —
  * nothing in the components will need to change.
  *
- * @returns {{ sliderCategories, navTabs, isLoading, error }}
+ * Nav tab labels (NAV_TABS) and nav dropdown data (NAV_DROPDOWN_DATA) are
+ * static constants imported directly by App.jsx and SiteNavBar.jsx —
+ * they don't need to go through the loading cycle.
+ *
+ * @returns {{ sliderCategories, isLoading, error }}
  */
 
 import { useState, useEffect } from 'react';
-import { SLIDER_CATEGORIES, NAV_TABS } from '../utils/homePageMockData';
+import { SLIDER_CATEGORIES } from '../utils/homePageMockData';
 
 export function useHomePage() {
   const [sliderCategories, setSliderCategories] = useState([]);
-  const [navTabs, setNavTabs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -23,7 +26,6 @@ export function useHomePage() {
     const timeout = setTimeout(() => {
       try {
         setSliderCategories(SLIDER_CATEGORIES);
-        setNavTabs(NAV_TABS);
       } catch (err) {
         setError(err);
       } finally {
@@ -34,5 +36,5 @@ export function useHomePage() {
     return () => clearTimeout(timeout);
   }, []);
 
-  return { sliderCategories, navTabs, isLoading, error };
+  return { sliderCategories, isLoading, error };
 }

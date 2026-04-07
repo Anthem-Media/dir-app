@@ -23,11 +23,11 @@ import './PriceTrendChart.css';
 // so CSS custom properties (var(--color-green)) can't be used here.
 // Centralizing them as constants means changing the brand color is still one edit.
 const CHART_COLORS = {
-  line:     '#16a34a',
-  gradient: '#16a34a',
-  grid:     '#f3f4f6',
-  axis:     '#9ca3af',
-  cursor:   '#e5e7eb',
+  line:     '#16a34a', // --color-green
+  gradient: '#16a34a', // --color-green
+  grid:     '#f3f4f6', // --color-border-subtle
+  axis:     '#9ca3af', // --color-text-muted
+  cursor:   '#e5e7eb', // --color-border
 };
 
 /**

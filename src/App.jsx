@@ -12,8 +12,6 @@ import { SiteNavBar } from './components/SiteNavBar';
 import { SiteFooter } from './components/SiteFooter';
 import { HomePage } from './pages/HomePage';
 import { NAV_TABS } from './utils/homePageMockData';
-import './App.css';
-
 function App() {
   // Search query is lifted here so SiteTopBar can control it and
   // eventually pass it down to whichever page needs it
