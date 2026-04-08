@@ -19,8 +19,8 @@
   margin: 0 auto;
   padding: 0 40px;
   display: grid;
-  /* Brand and actions are fixed-width; search fills the remaining space */
-  grid-template-columns: 200px 1fr 260px;
+  /* Brand fixed, search fills remaining space, actions size to content */
+  grid-template-columns: 200px 1fr auto;
   align-items: center;
   gap: 24px;
 }
@@ -97,23 +97,51 @@
   color: var(--color-text-primary);
 }
 
+/* Sign in — outlined secondary button */
 .site-top-bar__sign-in {
   height: 32px;
   padding: 0 14px;
   font-size: 13px;
   font-weight: 600;
   font-family: var(--font-sans);
-  color: var(--color-bg);
-  background: var(--color-text-primary);
-  border: none;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
   border-radius: 6px;
   cursor: pointer;
   white-space: nowrap;
-  transition: opacity 0.1s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: border-color 0.1s ease, color 0.1s ease;
 }
 
 .site-top-bar__sign-in:hover {
-  opacity: 0.85;
+  color: var(--color-text-primary);
+  border-color: var(--color-text-muted);
+}
+
+/* Sign up — solid green primary button */
+.site-top-bar__sign-up {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--color-nav-text);
+  background: var(--color-green);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.1s ease;
+}
+
+.site-top-bar__sign-up:hover {
+  background: var(--color-green-dark);
 }
 
 /* ── Responsive ────────────────────────────────────────────────────────── */

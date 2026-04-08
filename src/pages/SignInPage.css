@@ -1,0 +1,413 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   SignInPage — split layout styles.
+
+   Design intent: utility page with personality. The branded dark green
+   panel carries the visual interest so the form side can stay clean and
+   focused. Two hollow circles and a subtle angled stripe decorate the panel.
+
+   Layout: two equal columns side-by-side, full viewport height.
+   On mobile: panel hides, form takes the full screen.
+
+   All colors use CSS variables. No hardcoded hex values.
+───────────────────────────────────────────────────────────────────────── */
+
+/* Full-viewport split — sits inside the app shell which provides the header */
+.signin-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - 112px); /* subtract AppNav + SiteNavBar approximate height */
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BRANDED PANEL (left)
+   Dark green with decorative circles and the app wordmark.
+══════════════════════════════════════════════════════════════════════════ */
+
+.signin-panel {
+  position: relative;
+  background: var(--color-nav-bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 64px 56px;
+}
+
+/* ── Decorative circles ──────────────────────────────────────────────── */
+
+.signin-panel__circle {
+  position: absolute;
+  border-radius: 50%;
+  border: 64px solid rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.signin-panel__circle--large {
+  width: 500px;
+  height: 500px;
+  top: -160px;
+  right: -160px;
+}
+
+.signin-panel__circle--small {
+  width: 280px;
+  height: 280px;
+  bottom: -80px;
+  left: -80px;
+}
+
+/* ── Panel content ───────────────────────────────────────────────────── */
+
+.signin-panel__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Large wordmark — bolder than the app's normal nav branding */
+.signin-panel__wordmark {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: var(--color-nav-text);
+  margin: 0;
+}
+
+.signin-panel__tagline {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  color: var(--color-nav-text);
+  margin: 0;
+}
+
+.signin-panel__description {
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0;
+  max-width: 340px;
+}
+
+/* ── Stat pills ──────────────────────────────────────────────────────── */
+/* Three quick proof points — reinforce value at the sign-in decision moment */
+
+.signin-panel__stats {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.signin-panel__stat {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.signin-panel__stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-nav-text);
+  letter-spacing: -0.5px;
+}
+
+.signin-panel__stat-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FORM PANEL (right)
+   White background. Vertically centered card containing the sign-in form.
+══════════════════════════════════════════════════════════════════════════ */
+
+.signin-form-panel {
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+}
+
+.signin-form-panel__inner {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* DIR wordmark shown on mobile when the branded panel is hidden */
+.signin-form-panel__mobile-brand {
+  display: none;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  color: var(--color-nav-bg);
+  margin: 0 0 28px;
+}
+
+/* ── Headings ────────────────────────────────────────────────────────── */
+
+.signin-form__heading {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--color-text-primary);
+  margin: 0 0 6px;
+}
+
+.signin-form__subheading {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0 0 32px;
+}
+
+/* ── Form layout ─────────────────────────────────────────────────────── */
+
+.signin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.signin-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Label row: label on the left, "Forgot password?" on the right */
+.signin-form__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.signin-form__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.signin-form__forgot {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-green);
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.signin-form__forgot:hover {
+  opacity: 0.75;
+}
+
+/* ── Inputs ──────────────────────────────────────────────────────────── */
+
+.signin-form__input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.signin-form__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.signin-form__input:focus {
+  border-color: var(--color-green);
+  box-shadow: 0 0 0 3px var(--color-green-bg);
+}
+
+/* ── Password field with show/hide toggle ────────────────────────────── */
+
+.signin-form__password-wrap {
+  position: relative;
+}
+
+/* Extra right padding so text doesn't run under the toggle button */
+.signin-form__input--password {
+  padding-right: 68px;
+}
+
+.signin-form__toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 4px 4px;
+  transition: color 0.15s ease;
+}
+
+.signin-form__toggle:hover {
+  color: var(--color-green);
+}
+
+/* ── Submit button ───────────────────────────────────────────────────── */
+
+.signin-form__submit {
+  width: 100%;
+  height: 46px;
+  background: var(--color-green);
+  color: var(--color-nav-text);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-sans);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  margin-top: 4px;
+}
+
+.signin-form__submit:hover {
+  background: var(--color-green-dark);
+}
+
+/* ── Divider ─────────────────────────────────────────────────────────── */
+
+.signin-form__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.signin-form__divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.signin-form__divider-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  /* Prevent it from growing/shrinking with the flex lines */
+  flex-shrink: 0;
+}
+
+/* ── Google button ───────────────────────────────────────────────────── */
+
+.signin-form__google {
+  width: 100%;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.signin-form__google:hover {
+  background: var(--color-bg-subtle);
+  border-color: var(--color-border-strong);
+}
+
+/* Google "G" — styled text glyph, no image needed */
+.signin-form__google-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Footer link ─────────────────────────────────────────────────────── */
+
+.signin-form__footer {
+  margin: 28px 0 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.signin-form__footer-link {
+  font-weight: 700;
+  color: var(--color-green);
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.signin-form__footer-link:hover {
+  opacity: 0.75;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 860px and below: hide panel, form takes full width ── */
+
+@media (max-width: 860px) {
+  .signin-page {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  /* Hide the branded panel — it doesn't make sense at narrow widths */
+  .signin-panel {
+    display: none;
+  }
+
+  /* Form panel fills the viewport */
+  .signin-form-panel {
+    padding: 56px 24px 72px;
+    align-items: flex-start;
+  }
+
+  /* Show the mobile wordmark since the panel is hidden */
+  .signin-form-panel__mobile-brand {
+    display: block;
+  }
+
+  .signin-form-panel__inner {
+    max-width: 420px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+/* ── 480px and below: tighten padding ── */
+
+@media (max-width: 480px) {
+  .signin-form-panel {
+    padding: 40px 20px 56px;
+  }
+}

@@ -45,8 +45,9 @@ export function AppNav() {
             </svg>
           </button>
 
-          {/* Link renders as <a> — styled as a button via CSS */}
+          {/* Sign in: outlined secondary, Sign up: solid green primary */}
           <Link className="site-top-bar__sign-in" to="/signin">Sign in</Link>
+          <Link className="site-top-bar__sign-up" to="/signup">Sign up</Link>
         </nav>
 
       </div>
