@@ -2,7 +2,7 @@
 
 **Working Name:** DIR (Diamond in the Rough)
 **Tagline:** "Think inside the box."
-**Last Updated:** April 3, 2026
+**Last Updated:** April 7, 2026
 
 ---
 
@@ -187,6 +187,8 @@ In rough priority order:
 - **Color scheme (working):** White and green (easily changeable — CSS variables)
 - **Logo:** TBD — will be designed
 - **UI approach:** Layered complexity — casual users see top-level info (top chases, ROI score), serious investors can drill into full data (checklist, price history, pull rate math)
+- **Browse experience:** Dedicated browse page at `/browse` with StockX-style layout — filter sidebar on the left (Sport → Manufacturer → Year → Format), results grid on the right. Filters use URL query parameters so every combination is shareable. Header nav links route to the browse page with filters pre-applied.
+- **Routing:** React Router. All routes: `/` (home), `/browse` (browse/filter), `/box/:slug` (box profile), `/about`, `/news`, `/contact`, `/help`, `/signin`, `/signup`.
 
 ---
 
@@ -257,10 +259,12 @@ Three commands to save and push changes:
 3. `git push` — upload to GitHub
 
 ### Current Status
-- Project scaffolded with Vite + React
-- Folder structure established per codebase organization rules
-- First commit pushed to GitHub
-- No components or pages built yet — ready to start UI development
+- Homepage template built with dummy data
+- BoxProfilePage built with all sections (hero, top chases, pull rates, price trend, checklist)
+- Header with cascading navigation system built
+- Codebase audited and cleaned (CSS variables centralized, calculations moved to utils)
+- Next: routing/filtering system, landing pages (About, News, Contact, Help, Sign In, FAQ), auth system, backend setup
+- See CONTEXT.md for full task list and detailed progress tracking
 
 ---
 

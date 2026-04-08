@@ -7,6 +7,8 @@ A sports card box analytics web app. Users look up any box set and see the full 
 ## Key Files
 
 - `project-brief.md` — Full project brief (read this for detailed context on features, data strategy, business context)
+- `CONTEXT.md` — Current status, what's done, what's next
+- `REFERENCES.md` — Design and competitor references
 - `dir_database_schema.sql` — PostgreSQL schema with 13 tables, views, seed data
 
 ## Tech Stack
@@ -51,9 +53,33 @@ git commit -m "description of what changed"
 git push
 ```
 
+## Routing Architecture
+
+React Router handles all navigation. Routes defined in App.jsx:
+- `/` — Homepage
+- `/browse` — Browse page (filter sidebar + results grid)
+- `/box/:slug` — Box profile page (slug from box_sets table)
+- `/about`, `/news`, `/contact`, `/help`, `/signin`, `/signup` — Landing pages
+
+Browse page filter system:
+- Dedicated page at `/browse` with StockX-style layout
+- Left sidebar: filter sections in order — Sport → Manufacturer → Year → Format
+- Right side: results grid of BoxSetCard components, each links to `/box/:slug`
+- Filters passed as URL query parameters: `/browse?sport=baseball&manufacturer=topps&year=2024&format=hobby`
+- Header nav links route to `/browse` with query params (e.g. clicking "Baseball" → `/browse?sport=baseball`)
+- Filters are data-driven (from database), not hardcoded
+- Cascading logic: selecting a filter narrows downstream filter options (no dead-end combinations)
+
+Key files for routing/filtering:
+- `src/pages/BrowsePage.jsx` — Browse page with sidebar + results grid
+- `src/components/FilterSidebar.jsx` — Filter panel component
+- `src/components/BoxSetCard.jsx` — Card thumbnail for results grid
+
 ## Current Status
 
-- Project scaffolded with Vite + React
-- Folder structure established
-- First commit pushed to GitHub (github.com/Anthem-Media/dir-app)
-- No components or pages built yet — ready to start UI development
+- Homepage template built with dummy data
+- BoxProfilePage built with all sections (hero, top chases, pull rates, price trend, checklist)
+- Header with cascading navigation system built
+- Codebase audited — CSS variables centralized, calculations moved to utils
+- Next: routing/filtering system, landing pages, auth system, backend setup
+- See CONTEXT.md for full task list and detailed status
