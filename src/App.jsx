@@ -1,32 +1,59 @@
 /**
- * App.jsx — root component and persistent site shell
+ * App.jsx — root component, persistent site shell, and route definitions.
  *
- * Renders the top bar, secondary nav bar, the current page, and the footer.
- * When React Router is added, the <HomePage /> below becomes <RouterOutlet />
- * and each page gets its own URL. The chrome (top bar, nav, footer) stays here.
+ * The chrome (AppNav, SiteNavBar, SiteFooter) renders on every page.
+ * The <Routes> block swaps in the correct page component based on the URL.
+ *
+ * Route map:
+ *   /                → HomePage
+ *   /browse          → BrowsePage
+ *   /box/:slug       → BoxProfilePage  (slug matches the box id, e.g. topps-chrome-2024-hobby)
+ *   /about           → AboutPage
+ *   /news            → NewsPage
+ *   /contact         → ContactPage
+ *   /help            → HelpPage
+ *   /faq             → FaqPage
+ *   /signin          → SignInPage
+ *   /signup          → SignUpPage
  */
 
-import { useState } from 'react';
-import { AppNav } from './components/AppNav';
-import { SiteNavBar } from './components/SiteNavBar';
-import { SiteFooter } from './components/SiteFooter';
-import { HomePage } from './pages/HomePage';
-import { NAV_TABS } from './utils/homePageMockData';
+import { Routes, Route } from 'react-router-dom';
+
+import { AppNav }      from './components/AppNav';
+import { SiteNavBar }  from './components/SiteNavBar';
+import { SiteFooter }  from './components/SiteFooter';
+
+import { HomePage }       from './pages/HomePage';
+import { BrowsePage }     from './pages/BrowsePage';
+import { BoxProfilePage } from './pages/BoxProfilePage';
+import { AboutPage }      from './pages/AboutPage';
+import { NewsPage }       from './pages/NewsPage';
+import { ContactPage }    from './pages/ContactPage';
+import { HelpPage }       from './pages/HelpPage';
+import { FaqPage }        from './pages/FaqPage';
+import { SignInPage }     from './pages/SignInPage';
+import { SignUpPage }     from './pages/SignUpPage';
+
+import { NAV_TABS } from './utils/navMockData';
+
 function App() {
-  // Search query is lifted here so SiteTopBar can control it and
-  // eventually pass it down to whichever page needs it
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Active nav tab is also app-level state — it will control which page
-  // or filtered view is shown once routing is in place
-  const [activeTab, setActiveTab] = useState('All');
-
   return (
     <>
-      <AppNav searchValue={searchQuery} onSearchChange={setSearchQuery} />
-      <SiteNavBar tabs={NAV_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+      <AppNav />
+      <SiteNavBar tabs={NAV_TABS} />
       <main>
-        <HomePage />
+        <Routes>
+          <Route path="/"          element={<HomePage />} />
+          <Route path="/browse"    element={<BrowsePage />} />
+          <Route path="/box/:slug" element={<BoxProfilePage />} />
+          <Route path="/about"     element={<AboutPage />} />
+          <Route path="/news"      element={<NewsPage />} />
+          <Route path="/contact"   element={<ContactPage />} />
+          <Route path="/help"      element={<HelpPage />} />
+          <Route path="/faq"       element={<FaqPage />} />
+          <Route path="/signin"    element={<SignInPage />} />
+          <Route path="/signup"    element={<SignUpPage />} />
+        </Routes>
       </main>
       <SiteFooter />
     </>

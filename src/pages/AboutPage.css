@@ -1,0 +1,518 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   AboutPage — expressive company / mission page.
+
+   Design intent: more visual personality than the core app pages, but still
+   firmly within the same design system. Techniques used:
+     - clip-path on the hero and CTA sections for diagonal edges
+     - A large decorative hollow circle in the hero background
+     - Ghost numerals behind mission cards for texture
+     - Asymmetric hero layout (text wider than image column)
+     - Offset middle card in the mission grid to break rhythm
+
+   All colors use CSS variables. No hardcoded hex values.
+───────────────────────────────────────────────────────────────────────── */
+
+.about-page {
+  /* Prevent decorative shapes and clip-path overflow from creating scrollbars */
+  overflow-x: hidden;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HERO
+   Dark green, white text, diagonal lower edge, asymmetric two-column layout.
+══════════════════════════════════════════════════════════════════════════ */
+
+.about-hero {
+  position: relative;
+  background: var(--color-nav-bg);
+  padding: 88px 0 160px; /* tall bottom padding keeps content above the clip cut */
+  overflow: hidden;
+  /* Diagonal cut at the bottom: left edge goes to 100%, right edge stops at 84% */
+  clip-path: polygon(0 0, 100% 0, 100% 84%, 0 100%);
+}
+
+.about-hero__inner {
+  position: relative;
+  z-index: 1; /* sits above the decorative circle */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: grid;
+  /* Text column is intentionally wider than the image column — asymmetric split */
+  grid-template-columns: 1fr 380px;
+  gap: 64px;
+  align-items: center;
+}
+
+/* ── Text column ─────────────────────────────────────────────────────── */
+
+.about-hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.about-hero__eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  /* Light green — readable on dark green, signals brand identity */
+  color: var(--color-green-border);
+  margin: 0;
+}
+
+.about-hero__headline {
+  font-size: 54px;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -1.5px;
+  color: var(--color-nav-text); /* white */
+  margin: 0;
+}
+
+.about-hero__subtitle {
+  font-size: 17px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.68);
+  margin: 0;
+  max-width: 460px;
+}
+
+.about-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 13px 26px;
+  background: var(--color-green);
+  color: var(--color-nav-text);
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+  margin-top: 8px;
+}
+
+.about-hero__cta:hover {
+  opacity: 0.88;
+}
+
+/* ── Image column ────────────────────────────────────────────────────── */
+
+.about-hero__image-wrap {
+  /* Negative top margin pushes the image up, creating visual tension with
+     the text column — breaks the perfectly-split-50/50 feel */
+  margin-top: -40px;
+}
+
+.about-hero__image-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-hero__image-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* ── Decorative circle ───────────────────────────────────────────────── */
+/* Large hollow ring in the background — adds depth without adding information */
+
+.about-hero__circle {
+  position: absolute;
+  top: -120px;
+  right: -100px;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  /* Thick border-only circle (no fill) so content behind it remains readable */
+  border: 80px solid rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MISSION
+   White section below the hero. Three feature cards, middle one offset down.
+══════════════════════════════════════════════════════════════════════════ */
+
+.about-mission {
+  background: var(--color-bg);
+  /* Top padding is larger than the visual gap because the hero's clip-path
+     cuts into this section's space — extra padding restores the breathing room */
+  padding: 100px 0 96px;
+}
+
+.about-mission__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* ── Intro text ──────────────────────────────────────────────────────── */
+
+.about-mission__intro {
+  max-width: 580px;
+  margin-bottom: 72px;
+}
+
+.about-mission__heading {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  color: var(--color-text-primary);
+  margin: 0 0 16px;
+}
+
+.about-mission__subheading {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ── Cards grid ──────────────────────────────────────────────────────── */
+
+.about-mission__cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: start; /* cards don't stretch to equal height — intentional */
+}
+
+.about-mission__card {
+  position: relative;
+  padding: 36px 28px 40px;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden; /* clips the ghost number so it doesn't bleed outside */
+}
+
+/* Middle card drops down — breaks the grid monotony */
+.about-mission__card--offset {
+  margin-top: 52px;
+}
+
+/* Ghost numeral — large background texture, not readable content */
+.about-mission__card-number {
+  position: absolute;
+  top: -12px;
+  right: 12px;
+  font-size: 108px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -6px;
+  /* Uses border color — visible enough to see, invisible enough not to compete */
+  color: var(--color-border);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Icon area — replace with real icon/SVG/illustration when assets are ready */
+.about-mission__card-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--color-green-bg);
+  border: 1px solid var(--color-green-border);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.about-mission__card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.about-mission__card-body {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--color-text-secondary);
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FOUNDERS
+   Light green tint. Two centered cards with circular photo placeholders.
+   Deliberately calmer and more structured than the sections above.
+══════════════════════════════════════════════════════════════════════════ */
+
+.about-founders {
+  background: var(--color-green-bg);
+  border-top: 1px solid var(--color-green-border);
+  border-bottom: 1px solid var(--color-green-border);
+  padding: 96px 0;
+}
+
+.about-founders__inner {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.about-founders__heading {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: var(--color-text-primary);
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.about-founders__subheading {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: 0 0 56px;
+}
+
+/* ── Founder cards ───────────────────────────────────────────────────── */
+
+.about-founders__cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+.about-founders__card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-green-border);
+  border-radius: 20px;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0; /* individual children manage their own spacing */
+}
+
+/* Circular photo placeholder */
+.about-founders__photo {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--color-green-bg);
+  border: 3px solid var(--color-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: 20px;
+}
+
+.about-founders__photo-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-green);
+}
+
+.about-founders__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.about-founders__name {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.about-founders__role {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--color-green);
+  margin: 0;
+}
+
+.about-founders__bio {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--color-text-secondary);
+  margin: 14px 0 0;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CTA
+   Dark green — mirrors the hero and creates a visual bookend.
+   Diagonal top edge (polygon reversed from hero's bottom edge).
+══════════════════════════════════════════════════════════════════════════ */
+
+.about-cta {
+  background: var(--color-nav-bg);
+  /* Diagonal top: right edge starts at 0, left edge starts at ~10% down.
+     Mirrors the hero bottom cut so the page feels intentionally paired. */
+  clip-path: polygon(0 10%, 100% 0, 100% 100%, 0 100%);
+  /* Top padding compensates for the cut — pushes content below the sliced area */
+  padding: 128px 0 88px;
+  margin-top: -2px; /* close any sub-pixel seam between this and the section above */
+}
+
+.about-cta__inner {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+
+.about-cta__headline {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--color-nav-text);
+  margin: 0;
+}
+
+.about-cta__subtitle {
+  font-size: 16px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.68);
+  margin: 0;
+}
+
+/* White button on dark green — maximum contrast */
+.about-cta__button {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 32px;
+  background: var(--color-nav-text); /* white */
+  color: var(--color-nav-bg);        /* dark green text */
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+  margin-top: 8px;
+  transition: opacity 0.15s ease;
+}
+
+.about-cta__button:hover {
+  opacity: 0.9;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 900px and below: stack the hero columns, single-column mission cards ── */
+
+@media (max-width: 900px) {
+  .about-hero {
+    /* Shallower clip on smaller screens — the angle was calibrated for wide viewports */
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+    padding: 64px 0 120px;
+  }
+
+  .about-hero__inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .about-hero__headline {
+    font-size: 40px;
+  }
+
+  .about-hero__image-wrap {
+    margin-top: 0; /* remove the upward offset when stacked — it would look wrong */
+  }
+
+  .about-hero__image-placeholder {
+    aspect-ratio: 16 / 9; /* wider ratio looks better when full-width on mobile */
+  }
+
+  .about-mission__cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .about-mission__card--offset {
+    margin-top: 0; /* offset only makes sense in the 3-column layout */
+  }
+
+  .about-founders__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .about-cta {
+    clip-path: polygon(0 5%, 100% 0, 100% 100%, 0 100%);
+    padding: 96px 0 72px;
+  }
+
+  .about-cta__headline {
+    font-size: 32px;
+  }
+}
+
+/* ── 640px and below: tighten padding, smaller type ── */
+
+@media (max-width: 640px) {
+  .about-hero__inner,
+  .about-mission__inner,
+  .about-founders__inner,
+  .about-cta__inner {
+    padding: 0 20px;
+  }
+
+  .about-hero__headline {
+    font-size: 32px;
+    letter-spacing: -0.8px;
+  }
+
+  .about-hero__subtitle {
+    font-size: 15px;
+  }
+
+  .about-mission {
+    padding: 72px 0 64px;
+  }
+
+  .about-mission__heading {
+    font-size: 28px;
+  }
+
+  .about-founders {
+    padding: 64px 0;
+  }
+
+  .about-founders__heading {
+    font-size: 26px;
+  }
+
+  .about-founders__card {
+    padding: 32px 24px;
+  }
+
+  .about-cta__headline {
+    font-size: 26px;
+  }
+}

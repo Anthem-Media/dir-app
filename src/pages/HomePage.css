@@ -31,11 +31,7 @@
   border: 3px solid var(--color-border);
   border-top-color: var(--color-green);
   border-radius: 50%;
-  animation: home-spin 0.7s linear infinite;
-}
-
-@keyframes home-spin {
-  to { transform: rotate(360deg); }
+  animation: spin 0.7s linear infinite; /* @keyframes spin defined in index.css */
 }
 
 /* ── Responsive ────────────────────────────────────────────────────────── */

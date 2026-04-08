@@ -2,30 +2,26 @@
  * BrandSliderCard
  *
  * A compact card for the "By Brand" slider row.
- * Shows the brand logo (image placeholder until real logos are added)
- * and the brand name below. No price — this links to a brand browse page,
+ * Clicking navigates to the browse page filtered by this manufacturer.
+ *
+ * Shows the brand logo (placeholder until real logos are added)
+ * and the brand name below. No price — this links to a brand browse view,
  * not a specific purchasable box.
  *
  * @param {object}      item
  * @param {string}      item.id
  * @param {string}      item.name       - Brand name (e.g. "Topps")
  * @param {string|null} item.imageUrl   - Brand logo image URL
- * @param {function}    onClick
  */
 
+import { Link } from 'react-router-dom';
 import './BrandSliderCard.css';
 
-export function BrandSliderCard({ item, onClick }) {
+export function BrandSliderCard({ item }) {
   const { name, imageUrl } = item;
 
   return (
-    <article
-      className="brand-slider-card"
-      onClick={onClick}
-      tabIndex={0}
-      role="button"
-      onKeyDown={(e) => e.key === 'Enter' && onClick?.()}
-    >
+    <Link to={`/browse?manufacturer=${name}`} className="brand-slider-card">
       {/* Square logo area — real brand logos will go here */}
       <div className="brand-slider-card__image-wrap">
         {imageUrl ? (
@@ -41,6 +37,6 @@ export function BrandSliderCard({ item, onClick }) {
       <div className="brand-slider-card__body">
         <p className="brand-slider-card__name">{name}</p>
       </div>
-    </article>
+    </Link>
   );
 }

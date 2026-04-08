@@ -10,6 +10,7 @@
  * Each section's UI lives in a dedicated component.
  */
 
+import { useParams } from 'react-router-dom';
 import { useBoxProfile } from '../hooks/useBoxProfile';
 import { MetricCard } from '../components/MetricCard';
 import { TopChaseRow } from '../components/TopChaseRow';
@@ -19,12 +20,13 @@ import { ChecklistTier } from '../components/ChecklistTier';
 import { formatCurrency, formatPercent, getRoiSentiment } from '../utils/formatters';
 import './BoxProfilePage.css';
 
-// Hardcoded for now — will come from the URL (e.g. /boxes/:id) once routing is added
-const BOX_ID = 'topps-chrome-2023-hobby';
-
 export function BoxProfilePage() {
+  // slug comes from the URL — e.g. /box/topps-chrome-2024-hobby → slug = 'topps-chrome-2024-hobby'
+  // It matches the id field in the BOXES catalogue and the slug column in the database.
+  const { slug } = useParams();
+
   const { box, topChases, pullRates, priceHistory, checklistTiers, isLoading, error } =
-    useBoxProfile(BOX_ID);
+    useBoxProfile(slug);
 
   if (isLoading) {
     return (

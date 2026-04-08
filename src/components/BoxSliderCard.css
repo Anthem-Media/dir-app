@@ -9,6 +9,8 @@
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
+  text-decoration: none; /* reset <a> underline */
+  color: inherit;
   transition: box-shadow 0.15s ease;
   outline: none;
 }

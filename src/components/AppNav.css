@@ -31,8 +31,9 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
-  cursor: pointer;
   white-space: nowrap;
+  text-decoration: none; /* reset <a> underline */
+  cursor: pointer;
 }
 
 .site-top-bar__logo {

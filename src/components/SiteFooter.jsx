@@ -5,6 +5,7 @@
  * two link columns on the right: Company and Support.
  */
 
+import { Link } from 'react-router-dom';
 import './SiteFooter.css';
 
 export function SiteFooter() {
@@ -25,15 +26,15 @@ export function SiteFooter() {
         <div className="site-footer__links">
           <div className="site-footer__col">
             <span className="site-footer__col-heading">Company</span>
-            <a className="site-footer__link" href="#about">About</a>
-            <a className="site-footer__link" href="#news">News</a>
+            <Link className="site-footer__link" to="/about">About</Link>
+            <Link className="site-footer__link" to="/news">News</Link>
           </div>
 
           <div className="site-footer__col">
             <span className="site-footer__col-heading">Support</span>
-            <a className="site-footer__link" href="#help">Help</a>
-            <a className="site-footer__link" href="#faq">FAQ</a>
-            <a className="site-footer__link" href="#contact">Contact</a>
+            <Link className="site-footer__link" to="/help">Help</Link>
+            <Link className="site-footer__link" to="/faq">FAQ</Link>
+            <Link className="site-footer__link" to="/contact">Contact</Link>
           </div>
         </div>
 

@@ -1,20 +1,22 @@
 /**
- * Mock data for the HomePage slider rows and navigation dropdowns.
+ * Mock data for the HomePage slider rows.
  *
  * Structure:
  *   BOXES              — master catalogue of all box sets (defined once, referenced by ID)
+ *                        Also exported so navMockData.js can reference the same objects.
  *   BRAND_SLIDER_CARDS — 14 brand cards for the By Brand slider row
  *   YEAR_SLIDER_CARDS  — 14 year cards (2026 → 2013) for the By Year slider row
  *   SLIDER_CATEGORIES  — ordered list of slider rows, each with a type and items array
- *   NAV_DROPDOWN_DATA  — content for each nav tab's dropdown panel
- *   NAV_TABS           — ordered tab labels for SiteNavBar
+ *
+ * Navigation data (NAV_TABS, NAV_DROPDOWN_DATA) lives in navMockData.js.
  */
 
 // ─── Master box catalogue ──────────────────────────────────────────────────
 // Define each box once here. Slider rows reference boxes by ID via pick().
-// This mirrors how the real API will work — one source of truth per box.
+// Exported so navMockData.js can reference the same box objects without duplicating data.
+// The id field (e.g. 'topps-chrome-2024-hobby') is also the URL slug for /box/:slug.
 
-const BOXES = {
+export const BOXES = {
   // ── Baseball ──────────────────────────────────────────────────────────────
   'topps-chrome-2024-hobby': {
     id: 'topps-chrome-2024-hobby',
@@ -550,191 +552,4 @@ export const SLIDER_CATEGORIES = [
   },
 ];
 
-// ─── Navigation dropdown data ──────────────────────────────────────────────
-// Content for each tab's mega-menu dropdown. SiteNavBar imports this directly.
-//
-// type: 'cascade' → 3-level cascading menu (sport → brand → year)
-// type: 'trending'→ 4-column layout with top boxes per sport
-// type: 'list'    → simple multi-column list
-// type: 'sport'   → brands column + years column + popular boxes column
-
-export const NAV_DROPDOWN_DATA = {
-  All: {
-    type: 'cascade',
-    // Level 1 options
-    sports: ['Baseball', 'Football', 'Basketball', 'Hockey'],
-    // Level 2 options — brands available per sport
-    brandsBySport: {
-      Baseball:   ['Bowman', 'Panini', 'Topps'],
-      Football:   ['Panini'],
-      Basketball: ['Panini'],
-      Hockey:     ['Panini', 'Upper Deck'],
-    },
-    // Level 3 options — years (same list regardless of brand in mock data)
-    years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013],
-  },
-
-  Trending: {
-    type: 'trending',
-    // One column per sport, each with 10 top boxes this week
-    sections: [
-      {
-        sport: 'Baseball',
-        boxes: pick(
-          'topps-chrome-2024-hobby',
-          'bowman-chrome-2024-jumbo',
-          'topps-finest-2024-hobby',
-          'topps-museum-2024-hobby',
-          'panini-prizm-baseball-2024-hobby',
-          'topps-tier-one-2024-hobby',
-          'topps-series1-2024-hobby',
-          'bowman-2024-hobby',
-          'topps-heritage-2024-hobby',
-          'bowman-draft-2024-hobby',
-        ),
-      },
-      {
-        sport: 'Football',
-        boxes: pick(
-          'panini-prizm-football-2024-hobby',
-          'panini-nt-football-2024-hobby',
-          'panini-immaculate-football-2024-hobby',
-          'panini-spectra-football-2024-hobby',
-          'panini-select-football-2024-hobby',
-          'panini-mosaic-football-2024-hobby',
-          'panini-contenders-football-2024-hobby',
-          'panini-absolute-football-2024-hobby',
-          'panini-chronicles-football-2024-hobby',
-          'panini-prizm-football-2023-hobby',
-        ),
-      },
-      {
-        sport: 'Basketball',
-        boxes: pick(
-          'panini-flawless-bball-2425-hobby',
-          'panini-nt-bball-2425-hobby',
-          'panini-immaculate-bball-2425-hobby',
-          'panini-noir-bball-2425-hobby',
-          'panini-prizm-bball-2425-hobby',
-          'panini-select-bball-2425-hobby',
-          'panini-mosaic-bball-2425-hobby',
-          'panini-court-kings-bball-2425-hobby',
-          'panini-chronicles-bball-2425-hobby',
-          'panini-prizm-bball-2324-hobby',
-        ),
-      },
-      {
-        sport: 'Hockey',
-        boxes: pick(
-          'ud-black-diamond-hockey-2425-hobby',
-          'ud-ice-hockey-2425-hobby',
-          'skybox-metal-hockey-2425-hobby',
-          'ud-sp-authentic-hockey-2425-hobby',
-          'ud-artifacts-hockey-2425-hobby',
-          'ud-allure-hockey-2425-hobby',
-          'ud-canvas-hockey-2425-hobby',
-          'ud-series1-hockey-2425-hobby',
-          'ud-series2-hockey-2425-hobby',
-          'ud-ice-hockey-2324-hobby',
-        ),
-      },
-    ],
-  },
-
-  Brands: {
-    type: 'list',
-    items: [
-      'Bowman', 'Donruss', 'Fleer', 'Hoops', 'Leaf',
-      'Mosaic', 'Pacific', 'Panini', 'Prizm', 'Score',
-      'Select', 'Skybox', 'Topps', 'Upper Deck',
-    ],
-  },
-
-  Sports: {
-    type: 'list',
-    items: ['Baseball', 'Basketball', 'Football', 'Hockey'],
-  },
-
-  Year: {
-    type: 'list',
-    items: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013],
-  },
-
-  Baseball: {
-    type: 'sport',
-    brands: ['Bowman', 'Panini', 'Topps', 'Upper Deck'],
-    years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013],
-    popularBoxes: pick(
-      'topps-chrome-2024-hobby',
-      'bowman-chrome-2024-jumbo',
-      'topps-finest-2024-hobby',
-      'topps-museum-2024-hobby',
-      'panini-prizm-baseball-2024-hobby',
-      'topps-tier-one-2024-hobby',
-      'topps-series1-2024-hobby',
-      'bowman-2024-hobby',
-      'topps-heritage-2024-hobby',
-      'topps-stadium-club-2024-hobby',
-    ),
-  },
-
-  Football: {
-    type: 'sport',
-    brands: ['Panini'],
-    years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013],
-    popularBoxes: pick(
-      'panini-prizm-football-2024-hobby',
-      'panini-nt-football-2024-hobby',
-      'panini-immaculate-football-2024-hobby',
-      'panini-spectra-football-2024-hobby',
-      'panini-select-football-2024-hobby',
-      'panini-mosaic-football-2024-hobby',
-      'panini-contenders-football-2024-hobby',
-      'panini-absolute-football-2024-hobby',
-      'panini-chronicles-football-2024-hobby',
-      'panini-donruss-football-2024-hobby',
-    ),
-  },
-
-  Basketball: {
-    type: 'sport',
-    brands: ['Panini'],
-    years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013],
-    popularBoxes: pick(
-      'panini-flawless-bball-2425-hobby',
-      'panini-nt-bball-2425-hobby',
-      'panini-immaculate-bball-2425-hobby',
-      'panini-noir-bball-2425-hobby',
-      'panini-prizm-bball-2425-hobby',
-      'panini-select-bball-2425-hobby',
-      'panini-mosaic-bball-2425-hobby',
-      'panini-court-kings-bball-2425-hobby',
-      'panini-chronicles-bball-2425-hobby',
-      'panini-hoops-bball-2425-hobby',
-    ),
-  },
-
-  Hockey: {
-    type: 'sport',
-    brands: ['Panini', 'Upper Deck'],
-    years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013],
-    popularBoxes: pick(
-      'ud-black-diamond-hockey-2425-hobby',
-      'ud-ice-hockey-2425-hobby',
-      'skybox-metal-hockey-2425-hobby',
-      'ud-sp-authentic-hockey-2425-hobby',
-      'ud-artifacts-hockey-2425-hobby',
-      'ud-allure-hockey-2425-hobby',
-      'ud-canvas-hockey-2425-hobby',
-      'ud-series1-hockey-2425-hobby',
-      'ud-series2-hockey-2425-hobby',
-      'ud-parkhurst-hockey-2425-hobby',
-    ),
-  },
-};
-
-// Tab labels for the SiteNavBar — order determines visual order left-to-right
-export const NAV_TABS = [
-  'All', 'Trending', 'Brands', 'Sports', 'Year',
-  'Baseball', 'Football', 'Basketball', 'Hockey',
-];
+// NAV_TABS and NAV_DROPDOWN_DATA live in src/utils/navMockData.js

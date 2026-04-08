@@ -95,7 +95,6 @@ export function BoxSliderRow({ label, subtitle, items, CardComponent = BoxSlider
           <CardComponent
             key={item.id}
             item={item}
-            onClick={() => console.log(`Navigate to: ${item.id}`)}
           />
         ))}
       </div>

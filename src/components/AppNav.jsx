@@ -1,45 +1,40 @@
 /**
- * SiteTopBar
+ * AppNav
  *
  * The primary site header — logo on the left, search bar centered, links on the right.
- * Sticky so it stays visible as the user scrolls.
- * Exported as AppNav to match the existing import in App.jsx.
+ * Sticky so it stays visible as the user scrolls. Appears on every page.
+ *
+ * The logo links to the homepage.
+ * The search bar is self-contained here until it is wired to URL search params (?q=...).
  */
 
+import { Link } from 'react-router-dom';
 import { SearchBar } from './SearchBar';
 import './AppNav.css';
 
-/**
- * @param {string}   searchValue  - Controlled search query (lifted to App.jsx)
- * @param {function} onSearchChange
- */
-export function AppNav({ searchValue = '', onSearchChange = () => {} }) {
+export function AppNav() {
   return (
     <header className="site-top-bar">
       <div className="site-top-bar__inner">
 
-        {/* Left — brand */}
-        <div className="site-top-bar__brand">
+        {/* Left — brand (links to homepage) */}
+        <Link to="/" className="site-top-bar__brand">
           <span className="site-top-bar__logo">DIR</span>
           <span className="site-top-bar__logo-name">Diamond in the Rough</span>
-        </div>
+        </Link>
 
         {/* Center — search */}
         <div className="site-top-bar__search">
-          <SearchBar
-            value={searchValue}
-            onChange={onSearchChange}
-            placeholder="Search brand, year, sport, box set..."
-          />
+          <SearchBar placeholder="Search brand, year, sport, box set..." />
         </div>
 
         {/* Right — nav links + actions */}
         <nav className="site-top-bar__actions" aria-label="Site links">
-          <a className="site-top-bar__link" href="#about">About</a>
-          <a className="site-top-bar__link" href="#news">News</a>
-          <a className="site-top-bar__link" href="#help">Help</a>
+          <Link className="site-top-bar__link" to="/about">About</Link>
+          <Link className="site-top-bar__link" to="/news">News</Link>
+          <Link className="site-top-bar__link" to="/help">Help</Link>
 
-          {/* Notification bell */}
+          {/* Notification bell — will link to notifications once auth is built */}
           <button className="site-top-bar__icon-btn" aria-label="Notifications">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
               <path
@@ -50,7 +45,8 @@ export function AppNav({ searchValue = '', onSearchChange = () => {} }) {
             </svg>
           </button>
 
-          <button className="site-top-bar__sign-in">Sign in</button>
+          {/* Link renders as <a> — styled as a button via CSS */}
+          <Link className="site-top-bar__sign-in" to="/signin">Sign in</Link>
         </nav>
 
       </div>

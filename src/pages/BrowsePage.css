@@ -1,0 +1,77 @@
+/* ── BrowsePage ───────────────────────────────────────────────────────────── */
+
+.browse-page {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* ── Results column ───────────────────────────────────────────────────────── */
+
+.browse-page__results {
+  flex: 1;
+  min-width: 0; /* prevents flex child from overflowing */
+}
+
+.browse-page__results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.browse-page__result-count {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ── Grid ─────────────────────────────────────────────────────────────────── */
+
+.browse-page__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* Auto-fill columns: min 160px, no wider than 220px.
+     This lets the grid reflow naturally across screen sizes without breakpoints. */
+  grid-template-columns: repeat(auto-fill, minmax(160px, 220px));
+  gap: 16px;
+}
+
+/* ── States ───────────────────────────────────────────────────────────────── */
+
+.browse-page__error,
+.browse-page__empty {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  padding: 40px 0;
+}
+
+.browse-page__empty-clear {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--color-green);
+  text-decoration: underline;
+}
+
+/* ── Responsive: collapse sidebar below 640px ────────────────────────────── */
+
+@media (max-width: 640px) {
+  .browse-page {
+    flex-direction: column;
+  }
+
+  /* Sidebar becomes full-width and loses sticky behavior on small screens */
+  .browse-page .filter-sidebar {
+    width: 100%;
+    position: static;
+  }
+}

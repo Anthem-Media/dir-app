@@ -1,19 +1,17 @@
 /**
  * SearchBar
  *
- * The primary navigation input on the HomePage.
- * A controlled component — the parent owns the value and handles changes.
- * Intentionally has no submit button; search filters live results as you type.
+ * The primary search input in the site header, visible on every page.
+ * Currently uncontrolled — it collects input but doesn't navigate yet.
+ * When wired up, it will push ?q=<query> to the URL and route to /browse.
  */
 
 import './SearchBar.css';
 
 /**
- * @param {string}   value       - Current search query (controlled)
- * @param {function} onChange    - Called with the new string on every keystroke
- * @param {string}   [placeholder]
+ * @param {string} [placeholder]
  */
-export function SearchBar({ value, onChange, placeholder = 'Search any box set...' }) {
+export function SearchBar({ placeholder = 'Search any box set...' }) {
   return (
     <div className="search-bar">
       {/* Magnifying glass icon — purely decorative, no interaction */}
@@ -32,8 +30,6 @@ export function SearchBar({ value, onChange, placeholder = 'Search any box set..
       <input
         className="search-bar__input"
         type="search"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label="Search box sets"
         autoComplete="off"
