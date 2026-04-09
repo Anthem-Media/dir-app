@@ -2,7 +2,7 @@
 
 **Working Name:** DIR (Diamond in the Rough)
 **Tagline:** "Think inside the box."
-**Last Updated:** April 7, 2026
+**Last Updated:** April 9, 2026
 
 ---
 
@@ -132,7 +132,8 @@ Tier system:
 
 - **Frontend:** React, deployed on Vercel (shareable beta URL from day one)
 - **Backend:** Python or Node.js, deployed on Railway or Render (free tier to start)
-- **Database:** PostgreSQL (deployed on Railway or Render)
+- **Database:** Supabase (managed PostgreSQL — scales from free tier to enterprise, see SCALING-REFERENCE.md)
+- **Auth:** Supabase Auth (handles sign up, sign in, sessions, password reset)
 - **AI Vision:** Claude API (photo → structured JSON → box match)
 - **AI Summaries:** Claude API (price data → plain English trend summary) — post-launch feature
 
@@ -145,9 +146,10 @@ Tier system:
 - **Partnership agreement:** Drafted and ready for signatures
 - **Strategy:** Build-to-sell OR long-term operation — TBD based on traction
 - **Potential acquirers:** Fanatics, Topps, Panini
-- **Revenue model:** TBD — likely free with ads or freemium with pro tier
+- **Revenue model:** TBD — likely free with ads or freemium with pro tier. Free vs. paid decision MUST be made before auth system is built.
 - **Price range if subscription:** $4.99-$9.99/mo range
-- **Affiliate opportunity:** eBay partner network (implement from day one — free revenue)
+- **Affiliate opportunity:** eBay partner network (implement from day one — free revenue). Distributor partnerships with Buy Now button on box profile pages. Out-of-print boxes fall back to "Find on eBay" affiliate link. Schema changes needed to support distributor links — TBD pending Cam's distributor conversations.
+- **Email list:** All user emails are owned and stored in the database. Sign-up form includes email opt-in checkbox. A verified, opt-in email list of active sports card collectors is a valuable asset for marketing and for acquisition value.
 - **Legal structure:** LLC deferred until demand is validated
 - **Competitive advantage:** First and only box-level analytics tool for sports cards
 - **Distribution:** Cam has direct access to the target audience through hobby network
@@ -263,7 +265,11 @@ Three commands to save and push changes:
 - BoxProfilePage built with all sections (hero, top chases, pull rates, price trend, checklist)
 - Header with cascading navigation system built
 - Codebase audited and cleaned (CSS variables centralized, calculations moved to utils)
-- Next: routing/filtering system, landing pages (About, News, Contact, Help, Sign In, FAQ), auth system, backend setup
+- Routing and filtering system built and audited (React Router, BrowsePage, FilterSidebar, BoxSetCard)
+- All landing pages built (About, News, Help, Contact, Sign In, Sign Up) with dummy content
+- Sign Up button added to header nav next to Sign In
+- Deployed to Vercel (live URL available)
+- Next: UI audit with Cam, UI polish pass, code audit of new pages, then auth system
 - See CONTEXT.md for full task list and detailed progress tracking
 
 ---

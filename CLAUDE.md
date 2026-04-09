@@ -15,7 +15,8 @@ A sports card box analytics web app. Users look up any box set and see the full 
 
 - Frontend: React + Vite, deployed on Vercel
 - Backend: TBD (Python or Node.js), deployed on Railway or Render
-- Database: PostgreSQL
+- Database: Supabase (managed PostgreSQL)
+- Auth: Supabase Auth (planned)
 - AI: Claude API for photo scan (box identification) and trend summaries (post-launch)
 
 ## Folder Structure
@@ -81,5 +82,9 @@ Key files for routing/filtering:
 - BoxProfilePage built with all sections (hero, top chases, pull rates, price trend, checklist)
 - Header with cascading navigation system built
 - Codebase audited — CSS variables centralized, calculations moved to utils
-- Next: routing/filtering system, landing pages, auth system, backend setup
+- Routing and filtering system built and audited
+- All landing pages built (About, News, Help, Contact, Sign In, Sign Up)
+- Sign Up button added to header nav next to Sign In
+- Deployed to Vercel (live URL available)
+- Next: UI audit with Cam, UI polish pass, code audit of new pages, then auth system
 - See CONTEXT.md for full task list and detailed status
