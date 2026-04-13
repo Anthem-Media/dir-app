@@ -1,28 +1,44 @@
 # Context
 
 ## Current State
-Homepage and BoxProfilePage templates are built with dummy data. Header includes a cascading navigation system. Codebase has been audited and cleaned — CSS variables centralized, calculations moved to utils. Ready to build routing/filtering system and landing pages.
+Phases 1-4 complete. App is deployed to Vercel and live. UI audit in progress — Zach has audited the mobile experience and has notes. Desktop audit still needed. Once both are done, UI polish pass begins one page at a time. All major business decisions from Cam call (April 13, 2026) are now locked and documented below.
 
 ## What's Been Decided and Locked
-- **Scope:** All sports at launch (Baseball, Football, Basketball, Hockey). Baseball data first for beta. No TCG categories.
+- **Scope:** Baseball, Football, Basketball, Hockey, Soccer at launch. All sports need full database population for beta — not just baseball. No TCG categories.
+- **Data coverage:** Full profiles (checklist, pull rates, EV, ROI, card pricing) for boxes 2018-present. Legacy boxes (1995-2017) get box profiles without EV/ROI but keep checklist, card pricing, top chases, and pull rates where available.
+- **Card-level pricing required:** Every card in a checklist needs a current market value. This is what makes EV and ROI calculations work. Not just top chases — the full checklist priced out.
+- **EV and ROI confirmed:** Stays in the product. This is the core differentiator vs. Waxstat and everyone else.
 - **Core value prop:** "When I buy a box, what cards can I get, how much are they worth, and what's the best box for my budget and goals?"
 - **Tagline:** "Think inside the box."
+- **Revenue model — LOCKED:** Fully paid box profiles. Free browsing experience (homepage, browse page, search, filtering, scrolling through box sets). Paywall triggers when user clicks into a box profile page. Conversion funnel: visit site → scroll and look up boxes → click on box profile → hit paywall → pay for deeper analysis.
 - **Data sources:** Manufacturer pull rates + eBay sold listings only.
-- **Tech stack:** React + Vite frontend on Vercel, PostgreSQL on Railway, Python or Node.js backend, Claude API for photo scan and trend summary features.
-- **Database schema:** 13 tables, 2 views. Complete and finalized — do not rebuild.
+- **Tech stack:** React + Vite frontend on Vercel, PostgreSQL on Supabase, Python or Node.js backend, Claude API for photo scan and trend summary features.
+- **Database schema:** 13 tables, 2 views. Complete and finalized — do not rebuild. New tables needed: `distributors` and `distributor_listings` for affiliate/Buy Now system (add during database phases).
 - **Business structure:** 50/50 split with Cam Gibson. Zach handles all technical work. Cam handles business development, distribution, and capital.
-- **Strategy:** Build-to-sell OR long-term operation — TBD based on traction. Target acquirers: Fanatics, Topps, Panini.
+- **Strategy:** Leaning build-to-run (shift from original build-to-sell framing). Not finalized but mindset is long-term operation.
+- **Distribution:** Starts with local card stores, scales from there. Specifics TBD during beta when Cam begins outreach.
 - **Native app:** React Native build needed for pitch demos. Build web app first, port to native once features are solid. PWA as a possible interim step — pending partner discussion.
 - **Filtering system:** Filters are data-driven (populated from database), not hardcoded. Changing filter options later is a data task, not a code rebuild. Filter combinations cascade — sport + manufacturer + year + format all work together.
 - **Routing:** React Router. All routes defined in App.jsx. Routes: `/` (homepage), `/browse` (browse page with filters), `/box/:slug` (box profile), `/about`, `/news`, `/contact`, `/help`, `/signin`, `/signup`.
 - **Browse page architecture:** Dedicated browse page at `/browse` with StockX-style layout. Left sidebar has filter sections (Sport → Manufacturer → Year → Format, in that order). Right side shows results grid of BoxSetCard components. Clicking any card routes to `/box/:slug`.
 - **Filter URL structure:** Filters are passed as URL query parameters. Example: `/browse?sport=baseball&manufacturer=topps&year=2024&format=hobby`. Header nav links route to `/browse` with appropriate query params applied. Every filter combination produces a unique, shareable URL.
 - **Cascading filter logic:** Selecting a filter narrows the options in downstream filters. Example: selecting "Baseball" limits manufacturers to only those with baseball products. Prevents dead-end filter combinations with zero results.
-- **Landing pages:** About, News, Contact, Help, Sign In, FAQ. Dummy content for now. Same color system as main app but with more visual personality — backgrounds, images, less rigid layouts. Elegant but attention-grabbing.
+- **Landing pages:** About, News, Contact, Help, Sign In, Sign Up. Dummy content for now. These do NOT need to be locked down before database/backend work — they're independent static pages that can be updated any time.
 - **Auth:** Supabase Auth (planned). Sign In and Sign Up pages are built as visual templates. Will be wired to Supabase when auth is implemented. Users table in schema includes email, display_name, password_hash, plan columns. Email opt-in checkbox on sign-up form (add `email_opt_in` boolean to users table during auth implementation).
-- **Revenue model:** TBD — pending discussion with Cam. Options: fully paid, free with ads, or freemium. Cam is pushing for full paywall given his distribution network (massive influencer network across multiple spaces, billions of impressions, manufacturer relationships). If full paywall: homepage, about, and browse pages stay public as a landing experience / conversion funnel. Full analytics (box profiles, pull rates, EV) gated behind paid account. Starting paid and loosening later is safer than starting free and adding a paywall. Affiliate revenue from distributor partnerships and eBay Partner Network planned from day one. Free vs. paid decision MUST be made before auth is implemented.
-- **Affiliate strategy (in progress):** Buy Now button on BoxProfilePage linking to distributor affiliate pages. May support multiple distributors with price comparison. Out-of-print boxes fall back to "Find on eBay" link (also affiliate). Schema changes needed to support distributor links. Details pending Cam's distributor conversations.
-- **Data entry strategy:** Admin panel (Phase 11) for form-based data entry. AI-assisted workflow: paste checklist into Claude for structuring, bulk import into database. Launch with manufacturer-published data (checklists, pull rates, MSRP) + eBay pricing for top chase cards. Full variation-level data layers in over time.
+- **Buy Now / affiliate system — LOCKED:** Price comparison with multiple distributors on box profile pages. Starts with 1-2 distributors, grows over time. Boxes without distributor listings fall back to "Find on eBay" affiliate link. System gets designed and built but launches empty — populated when Cam has distributor partnerships (during beta). No distributor outreach until app is ready. New database tables needed: `distributors` and `distributor_listings`.
+- **eBay Partner Network:** Free to join, 1-4% commission (collectibles on the higher end at 3-4%), 24-hour cookie window. Sign up when real data is live on the site (Phase 10-12 timeframe) — signing up with dummy data risks rejection.
+- **Data entry — LOCKED:** Zach handles all data entry during beta (5-10 hrs/week). No data engineer hire until revenue or investors. Pipeline needs to be founder-operable. AI-assisted workflow: paste raw data from sources into Claude (or Cowork) for structuring, output to spreadsheets matching database schema, bulk import when database is live. Spreadsheet templates created (drafts) — will be finalized when Zach brings real box data to cross-reference against schema.
+- **Data entry sources by sport:**
+  - Baseball: Beckett, Cardboard Connection, Topps, Baseballcardpedia
+  - Football: TCDB (tcdb.com) — Panini exclusive until 2025, Topps post-2025
+  - Basketball: TCDB — Panini exclusive license
+  - Hockey: TCDB — Upper Deck exclusive license
+  - Soccer: TCDB — Panini and Topps
+  - Pull rates: Cross-reference Beckett and Cardboard Connection (TCDB does not publish pull rates)
+- **Legacy boxes idea (on the shelf):** Separate "Legacy Boxes" header tab showing a filtered list of pre-2018 boxes available for purchase through affiliate partners. Only populated when distributor partnerships exist. May or may not be built — not on the roadmap, just documented as a future idea.
+- **Budget:** $5k max for professional code audits (covers all three planned audits). No data engineer hire until revenue.
+- **Timeline:** No hard launch date. Working diligently but not rushing. No corners cut.
+- **Images strategy:** Don't let images block data entry. Enter checklist/pricing/pull rate data first, leave image_url blank. eBay API integration (Phase 13) will provide images as a byproduct of price scraping. Manufacturer sites and retailer product feeds are secondary sources. Placeholder images acceptable for beta.
 
 ## Hard No List (v1)
 - Marketplace
@@ -38,6 +54,7 @@ Homepage and BoxProfilePage templates are built with dummy data. Header includes
 - SCALING-REFERENCE.md — infrastructure scaling roadmap
 - Database schema (13 tables, 2 views)
 - Partnership agreement (drafted, ready for signatures)
+- Data entry spreadsheet templates (drafts — need review before use)
 
 ## What's Done
 1. ✅ Project scaffolded with Vite + React
@@ -54,34 +71,44 @@ Homepage and BoxProfilePage templates are built with dummy data. Header includes
 12. ✅ Landing pages built (AboutPage, NewsPage, HelpPage, ContactPage, SignInPage, SignUpPage)
 13. ✅ Sign Up button added to header nav next to Sign In
 14. ✅ Deployed to Vercel (live URL available)
+15. ✅ All major business decisions locked with Cam (revenue model, data strategy, affiliate approach, sport scope, timeline)
 
 ## Full Roadmap
 1. ~~Codebase audit~~ ✅
 2. ~~Routing and filtering system~~ ✅
 3. ~~Landing pages~~ ✅
 4. ~~Deploy to Vercel~~ ✅
-5. UI audit with Cam
-6. UI polish pass + code audit of all new pages (one at a time: About → News → Help → Contact → Sign In → Sign Up → homepage changes)
-7. Auth system (Supabase) + free vs. paid decision — MUST decide before building auth
+5. UI audit with Cam ← CURRENT (mobile notes done, desktop audit in progress)
+6. UI polish pass + code audit of all new pages (one at a time: Header/Nav → Homepage → Browse → Box Profile → About → News → Help → Contact → Sign In → Sign Up)
+7. Auth system (Supabase) — revenue model locked as fully paid box profiles
 8. Pro audit #1 (senior React dev — is the frontend and auth foundation solid? ~3-5 hours at $50-150/hr = $150-750)
-9. Database setup and backend API
+9. Database setup and backend API (add `distributors` and `distributor_listings` tables to schema)
 10. Connect frontend to real data
 11. Admin panel for data entry
-12. Seed database with 100-200 popular baseball box sets
-13. eBay API integration (card pricing + box pricing)
+12. Seed database with all sports (Baseball, Football, Basketball, Hockey, Soccer) — 2018-present full profiles, 1995-2017 legacy profiles
+13. eBay API integration (card pricing + box pricing + images)
 14. Claude API integration for photo scan feature
-15. Buy Now / affiliate link system + schema changes for distributors
+15. Buy Now / affiliate link system (UI built, populated when Cam has distributor partnerships)
 16. Price alerts and notifications
 17. User features (saved boxes, collection tracker, wishlist)
 18. Search functionality
-19. Pro audit #2 (full-stack dev or React dev + backend/database dev — is the complete app ready for real users? ~8-15 hours at $50-150/hr = $400-2,250)
+19. Pro audit #2 (full-stack dev — is the complete app ready for real users? ~8-15 hours at $50-150/hr = $400-2,250)
 20. Beta launch
 21. Pro audit #3 (specialist based on what breaks — performance, security, or both. ~5-10 hours at $75-200/hr = $375-2,000)
-22. Post-launch: AI trend summaries, portfolio tracking, additional sports data
+22. Post-launch: AI trend summaries, portfolio tracking, Legacy Boxes marketplace tab (if validated)
+
+## Reminders & Flags
+- ⚠️ Do NOT build auth without the free vs. paid decision — RESOLVED: fully paid box profiles, free browsing
+- ⚠️ When we get to database phases, add `distributors` and `distributor_listings` tables and build the Buy Now system with eBay fallback
+- ⚠️ Code audit of new pages happens one page at a time during Phase 6
+- ⚠️ Spreadsheet templates need review with real box data before any data entry begins
+- ⚠️ Update MD files with data entry workflow details when Cowork pipeline is tested
+- ⚠️ Soccer needs to be added to the UI navigation alongside the other four sports
 
 ## Development Guidelines
 - Use this Project chat for planning, strategy, and decisions
 - Use Claude Code for hands-on coding and file creation
+- Use Cowork for repetitive data entry processing (test with one box set first)
 - Consistent naming conventions throughout the codebase
 - One job per file — components render UI, hooks fetch data, utils calculate
 - Start each session by reviewing this file and project-brief.md

@@ -2,7 +2,7 @@
 
 **Working Name:** DIR (Diamond in the Rough)
 **Tagline:** "Think inside the box."
-**Last Updated:** April 9, 2026
+**Last Updated:** April 13, 2026
 
 ---
 
@@ -19,7 +19,7 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - Age 13+ (minimum age for account creation)
 - Casual collectors through serious investors
 - People who currently rely on card shop employees, manufacturer marketing, or gut instinct to decide what box to buy
-- Baseball collectors first, expanding to other sports and categories later
+- Distribution starts with local card stores, scales from there
 
 ---
 
@@ -27,6 +27,7 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 
 ### Priority 5 — Core (must have for beta)
 - Box profile page with full checklist, pull rates, EV calculator, ROI score
+- Card-level pricing for every card in the checklist (required for EV/ROI math)
 - Card value rankings within a set by tier
 - Market trend charts over time (box price and card values)
 - Manufacturer-published pull rate display
@@ -63,12 +64,24 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 
 ## Data Strategy
 
+### Data Coverage
+- **Full profiles (2018-present):** Checklist, card-level pricing, pull rates, EV, ROI, top chases, market trends. This is the core product.
+- **Legacy profiles (1995-2017):** Checklist, card-level pricing, top chases, pull rates where available. NO EV or ROI — the math doesn't apply to older product. Box profile page hides or gracefully handles missing EV/ROI sections for legacy boxes.
+
 ### Data Sources
-- **Card checklists:** Cardboard Connection and Sports Cards Pro (sportscardspro.com) as references, manual data entry into own database. Sports Cards Pro is especially useful for historical sets and complete card-level data (which cards are in which set, card numbers, player names). Do not scrape verbatim — build own dataset from factual information.
-- **Card pricing:** eBay sold listings (primary source). eBay API for programmatic access.
-- **Pull rates:** Manufacturer-published odds from packaging and official sites (Topps, Panini, Upper Deck).
+- **Card checklists:** Varies by sport (see Data Entry Sources below). Manual data entry into own database using AI-assisted workflow. Do not scrape verbatim — build own dataset from factual information.
+- **Card pricing:** eBay sold listings (primary source). eBay API for programmatic access. Card-level pricing is required for every card — not just top chases.
+- **Pull rates:** Manufacturer-published odds from packaging and official sites (Topps, Panini, Upper Deck). Cross-reference Beckett and Cardboard Connection. TCDB does not publish pull rates.
 - **Box pricing:** eBay sold listings for sealed box market prices.
-- **Images:** Box set images (required) and individual card images (required) — source from manufacturer promo materials and official sites. Legal considerations around card image usage TBD — document but don't block development on this.
+- **Images:** Don't let images block data entry. Enter data first, leave image_url blank. eBay API will provide images as a byproduct of price scraping (Phase 13). Manufacturer sites and retailer product feeds are secondary sources. Placeholder images acceptable for beta.
+
+### Data Entry Sources by Sport
+- **Baseball:** Beckett, Cardboard Connection, Topps, Baseballcardpedia
+- **Football:** TCDB (tcdb.com) — Panini exclusive until 2025, Topps post-2025
+- **Basketball:** TCDB — Panini exclusive license
+- **Hockey:** TCDB — Upper Deck exclusive license
+- **Soccer:** TCDB — Panini and Topps
+- **Pull rates (all sports):** Cross-reference Beckett and Cardboard Connection (TCDB does not publish pull rates)
 
 ### Data Integrity Rules
 - NO user-submitted data influencing the dataset. Ever.
@@ -82,18 +95,22 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - Long-term: Real-time or near-real-time (engineering hire needed)
 
 ### Scale
-- Beta launch: Manually seed 100-200 of the most popular current baseball box sets (last 2-3 years)
-- 40-60 new baseball box set products per year from Topps and Panini
+- Beta launch: All five sports (Baseball, Football, Basketball, Hockey, Soccer) populated with full profiles for 2018-present, legacy profiles for 1995-2017
+- Estimated box count for full profiles (2018-present): ~1,200-2,000 boxes across all sports
+- 40-60 new box set products per year per sport from major manufacturers
 - Each set has multiple formats (Hobby, Jumbo, Blaster, Mega, Retail) — each is a separate database entry
 
-### Data Entry
-- Build an admin panel (form-based interface) so data entry never requires raw SQL
-- Semi-manual process for beta: reference Cardboard Connection, enter data through admin forms
-- Automated pipeline is a post-validation hire (data engineer on Upwork)
-- Claude can build ~70-75% of the pipeline; remaining 25-30% needs a specialist
+### Data Entry Workflow
+- **Who:** Zach handles all data entry during beta. No data engineer hire until revenue or investors.
+- **Pipeline:** AI-assisted workflow — paste raw data from sources (TCDB, Cardboard Connection, Beckett, etc.) into Claude or Cowork for structuring. Output to spreadsheets matching database schema. Bulk import when database is live.
+- **Spreadsheet templates:** Draft templates created for box_sets, cards (checklist), and pull_rates. Will be finalized when real box data is used to cross-reference against the database schema.
+- **Cowork pipeline:** Test with one box set first before committing to full data pull. Set up repeatable workflow: drop raw data into folder → Cowork processes into structured spreadsheet → output to designated folder.
+- **Target speed:** 100+ boxes per day once pipeline is dialed in.
+- **Admin panel:** Form-based interface (Phase 11) so data entry never requires raw SQL after initial seeding.
+- **Post-automation:** Data engineer hire on Upwork ($15-25/hr, ~10hrs/week) once revenue justifies it. Until then, eBay API pipeline needs to be founder-operable.
 
 ### Data Entry Maintenance
-- During beta: 5-10 hours/week between partners
+- During beta: 5-10 hours/week (Zach only)
 - Post-automation: 2-3 hours/week monitoring
 - At scale: Part-time data contractor (~$15-25/hr, ~10hrs/week)
 
@@ -144,24 +161,26 @@ Tier system:
 - **Working name:** DIR (Diamond in the Rough)
 - **Founders:** Zach Seabolt (technical, 50%) and Cam Gibson (business, 50%)
 - **Partnership agreement:** Drafted and ready for signatures
-- **Strategy:** Build-to-sell OR long-term operation — TBD based on traction
-- **Potential acquirers:** Fanatics, Topps, Panini
-- **Revenue model:** TBD — likely free with ads or freemium with pro tier. Free vs. paid decision MUST be made before auth system is built.
+- **Strategy:** Leaning build-to-run (long-term operation). Not finalized but mindset has shifted from original build-to-sell framing.
+- **Potential acquirers (if strategy changes):** Fanatics, Topps, Panini
+- **Revenue model — LOCKED:** Fully paid box profiles. Free browsing (homepage, browse, search, filtering). Paywall on box profile page (checklist, pull rates, EV, ROI, price trends). Conversion funnel: visit → browse → click box → paywall → pay.
 - **Price range if subscription:** $4.99-$9.99/mo range
-- **Affiliate opportunity:** eBay partner network (implement from day one — free revenue). Distributor partnerships with Buy Now button on box profile pages. Out-of-print boxes fall back to "Find on eBay" affiliate link. Schema changes needed to support distributor links — TBD pending Cam's distributor conversations.
+- **Buy Now / affiliate system:** Price comparison with multiple distributors on box profile pages. Starts with 1-2 distributors, grows over time. Boxes without distributor listings fall back to "Find on eBay" affiliate link. Every box profile has a monetization path. System built but launches empty — populated when Cam has distributor partnerships (during beta). New database tables needed: `distributors` and `distributor_listings`.
+- **eBay Partner Network:** Free to join, 1-4% commission (collectibles 3-4%), 24-hour cookie. Sign up when real data is live (Phase 10-12). Don't apply with dummy data.
+- **Distributor outreach:** No conversations until app is ready for launch or in beta. Cam handles all distributor relationships.
 - **Email list:** All user emails are owned and stored in the database. Sign-up form includes email opt-in checkbox. A verified, opt-in email list of active sports card collectors is a valuable asset for marketing and for acquisition value.
 - **Legal structure:** LLC deferred until demand is validated
-- **Competitive advantage:** First and only box-level analytics tool for sports cards
-- **Distribution:** Cam has direct access to the target audience through hobby network
-- **Target timeline:** Fully functional app within 6 months, launch/acquisition decision at 1 year
+- **Competitive advantage:** First and only box-level analytics tool for sports cards. Waxstat does box price comparison but NOT analytics/EV/ROI.
+- **Distribution:** Starts with local card stores. Cam has direct access to the target audience through hobby network. Scales from local to broader during/after beta.
+- **Budget:** $5k max for professional code audits. No data engineer until revenue or investors.
+- **Timeline:** No hard launch date. Working diligently but not rushing. No corners cut.
 
 ---
 
 ## Sport Expansion Roadmap
 
-Beta: Baseball data only (building the formula and automation pipeline)
-Launch: Baseball, Football, Basketball, Hockey
-Phase 2: UFC, Soccer, F1
+Beta & Launch: Baseball, Football, Basketball, Hockey, Soccer (all populated with data)
+Phase 2: UFC, F1
 Phase 3 (if ever): Entertainment/TCG (Disney, Marvel, Pokemon, Magic, Yu-Gi-Oh, etc.)
 
 The database schema supports all sports from day one. The UI supports all sports from day one. Adding a new sport is a data entry task, not a rebuild.
@@ -178,15 +197,16 @@ In rough priority order:
 5. Portfolio value tracking over time (graph your collection's total value)
 6. "Cards I need" auto-generated from checklist minus owned cards
 7. Community / social features
-8. Marketplace exploration (StockX-style for cards — year two at earliest)
-9. AI price predictions (only if historical data is deep enough to be credible)
+8. Legacy Boxes marketplace tab (filtered list of pre-2018 boxes for sale through affiliate partners — only if validated and distributor partnerships exist)
+9. Marketplace exploration (StockX-style for cards — year two at earliest)
+10. AI price predictions (only if historical data is deep enough to be credible)
 
 ---
 
 ## Design Direction
 
 - **Aesthetic:** Clean and minimal, inspired by StockX
-- **Color scheme (working):** White and green (easily changeable — CSS variables)
+- **Color scheme:** TBD — changing from current green. Not using anything competitors use. CSS variables make this a one-file change.
 - **Logo:** TBD — will be designed
 - **UI approach:** Layered complexity — casual users see top-level info (top chases, ROI score), serious investors can drill into full data (checklist, price history, pull rate math)
 - **Browse experience:** Dedicated browse page at `/browse` with StockX-style layout — filter sidebar on the left (Sport → Manufacturer → Year → Format), results grid on the right. Filters use URL query parameters so every combination is shareable. Header nav links route to the browse page with filters pre-applied.
@@ -269,7 +289,7 @@ Three commands to save and push changes:
 - All landing pages built (About, News, Help, Contact, Sign In, Sign Up) with dummy content
 - Sign Up button added to header nav next to Sign In
 - Deployed to Vercel (live URL available)
-- Next: UI audit with Cam, UI polish pass, code audit of new pages, then auth system
+- Next: Complete UI audit (desktop), UI polish pass one page at a time, code audit of each page, then auth system
 - See CONTEXT.md for full task list and detailed progress tracking
 
 ---
@@ -278,4 +298,4 @@ Three commands to save and push changes:
 
 See pinned file: `dir_database_schema.sql`
 
-The schema is complete with 13 tables, indexes, views, seed data, and example data. Do not rebuild from scratch — modify the existing schema.
+The schema is complete with 13 tables, indexes, views, seed data, and example data. Do not rebuild from scratch — modify the existing schema. New tables to add during database phases: `distributors` and `distributor_listings` for the Buy Now affiliate system.
