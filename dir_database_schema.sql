@@ -8,7 +8,6 @@
 -- ============================================================
 -- TABLE 1: SPORTS
 -- Reference table for sport types
--- Starting with baseball only, structured for expansion
 -- ============================================================
 CREATE TABLE sports (
     id          SERIAL PRIMARY KEY,
@@ -47,6 +46,12 @@ INSERT INTO manufacturers (name, slug) VALUES
 -- TABLE 3: BOX_SETS
 -- Core table — one row per unique box set product
 -- Example: "2024 Topps Chrome Baseball Hobby Box" is one row
+--
+-- PENDING AMENDMENT (database phase):
+-- Add parent_set_id INT REFERENCES box_sets(id) NULL
+-- This groups all formats of the same set together (Hobby, Jumbo,
+-- Blaster, Mega, Retail). Used by the format switcher on the box
+-- profile page. A NULL parent_set_id means no related formats exist.
 -- ============================================================
 CREATE TABLE box_sets (
     id                      SERIAL PRIMARY KEY,
@@ -57,6 +62,10 @@ CREATE TABLE box_sets (
     manufacturer_id         INT NOT NULL REFERENCES manufacturers(id),
     box_format              VARCHAR(50) NOT NULL,
     series                  VARCHAR(100),
+
+    -- Links related formats of the same set together (Hobby, Jumbo, Blaster etc.)
+    -- Add during database phase: parent_set_id INT REFERENCES box_sets(id) NULL
+    -- NULL = no related formats. All formats of the same set share the same parent_set_id.
 
     -- Box configuration
     packs_per_box           SMALLINT,
@@ -144,9 +153,9 @@ CREATE TABLE cards (
     is_case_hit         BOOLEAN DEFAULT FALSE,
 
     -- Grails tab: tracks whether low-print cards (print_run <= 10) have been pulled/sold.
-    -- 'unknown'      = status not yet verified (default for all low-print cards at entry)
+    -- 'unknown'        = status not yet verified (default for all low-print cards at entry)
     -- 'in_circulation' = confirmed still available in sealed product
-    -- 'pulled_sold'  = confirmed pulled and sold; no longer in circulation
+    -- 'pulled_sold'    = confirmed pulled and sold; no longer in circulation
     -- Only meaningful for cards where print_run <= 10. Ignored for all other cards.
     circulation_status  VARCHAR(20) DEFAULT 'unknown',
 
@@ -202,6 +211,8 @@ CREATE INDEX idx_pull_rates_box_set ON pull_rates(box_set_id);
 -- TABLE 7: PRICE_HISTORY
 -- Running log of card prices over time
 -- Powers all trend charts and ROI calculations
+-- Also powers the tier price trend chart on the box profile page
+-- (average sale price per tier over time)
 -- ============================================================
 CREATE TABLE price_history (
     id              BIGSERIAL PRIMARY KEY,
@@ -228,7 +239,7 @@ CREATE INDEX idx_price_history_source ON price_history(source);
 -- ============================================================
 -- TABLE 8: BOX_PRICE_HISTORY
 -- Tracks sealed box market prices over time
--- Separate from card price history
+-- Powers the sealed box price trend chart in the hero section
 -- ============================================================
 CREATE TABLE box_price_history (
     id          BIGSERIAL PRIMARY KEY,
@@ -356,6 +367,7 @@ SELECT
     bs.expected_value,
     bs.roi_percentage,
     bs.release_date,
+    bs.is_active,
     COUNT(DISTINCT c.id) AS total_cards_in_checklist
 FROM box_sets bs
 JOIN sports s ON bs.sport_id = s.id
@@ -363,8 +375,8 @@ JOIN manufacturers m ON bs.manufacturer_id = m.id
 LEFT JOIN cards c ON c.box_set_id = bs.id
 GROUP BY bs.id, s.name, m.name;
 
--- Top cards by value within a set
--- Note: excludes Grails (print_run <= 10) — those are shown separately on the box profile page
+-- Top cards by value within a set (Top Chases tab)
+-- Excludes Grails (print_run <= 10) — those are shown separately on the Grails tab
 CREATE VIEW v_top_cards_by_set AS
 SELECT
     c.box_set_id,
@@ -372,6 +384,7 @@ SELECT
     c.player_name,
     c.variation_name,
     cc.name AS category,
+    cc.tier,
     c.current_value,
     c.is_autograph,
     c.is_relic,

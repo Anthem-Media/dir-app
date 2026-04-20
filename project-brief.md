@@ -31,6 +31,10 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - Card value rankings within a set by tier
 - Top Chases tab — cards with print run > 10 or no print run; drives EV/ROI math
 - Grails tab — cards with print run ≤ 10 (including 1/1s and Superfractors); excluded from EV/ROI; shows circulation status badge
+- Format switcher — tab row at top of box profile page to switch between Hobby, Jumbo, Blaster, Mega, Retail; updates MSRP, pull rates, EV, ROI
+- Two price trend charts — (1) sealed box price in hero section, (2) card value by tier below checklist with toggle tabs
+- Checklist expand/collapse — 5 cards shown per tier by default, expand inline per tier
+- Card search within checklist tiers — real time filter by player name or card number, visible only when tier is expanded
 - Market trend charts over time (box price and card values)
 - Manufacturer-published pull rate display
 
@@ -46,10 +50,12 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - User accounts with saved/watchlisted boxes
 - Personal collection tracker (cards owned, quantity, condition)
 - Wishlist feature (cards wanted)
+- Coming Soon / upcoming releases section on homepage with countdown timers
 
 ### Priority 1 — Future
 - Community/social features (comments, forums, card showcase)
 - Claude API generated plain English trend summaries
+- Light/dark mode toggle in settings
 
 ---
 
@@ -75,7 +81,7 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 ### Data Sources
 - **Card checklists:** Varies by sport (see Data Entry Sources below). Manual data entry into own database using AI-assisted workflow. Do not scrape verbatim — build own dataset from factual information.
 - **Card pricing:** eBay sold listings (primary source). eBay API for programmatic access. Card-level pricing is required for every card — not just top chases.
-- **Pull rates:** Manufacturer-published odds from packaging and official sites (Topps, Panini, Upper Deck). Cross-reference Beckett and Cardboard Connection. TCDB does not publish pull rates.
+- **Pull rates:** Manufacturer-published odds from packaging and official sites (Topps, Panini, Upper Deck). Cross-reference Beckett, Cardboard Connection, Chasing Majors, and Checklist Insider. TCDB does not publish pull rates. Chasing Majors and Checklist Insider provide format-level odds (Hobby vs Jumbo vs Blaster etc.) — required for the format switcher feature.
 - **Box pricing:** eBay sold listings for sealed box market prices.
 - **Images:** Don't let images block data entry. Enter data first, leave image_url blank. Primary image source is distributor product feeds (Dave & Adam's, Blowout Cards, Steel City, etc.) — clean, standardized, high-res box art pulled automatically as a byproduct of price scraping, same method Waxstat uses for their 27k+ box library. eBay API (Phase 13) is the fallback for boxes no distributor carries. Manufacturer sites are a tertiary source. Placeholder images acceptable for beta. Images are never manually sourced.
 
@@ -85,7 +91,7 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - **Basketball:** TCDB — Panini exclusive license
 - **Hockey:** TCDB — Upper Deck exclusive license
 - **Soccer:** TCDB — Panini and Topps
-- **Pull rates (all sports):** Cross-reference Beckett and Cardboard Connection (TCDB does not publish pull rates)
+- **Pull rates (all sports):** Cross-reference Beckett, Cardboard Connection, Chasing Majors, and Checklist Insider. TCDB does not publish pull rates. Chasing Majors and Checklist Insider provide format-level odds.
 
 ### Data Integrity Rules
 - NO user-submitted data influencing the dataset. Ever.
@@ -102,7 +108,7 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - Beta launch: All five sports (Baseball, Football, Basketball, Hockey, Soccer) populated with full profiles for 2018-present, legacy profiles for 1995-2017
 - Estimated box count for full profiles (2018-present): ~1,200-2,000 boxes across all sports
 - 40-60 new box set products per year per sport from major manufacturers
-- Each set has multiple formats (Hobby, Jumbo, Blaster, Mega, Retail) — each is a separate database entry
+- Each set has multiple formats (Hobby, Jumbo, Blaster, Mega, Retail) — each is a separate database entry linked by `parent_set_id`
 
 ### Data Entry Workflow
 - **Who:** Zach handles all data entry during beta. No data engineer hire until revenue or investors.
@@ -216,20 +222,22 @@ In rough priority order:
 1. User accounts with saved/watchlisted boxes
 2. Personal collection tracker and wishlist
 3. Price alerts and notifications
-4. Plain English AI trend summaries
-5. Portfolio value tracking over time (graph your collection's total value)
-6. "Cards I need" auto-generated from checklist minus owned cards
-7. Community / social features
-8. Legacy Boxes marketplace tab (filtered list of pre-2018 boxes for sale through affiliate partners — only if validated and distributor partnerships exist)
-9. Marketplace exploration (StockX-style for cards — year two at earliest)
-10. AI price predictions (only if historical data is deep enough to be credible)
+4. Coming Soon / upcoming releases section with countdown timers
+5. Plain English AI trend summaries
+6. Light/dark mode toggle in user settings
+7. Portfolio value tracking over time (graph your collection's total value)
+8. "Cards I need" auto-generated from checklist minus owned cards
+9. Community / social features
+10. Legacy Boxes marketplace tab (filtered list of pre-2018 boxes for sale through affiliate partners — only if validated and distributor partnerships exist)
+11. Marketplace exploration (StockX-style for cards — year two at earliest)
+12. AI price predictions (only if historical data is deep enough to be credible)
 
 ---
 
 ## Design Direction
 
 - **Aesthetic:** Clean and minimal, inspired by StockX
-- **Color scheme:** TBD — changing from current green. Not using anything competitors use. CSS variables make this a one-file change.
+- **Color scheme:** Dark mode — background #111214, accent #7c6fff (purple), positive financial indicators #16a34a (green). All colors are CSS variables in index.css. May evolve post-beta based on user feedback — CSS variables make this a one-file change.
 - **Logo:** TBD — will be designed
 - **UI approach:** Layered complexity — casual users see top-level info (top chases, ROI score), serious investors can drill into full data (checklist, price history, pull rate math)
 - **Browse experience:** Dedicated browse page at `/browse` with StockX-style layout — filter sidebar on the left (Sport → Manufacturer → Year → Format), results grid on the right. Filters use URL query parameters so every combination is shareable. Header nav links route to the browse page with filters pre-applied.
@@ -257,6 +265,7 @@ In rough priority order:
 9. **No hacky workarounds** — if something needs a shortcut to work, flag it and find the right solution. A future developer shouldn't have to untangle clever hacks.
 10. **Comment non-obvious code** — if a piece of logic isn't self-explanatory, add a brief comment explaining what it does and why
 11. **Keep dependencies minimal** — don't install packages for things that can be done simply. Every dependency is something a future dev has to understand and maintain.
+12. **Use CSS variables for ALL colors** — no hardcoded hex values in any component or CSS file. All color values live in index.css only.
 
 ---
 
@@ -276,7 +285,7 @@ Zach Seabolt is a mix engineer based in Tennessee with no formal coding or devel
 - **GitHub repo:** github.com/Anthem-Media/dir-app
 - **Frontend tooling:** Vite v8.0.3 + React
 - **Project location on disk:** ~/Desktop/dir-app
-- **Claude tools:** Claude Pro subscription, Claude Code, Cowork
+- **Claude tools:** Claude Pro subscription, Claude Code (Sonnet for UI/mechanical tasks, Opus for auth/database/backend), Cowork
 
 ### Project Folder Structure (established)
 ```
@@ -304,15 +313,9 @@ Three commands to save and push changes:
 3. `git push` — upload to GitHub
 
 ### Current Status
-- Homepage template built with dummy data
-- BoxProfilePage built with all sections (hero, top chases, pull rates, price trend, checklist)
-- Header with cascading navigation system built
-- Codebase audited and cleaned (CSS variables centralized, calculations moved to utils)
-- Routing and filtering system built and audited (React Router, BrowsePage, FilterSidebar, BoxSetCard)
-- All landing pages built (About, News, Help, Contact, Sign In, Sign Up) with dummy content
-- Sign Up button added to header nav next to Sign In
-- Deployed to Vercel (live URL available)
-- Next: Complete UI audit (desktop), UI polish pass one page at a time, code audit of each page, then auth system
+- Dark mode color scheme implemented and deployed
+- All colors are CSS variables — no hardcoded hex in codebase
+- UI polish pass starting now — new box profile features first, then page-by-page polish
 - See CONTEXT.md for full task list and detailed progress tracking
 
 ---
@@ -324,6 +327,7 @@ See pinned file: `dir_database_schema.sql`
 The schema is complete with 13 tables, indexes, views, seed data, and example data. Do not rebuild from scratch — modify the existing schema.
 
 **Pending schema amendments (apply during database phase):**
-- Add `circulation_status VARCHAR(20) DEFAULT 'unknown'` to the `cards` table. Valid values: `unknown`, `in_circulation`, `pulled_sold`. Powers the Grails tab circulation status badge. Only meaningful for cards with `print_run` ≤ 10.
-- Add `distributors` table for the Buy Now affiliate system
-- Add `distributor_listings` table for the Buy Now affiliate system
+- Add `circulation_status VARCHAR(20) DEFAULT 'unknown'` to the `cards` table. Values: `unknown`, `in_circulation`, `pulled_sold`. Powers the Grails tab circulation status badge. Only meaningful for cards with `print_run` ≤ 10.
+- Add `parent_set_id INT REFERENCES box_sets(id) NULL` to the `box_sets` table. Groups all formats of the same set together (Hobby, Jumbo, Blaster, Mega, Retail). Powers the format switcher on the box profile page. NULL means no related formats exist.
+- Add `distributors` table for the Buy Now affiliate system.
+- Add `distributor_listings` table for the Buy Now affiliate system.

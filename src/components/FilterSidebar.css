@@ -85,11 +85,11 @@
 
 .filter-sidebar__option--active {
   background-color: var(--color-green);
-  color: #fff;
+  color: var(--color-nav-text);
   font-weight: 600;
 }
 
 .filter-sidebar__option--active:hover {
   background-color: var(--color-green-dark);
-  color: #fff;
+  color: var(--color-nav-text);
 }
