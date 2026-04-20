@@ -55,6 +55,23 @@ export function BoxProfilePage() {
   // specific format); the tier tab is not — it's a navigational detail within the page.
   const [activeTierTab, setActiveTierTab] = useState('base');
 
+  // Tracks which checklist tiers are expanded (showing all cards vs. the first 5).
+  // Lives here — not inside ChecklistTier — so the page controls all tiers from one
+  // place. This also keeps ChecklistTier a simple controlled component with no state.
+  const [expandedTiers, setExpandedTiers] = useState(new Set());
+
+  function handleTierToggle(tierId) {
+    setExpandedTiers((prev) => {
+      const next = new Set(prev);
+      if (next.has(tierId)) {
+        next.delete(tierId);
+      } else {
+        next.add(tierId);
+      }
+      return next;
+    });
+  }
+
   const { box, topChases, priceHistory, checklistTiers, isLoading, error } =
     useBoxProfile(slug);
 
@@ -200,12 +217,17 @@ export function BoxProfilePage() {
         <div className="box-profile-page__section-header">
           <h2 className="box-profile-page__section-title">Full checklist</h2>
           <p className="box-profile-page__section-subtitle">
-            All cards in this set — tap a tier to expand.
+            All cards in this set, grouped by tier.
           </p>
         </div>
         <div className="box-profile-page__checklist">
           {checklistTiers.map((tier) => (
-            <ChecklistTier key={tier.id} tier={tier} />
+            <ChecklistTier
+              key={tier.id}
+              tier={tier}
+              isExpanded={expandedTiers.has(tier.id)}
+              onToggle={() => handleTierToggle(tier.id)}
+            />
           ))}
         </div>
       </section>

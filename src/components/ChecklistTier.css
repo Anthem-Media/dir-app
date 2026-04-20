@@ -1,3 +1,9 @@
+/*
+ * ChecklistTier — one collapsible tier in the box profile checklist.
+ * Shows 5 cards by default; toggle button expands to all cards.
+ * No hardcoded hex values — all colors from index.css CSS variables.
+ */
+
 .checklist-tier {
   border-bottom: 1px solid var(--color-border);
 }
@@ -6,32 +12,14 @@
   border-bottom: none;
 }
 
-/* Header is a <button> so it's keyboard-accessible */
+/* ── Tier header (display only — not interactive) ───────────────────────── */
+
 .checklist-tier__header {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 16px 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-}
-
-.checklist-tier__header:hover .checklist-tier__label {
-  color: var(--color-green);
-}
-
-/* Chevron rotates 180° when the tier is open */
-.checklist-tier__chevron {
-  color: var(--color-text-muted);
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
-
-.checklist-tier--open .checklist-tier__chevron {
-  transform: rotate(180deg);
 }
 
 .checklist-tier__label {
@@ -39,7 +27,6 @@
   font-weight: 600;
   color: var(--color-text-primary);
   flex: 1;
-  transition: color 0.15s ease;
 }
 
 .checklist-tier__meta {
@@ -60,16 +47,17 @@
   text-align: right;
 }
 
-/* Expanded card list */
+/* ── Card list ───────────────────────────────────────────────────────────── */
+
 .checklist-tier__body {
-  padding-bottom: 12px;
+  padding-bottom: 4px;
 }
 
 .checklist-tier__card-row {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 8px 0 8px 28px; /* indent to align under the label */
+  padding: 8px 0 8px 28px; /* indent to align under the tier label */
   border-top: 1px solid var(--color-bg-subtle);
 }
 
@@ -91,4 +79,26 @@
   color: var(--color-text-primary);
   min-width: 72px;
   text-align: right;
+}
+
+/* ── Toggle button ───────────────────────────────────────────────────────── */
+
+/* Subtle text-only button — understated, not a CTA */
+.checklist-tier__toggle {
+  display: block;
+  width: 100%;
+  padding: 10px 0 14px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--color-accent-text);
+  text-align: center;
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+
+.checklist-tier__toggle:hover {
+  color: var(--color-accent);
 }
