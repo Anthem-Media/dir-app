@@ -2,7 +2,7 @@
 
 **Working Name:** DIR (Diamond in the Rough)
 **Tagline:** "Think inside the box."
-**Last Updated:** April 13, 2026
+**Last Updated:** April 20, 2026
 
 ---
 
@@ -29,6 +29,8 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - Box profile page with full checklist, pull rates, EV calculator, ROI score
 - Card-level pricing for every card in the checklist (required for EV/ROI math)
 - Card value rankings within a set by tier
+- Top Chases tab — cards with print run > 10 or no print run; drives EV/ROI math
+- Grails tab — cards with print run ≤ 10 (including 1/1s and Superfractors); excluded from EV/ROI; shows circulation status badge
 - Market trend charts over time (box price and card values)
 - Manufacturer-published pull rate display
 
@@ -59,21 +61,23 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - AI price predictions / future valuations
 - Entertainment / TCG categories (Pokemon, Magic, Yu-Gi-Oh, Disney, etc.)
 - Box break data aggregation from external sources
+- In-app purchases on iOS (hard architectural decision — all payment through web/Stripe)
+- Free tier on iOS app (web-only free browsing experience)
 
 ---
 
 ## Data Strategy
 
 ### Data Coverage
-- **Full profiles (2018-present):** Checklist, card-level pricing, pull rates, EV, ROI, top chases, market trends. This is the core product.
-- **Legacy profiles (1995-2017):** Checklist, card-level pricing, top chases, pull rates where available. NO EV or ROI — the math doesn't apply to older product. Box profile page hides or gracefully handles missing EV/ROI sections for legacy boxes.
+- **Full profiles (2018-present):** Checklist, card-level pricing, pull rates, EV, ROI, top chases, grails, market trends. This is the core product.
+- **Legacy profiles (1995-2017):** Checklist, card-level pricing, top chases, grails, pull rates where available. NO EV or ROI — the math doesn't apply to older product. Box profile page hides or gracefully handles missing EV/ROI sections for legacy boxes.
 
 ### Data Sources
 - **Card checklists:** Varies by sport (see Data Entry Sources below). Manual data entry into own database using AI-assisted workflow. Do not scrape verbatim — build own dataset from factual information.
 - **Card pricing:** eBay sold listings (primary source). eBay API for programmatic access. Card-level pricing is required for every card — not just top chases.
 - **Pull rates:** Manufacturer-published odds from packaging and official sites (Topps, Panini, Upper Deck). Cross-reference Beckett and Cardboard Connection. TCDB does not publish pull rates.
 - **Box pricing:** eBay sold listings for sealed box market prices.
-- **Images:** Don't let images block data entry. Enter data first, leave image_url blank. eBay API will provide images as a byproduct of price scraping (Phase 13). Manufacturer sites and retailer product feeds are secondary sources. Placeholder images acceptable for beta.
+- **Images:** Don't let images block data entry. Enter data first, leave image_url blank. Primary image source is distributor product feeds (Dave & Adam's, Blowout Cards, Steel City, etc.) — clean, standardized, high-res box art pulled automatically as a byproduct of price scraping, same method Waxstat uses for their 27k+ box library. eBay API (Phase 13) is the fallback for boxes no distributor carries. Manufacturer sites are a tertiary source. Placeholder images acceptable for beta. Images are never manually sourced.
 
 ### Data Entry Sources by Sport
 - **Baseball:** Beckett, Cardboard Connection, Topps, Baseballcardpedia
@@ -151,6 +155,7 @@ Tier system:
 - **Backend:** Python or Node.js, deployed on Railway or Render (free tier to start)
 - **Database:** Supabase (managed PostgreSQL — scales from free tier to enterprise, see SCALING-REFERENCE.md)
 - **Auth:** Supabase Auth (handles sign up, sign in, sessions, password reset)
+- **Payments:** Stripe (web only — all subscription management and billing handled on DIRapp.com)
 - **AI Vision:** Claude API (photo → structured JSON → box match)
 - **AI Summaries:** Claude API (price data → plain English trend summary) — post-launch feature
 
@@ -163,7 +168,7 @@ Tier system:
 - **Partnership agreement:** Drafted and ready for signatures
 - **Strategy:** Leaning build-to-run (long-term operation). Not finalized but mindset has shifted from original build-to-sell framing.
 - **Potential acquirers (if strategy changes):** Fanatics, Topps, Panini
-- **Revenue model — LOCKED:** Fully paid box profiles. Free browsing (homepage, browse, search, filtering). Paywall on box profile page (checklist, pull rates, EV, ROI, price trends). Conversion funnel: visit → browse → click box → paywall → pay.
+- **Revenue model — LOCKED:** Fully paid box profiles. Free browsing on web only (homepage, browse, search, filtering). Paywall on box profile page (checklist, pull rates, EV, ROI, price trends). Conversion funnel: visit → browse → click box → paywall → pay. All payment via Stripe on the web. iOS app is auth-only — no in-app purchases ever.
 - **Price range if subscription:** $4.99-$9.99/mo range
 - **Buy Now / affiliate system:** Price comparison with multiple distributors on box profile pages. Starts with 1-2 distributors, grows over time. Boxes without distributor listings fall back to "Find on eBay" affiliate link. Every box profile has a monetization path. System built but launches empty — populated when Cam has distributor partnerships (during beta). New database tables needed: `distributors` and `distributor_listings`.
 - **eBay Partner Network:** Free to join, 1-4% commission (collectibles 3-4%), 24-hour cookie. Sign up when real data is live (Phase 10-12). Don't apply with dummy data.
@@ -174,6 +179,24 @@ Tier system:
 - **Distribution:** Starts with local card stores. Cam has direct access to the target audience through hobby network. Scales from local to broader during/after beta.
 - **Budget:** $5k max for professional code audits. No data engineer until revenue or investors.
 - **Timeline:** No hard launch date. Working diligently but not rushing. No corners cut.
+
+---
+
+## iOS App — Hard Architectural Requirements
+
+The DIR iOS app is authentication only. There is no free tier, no in-app signup flow, and no in-app purchase system. All user acquisition and payment happens exclusively on the web at DIRapp.com through Stripe.
+
+The app opens to a login screen with a single line directing users without credentials to the website. Once authenticated, users have full premium access. Without credentials the app has no usable functionality.
+
+This is an intentional architectural decision to avoid Apple's in-app purchase requirements and their associated revenue cut. It is not to be changed without a deliberate architectural review.
+
+The only free-facing feature in the entire product is the ability to browse card boxes by year — this exists on the web only, not in the app.
+
+**Do not build any of the following into the iOS app:**
+- Signup or account creation flow
+- Subscription selection or pricing screen
+- In-app purchase or payment processing
+- Free browse mode or unauthenticated content
 
 ---
 
@@ -298,4 +321,9 @@ Three commands to save and push changes:
 
 See pinned file: `dir_database_schema.sql`
 
-The schema is complete with 13 tables, indexes, views, seed data, and example data. Do not rebuild from scratch — modify the existing schema. New tables to add during database phases: `distributors` and `distributor_listings` for the Buy Now affiliate system.
+The schema is complete with 13 tables, indexes, views, seed data, and example data. Do not rebuild from scratch — modify the existing schema.
+
+**Pending schema amendments (apply during database phase):**
+- Add `circulation_status VARCHAR(20) DEFAULT 'unknown'` to the `cards` table. Valid values: `unknown`, `in_circulation`, `pulled_sold`. Powers the Grails tab circulation status badge. Only meaningful for cards with `print_run` ≤ 10.
+- Add `distributors` table for the Buy Now affiliate system
+- Add `distributor_listings` table for the Buy Now affiliate system

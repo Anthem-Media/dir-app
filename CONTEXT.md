@@ -10,14 +10,15 @@ Phases 1-4 complete. App is deployed to Vercel and live. UI audit in progress �
 - **EV and ROI confirmed:** Stays in the product. This is the core differentiator vs. Waxstat and everyone else.
 - **Core value prop:** "When I buy a box, what cards can I get, how much are they worth, and what's the best box for my budget and goals?"
 - **Tagline:** "Think inside the box."
-- **Revenue model — LOCKED:** Fully paid box profiles. Free browsing experience (homepage, browse page, search, filtering, scrolling through box sets). Paywall triggers when user clicks into a box profile page. Conversion funnel: visit site → scroll and look up boxes → click on box profile → hit paywall → pay for deeper analysis.
+- **Revenue model — LOCKED:** Fully paid box profiles. Free browsing experience (homepage, browse page, search, filtering, scrolling through box sets) on web only. Paywall triggers when user clicks into a box profile page. Conversion funnel: visit site → scroll and look up boxes → click on box profile → hit paywall → pay for deeper analysis.
 - **Data sources:** Manufacturer pull rates + eBay sold listings only.
 - **Tech stack:** React + Vite frontend on Vercel, PostgreSQL on Supabase, Python or Node.js backend, Claude API for photo scan and trend summary features.
-- **Database schema:** 13 tables, 2 views. Complete and finalized — do not rebuild. New tables needed: `distributors` and `distributor_listings` for affiliate/Buy Now system (add during database phases).
+- **Database schema:** 13 tables, 2 views. Complete and finalized — do not rebuild. Schema amendment needed: add `circulation_status VARCHAR(20) DEFAULT 'unknown'` to `cards` table (values: `unknown`, `in_circulation`, `pulled_sold`). New tables needed: `distributors` and `distributor_listings` for affiliate/Buy Now system (add during database phases).
 - **Business structure:** 50/50 split with Cam Gibson. Zach handles all technical work. Cam handles business development, distribution, and capital.
 - **Strategy:** Leaning build-to-run (shift from original build-to-sell framing). Not finalized but mindset is long-term operation.
 - **Distribution:** Starts with local card stores, scales from there. Specifics TBD during beta when Cam begins outreach.
-- **Native app:** React Native build needed for pitch demos. Build web app first, port to native once features are solid. PWA as a possible interim step — pending partner discussion.
+- **Native app (iOS) — HARD REQUIREMENT:** The DIR iOS app is authentication only. There is no free tier, no in-app signup flow, and no in-app purchase system. All user acquisition and payment happens exclusively on the web at DIRapp.com through Stripe. The app opens to a login screen with a single line directing users without credentials to the website. Once authenticated, users have full premium access. Without credentials the app has no usable functionality. This is an intentional architectural decision to avoid Apple's in-app purchase requirements and their associated revenue cut. It is not to be changed without a deliberate architectural review. The only free-facing feature in the entire product is the ability to browse card boxes by year — this exists on the web only, not in the app.
+- **React Native:** React Native build needed for pitch demos. Build web app first, port to native once features are solid. PWA as a possible interim step — pending partner discussion.
 - **Filtering system:** Filters are data-driven (populated from database), not hardcoded. Changing filter options later is a data task, not a code rebuild. Filter combinations cascade — sport + manufacturer + year + format all work together.
 - **Routing:** React Router. All routes defined in App.jsx. Routes: `/` (homepage), `/browse` (browse page with filters), `/box/:slug` (box profile), `/about`, `/news`, `/contact`, `/help`, `/signin`, `/signup`.
 - **Browse page architecture:** Dedicated browse page at `/browse` with StockX-style layout. Left sidebar has filter sections (Sport → Manufacturer → Year → Format, in that order). Right side shows results grid of BoxSetCard components. Clicking any card routes to `/box/:slug`.
@@ -38,7 +39,8 @@ Phases 1-4 complete. App is deployed to Vercel and live. UI audit in progress �
 - **Legacy boxes idea (on the shelf):** Separate "Legacy Boxes" header tab showing a filtered list of pre-2018 boxes available for purchase through affiliate partners. Only populated when distributor partnerships exist. May or may not be built — not on the roadmap, just documented as a future idea.
 - **Budget:** $5k max for professional code audits (covers all three planned audits). No data engineer hire until revenue.
 - **Timeline:** No hard launch date. Working diligently but not rushing. No corners cut.
-- **Images strategy:** Don't let images block data entry. Enter checklist/pricing/pull rate data first, leave image_url blank. eBay API integration (Phase 13) will provide images as a byproduct of price scraping. Manufacturer sites and retailer product feeds are secondary sources. Placeholder images acceptable for beta.
+- **Images strategy — LOCKED:** Don't let images block data entry. Enter checklist/pricing/pull rate data first, leave image_url blank. Primary image source is distributor product feeds (Dave & Adam's, Blowout Cards, Steel City, etc.) — clean, standardized, high-res box art pulled automatically as a byproduct of price scraping, same method Waxstat uses for their 27k+ box library. eBay API (Phase 13) is the fallback for boxes no distributor carries. Manufacturer sites are a tertiary source. Placeholder images acceptable for beta. Images are never manually sourced.
+- **Grails tab — LOCKED:** Box profile page has two separate tabs for high-value cards. Top Chases shows cards with `print_run` > 10 or no print run (base autos, standard parallels, refractors — realistically pullable cards that drive EV/ROI math). Grails tab shows cards with `print_run` ≤ 10, including all 1/1s and Superfractors. The /10 cutoff is a hard product decision, not a preference. Grails are excluded from EV and ROI calculations entirely — their pull probability is effectively zero for any individual buyer and including them would inflate EV misleadingly. Grails display a `circulation_status` badge: `Unknown`, `In Circulation`, or `Pulled/Sold`. Status defaults to `Unknown` at data entry and is updated when reliable data exists (eBay sold listings, community sources). The `cards` table requires a `circulation_status` column (values: `unknown`, `in_circulation`, `pulled_sold` — default `unknown`).
 
 ## Hard No List (v1)
 - Marketplace
@@ -46,12 +48,15 @@ Phases 1-4 complete. App is deployed to Vercel and live. UI audit in progress �
 - User-submitted data
 - AI price predictions
 - TCG categories
+- In-app purchases on iOS (hard architectural decision — see iOS app requirement above)
+- Free tier on iOS app (web only)
 
 ## Existing Deliverables
 - project-brief.md — comprehensive project plan
 - CLAUDE.md — Claude Code context file (lives in repo root)
 - REFERENCES.md — design and competitor references
 - SCALING-REFERENCE.md — infrastructure scaling roadmap
+- requirements.md — hard platform and architectural requirements
 - Database schema (13 tables, 2 views)
 - Partnership agreement (drafted, ready for signatures)
 - Data entry spreadsheet templates (drafts — need review before use)
@@ -82,11 +87,11 @@ Phases 1-4 complete. App is deployed to Vercel and live. UI audit in progress �
 6. UI polish pass + code audit of all new pages (one at a time: Header/Nav → Homepage → Browse → Box Profile → About → News → Help → Contact → Sign In → Sign Up)
 7. Auth system (Supabase) — revenue model locked as fully paid box profiles
 8. Pro audit #1 (senior React dev — is the frontend and auth foundation solid? ~3-5 hours at $50-150/hr = $150-750)
-9. Database setup and backend API (add `distributors` and `distributor_listings` tables to schema)
+9. Database setup and backend API (add `circulation_status` to `cards` table; add `distributors` and `distributor_listings` tables to schema)
 10. Connect frontend to real data
 11. Admin panel for data entry
 12. Seed database with all sports (Baseball, Football, Basketball, Hockey, Soccer) — 2018-present full profiles, 1995-2017 legacy profiles
-13. eBay API integration (card pricing + box pricing + images)
+13. eBay API integration (card pricing + box pricing + images from distributor feeds + eBay fallback)
 14. Claude API integration for photo scan feature
 15. Buy Now / affiliate link system (UI built, populated when Cam has distributor partnerships)
 16. Price alerts and notifications
@@ -98,12 +103,14 @@ Phases 1-4 complete. App is deployed to Vercel and live. UI audit in progress �
 22. Post-launch: AI trend summaries, portfolio tracking, Legacy Boxes marketplace tab (if validated)
 
 ## Reminders & Flags
-- ⚠️ Do NOT build auth without the free vs. paid decision — RESOLVED: fully paid box profiles, free browsing
-- ⚠️ When we get to database phases, add `distributors` and `distributor_listings` tables and build the Buy Now system with eBay fallback
+- ⚠️ Do NOT build auth without the free vs. paid decision — RESOLVED: fully paid box profiles, free browsing on web only
+- ⚠️ When we get to database phases, add `circulation_status VARCHAR(20) DEFAULT 'unknown'` to `cards` table, and add `distributors` and `distributor_listings` tables for the Buy Now system with eBay fallback
 - ⚠️ Code audit of new pages happens one page at a time during Phase 6
 - ⚠️ Spreadsheet templates need review with real box data before any data entry begins
 - ⚠️ Update MD files with data entry workflow details when Cowork pipeline is tested
 - ⚠️ Soccer needs to be added to the UI navigation alongside the other four sports
+- ⚠️ iOS app is auth-only — no in-app purchases, no signup flow, no free tier. All acquisition and payment through web/Stripe. Do not deviate without architectural review.
+- ⚠️ Payment processor is Stripe (web only). Do not design any iOS purchase flow.
 
 ## Development Guidelines
 - Use this Project chat for planning, strategy, and decisions

@@ -10,6 +10,7 @@ A sports card box analytics web app. Users look up any box set and see the full 
 - `CONTEXT.md` — Current status, what's done, what's next
 - `REFERENCES.md` — Design and competitor references
 - `SCALING-REFERENCE.md` — Infrastructure scaling roadmap
+- `requirements.md` — Hard platform and architectural requirements (iOS app model, payment, access rules)
 - `dir_database_schema.sql` — PostgreSQL schema with 13 tables, views, seed data
 
 ## Tech Stack
@@ -18,6 +19,7 @@ A sports card box analytics web app. Users look up any box set and see the full 
 - Backend: TBD (Python or Node.js), deployed on Railway or Render
 - Database: Supabase (managed PostgreSQL)
 - Auth: Supabase Auth (planned)
+- Payments: Stripe (web only — all billing handled on DIRapp.com, never in the iOS app)
 - AI: Claude API for photo scan (box identification) and trend summaries (post-launch)
 
 ## Folder Structure
@@ -57,13 +59,22 @@ git push
 
 ## Revenue Model
 
-Fully paid box profiles. Free browsing experience (homepage, browse page, search, filtering, scrolling through box sets). Paywall triggers when user clicks into a box profile page. Auth system must enforce this gating.
+Fully paid box profiles. Free browsing experience on web only (homepage, browse page, search, filtering, scrolling through box sets). Paywall triggers when user clicks into a box profile page. Auth system must enforce this gating. All payment via Stripe on the web.
+
+iOS app is auth-only — no in-app purchases, no signup flow, no free tier. See requirements.md.
 
 ## Data Coverage
 
-- **Full profiles (2018-present):** Checklist, card-level pricing, pull rates, EV, ROI, top chases, market trends.
-- **Legacy profiles (1995-2017):** Checklist, card-level pricing, top chases, pull rates where available. NO EV or ROI. Box profile page must gracefully handle missing EV/ROI sections for legacy boxes (hide or show "not available" message).
+- **Full profiles (2018-present):** Checklist, card-level pricing, pull rates, EV, ROI, top chases, grails, market trends.
+- **Legacy profiles (1995-2017):** Checklist, card-level pricing, top chases, grails, pull rates where available. NO EV or ROI. Box profile page must gracefully handle missing EV/ROI sections for legacy boxes (hide or show "not available" message).
 - **Sports at launch:** Baseball, Football, Basketball, Hockey, Soccer.
+
+## Top Chases vs. Grails (Box Profile Page)
+
+The box profile page has two separate tabs for high-value cards:
+
+- **Top Chases** — cards with `print_run` > 10 or no print run (base autos, standard parallels, refractors). These are realistically pullable and drive all EV/ROI calculations.
+- **Grails** — cards with `print_run` ≤ 10 (including all 1/1s and Superfractors). The /10 cutoff is a hard product decision. Grails are excluded from EV and ROI math entirely — including them would inflate EV misleadingly. Grails display a `circulation_status` badge: `Unknown`, `In Circulation`, or `Pulled/Sold`. Status defaults to `Unknown` at data entry.
 
 ## Routing Architecture
 
@@ -89,9 +100,13 @@ Key files for routing/filtering:
 
 ## Schema Notes
 
-Current schema has 13 tables and 2 views. Two new tables needed (add during database phases):
-- `distributors` — distributor name, website, logo, affiliate URL pattern
-- `distributor_listings` — which distributor has which box, at what price, with what affiliate link
+Current schema has 13 tables and 2 views. Pending amendments to apply during database phase:
+
+1. **Add `circulation_status` column to `cards` table** — `VARCHAR(20) DEFAULT 'unknown'`. Valid values: `unknown`, `in_circulation`, `pulled_sold`. Powers the Grails tab circulation status badge. Only meaningful for cards with `print_run` ≤ 10.
+
+2. **Add `distributors` table** — distributor name, website, logo, affiliate URL pattern
+
+3. **Add `distributor_listings` table** — which distributor has which box, at what price, with what affiliate link
 
 Buy Now system: price comparison with multiple distributors. Fallback to "Find on eBay" affiliate link when no distributor carries a box.
 
