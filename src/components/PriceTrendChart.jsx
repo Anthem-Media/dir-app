@@ -4,7 +4,7 @@
  * Renders a line + area chart showing the sealed box market price over time.
  * Uses Recharts (already installed) — a composable charting library for React.
  *
- * Design: green line, light green fill below the line, clean axes, no grid clutter.
+ * Design: green line, low-opacity green fill below the line, clean axes, no grid clutter.
  */
 
 import {
@@ -23,11 +23,11 @@ import './PriceTrendChart.css';
 // so CSS custom properties (var(--color-green)) can't be used here.
 // Centralizing them as constants means changing the brand color is still one edit.
 const CHART_COLORS = {
-  line:     '#16a34a', // --color-green
-  gradient: '#16a34a', // --color-green
-  grid:     '#f3f4f6', // --color-border-subtle
-  axis:     '#9ca3af', // --color-text-muted
-  cursor:   '#e5e7eb', // --color-border
+  line:     '#16a34a', // --color-positive
+  gradient: '#16a34a', // --color-positive
+  grid:     '#2a2a2e', // --color-border
+  axis:     '#777777', // --color-text-secondary
+  cursor:   '#2a2a2e', // --color-border
 };
 
 /**
