@@ -1,0 +1,51 @@
+/*
+ * FormatSwitcher — tab row for switching between box formats on BoxProfilePage.
+ * Sits above the hero section at the top of the page content area.
+ * No hardcoded hex values — all colors from index.css CSS variables.
+ */
+
+.format-switcher {
+  display: flex;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  /* Allow horizontal scroll on narrow screens so all tabs remain reachable */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.format-switcher::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Tab buttons ────────────────────────────────────────────────────────── */
+
+.format-switcher__tab {
+  flex: 1;
+  padding: 14px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  /* Bottom border acts as the active indicator — transparent by default */
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
+  transition: color 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+}
+
+.format-switcher__tab:hover:not(.format-switcher__tab--active) {
+  color: var(--color-text-primary);
+}
+
+/* ── Active tab ─────────────────────────────────────────────────────────── */
+
+.format-switcher__tab--active {
+  background: var(--color-accent-bg);
+  color: var(--color-accent-text);
+  border-bottom-color: var(--color-accent);
+}
