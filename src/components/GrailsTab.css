@@ -1,0 +1,20 @@
+/*
+ * GrailsTab — wrapper for the grail card list.
+ * No hardcoded hex values — all colors from index.css CSS variables.
+ */
+
+/* Empty state — shown when no grails exist for this set */
+.grails-tab__empty {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: 24px 0;
+  margin: 0;
+}
+
+/* EV/ROI exclusion disclaimer — displayed below the card list */
+.grails-tab__disclaimer {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin: 12px 0 0;
+}

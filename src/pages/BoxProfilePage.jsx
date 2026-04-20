@@ -18,6 +18,7 @@ import { useBoxProfile } from '../hooks/useBoxProfile';
 import { FormatSwitcher } from '../components/FormatSwitcher';
 import { MetricCard } from '../components/MetricCard';
 import { TopChaseRow } from '../components/TopChaseRow';
+import { GrailsTab } from '../components/GrailsTab';
 import { PullRateCard } from '../components/PullRateCard';
 import { PriceTrendChart } from '../components/PriceTrendChart';
 import { ChecklistTier } from '../components/ChecklistTier';
@@ -26,6 +27,7 @@ import { TierPriceTrendChart } from '../components/TierPriceTrendChart';
 import { DUMMY_FORMAT_DATA, FORMAT_ORDER } from '../utils/formatSwitcherData';
 import { DUMMY_TIER_TREND_DATA } from '../utils/tierPriceTrendData';
 import { formatCurrency, formatPercent, getRoiSentiment } from '../utils/formatters';
+import { filterGrailCards } from '../utils/grailsUtils';
 import './BoxProfilePage.css';
 
 export function BoxProfilePage() {
@@ -49,6 +51,10 @@ export function BoxProfilePage() {
   function handleFormatChange(formatSlug) {
     setSearchParams({ format: formatSlug });
   }
+
+  // Active tab for the Top Chases / Grails section.
+  // Local state only — not in the URL. Tab choice is a navigational detail within the page.
+  const [activeHitsTab, setActiveHitsTab] = useState('topChases');
 
   // Active tier tab for the card value trend chart.
   // Local state only — not in the URL. The format switcher is shareable (bookmark a
@@ -84,7 +90,7 @@ export function BoxProfilePage() {
     setTierSearchQueries((prev) => ({ ...prev, [tierId]: query }));
   }
 
-  const { box, topChases, priceHistory, checklistTiers, isLoading, error } =
+  const { box, topChases, grailCards, priceHistory, checklistTiers, isLoading, error } =
     useBoxProfile(slug);
 
   if (isLoading) {
@@ -106,6 +112,10 @@ export function BoxProfilePage() {
   // ROI sentiment drives the color of the ROI metric card (green = positive, red = negative).
   // Calculated from the selected format's ROI, not the base box data.
   const roiSentiment = getRoiSentiment(formatData.roi);
+
+  // Apply the canonical /10 filter. filterGrailCards is the single source of truth
+  // for which cards qualify as grails — the cutoff must not be re-implemented elsewhere.
+  const grailCardsList = filterGrailCards(grailCards);
 
   // Build the ordered formats array for the tab row — label and slug only, no extra data.
   const formatTabs = FORMAT_ORDER.map((key) => ({
@@ -180,20 +190,50 @@ export function BoxProfilePage() {
         </div>
       </section>
 
-      {/* ── TOP CHASES ───────────────────────────────────────────────────── */}
-      {/* Checklist cards are the same across all formats — no format dependency here */}
+      {/* ── TOP CHASES / GRAILS ──────────────────────────────────────────── */}
+      {/* Two tabs: Top Chases (realistically pullable) and Grails (print run ≤ 10).
+          Tab state is local — not in the URL. Same tab pattern as FormatSwitcher
+          and TierTrendTabs: role="tablist", bottom-border active indicator. */}
       <section className="box-profile-page__section">
         <div className="box-profile-page__section-header">
-          <h2 className="box-profile-page__section-title">Top chases</h2>
+          <h2 className="box-profile-page__section-title">
+            {activeHitsTab === 'topChases' ? 'Top chases' : 'Grails'}
+          </h2>
           <p className="box-profile-page__section-subtitle">
-            Highest value cards in this set.
+            {activeHitsTab === 'topChases'
+              ? 'Highest value cards in this set.'
+              : 'The rarest cards in this set — print run \u2264 10.'}
           </p>
         </div>
-        <div className="box-profile-page__card-list">
-          {topChases.map((card) => (
-            <TopChaseRow key={card.id} card={card} />
-          ))}
+
+        <div className="hits-tabs" role="tablist" aria-label="Card type">
+          <button
+            role="tab"
+            aria-selected={activeHitsTab === 'topChases'}
+            className={`hits-tabs__tab${activeHitsTab === 'topChases' ? ' hits-tabs__tab--active' : ''}`}
+            onClick={() => setActiveHitsTab('topChases')}
+          >
+            Top Chases
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeHitsTab === 'grails'}
+            className={`hits-tabs__tab${activeHitsTab === 'grails' ? ' hits-tabs__tab--active' : ''}`}
+            onClick={() => setActiveHitsTab('grails')}
+          >
+            Grails
+          </button>
         </div>
+
+        {activeHitsTab === 'topChases' ? (
+          <div className="box-profile-page__card-list">
+            {topChases.map((card) => (
+              <TopChaseRow key={card.id} card={card} />
+            ))}
+          </div>
+        ) : (
+          <GrailsTab cards={grailCardsList} />
+        )}
       </section>
 
       {/* ── PULL RATES ───────────────────────────────────────────────────── */}

@@ -137,6 +137,50 @@
   margin: 0;
 }
 
+/* ── TOP CHASES / GRAILS TABS ──────────────────────────────────────────── */
+/* Mirrors FormatSwitcher.css and TierTrendTabs.css exactly — same container,
+   same tab padding, same active indicator pattern. Only class name differs. */
+
+.hits-tabs {
+  display: flex;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.hits-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.hits-tabs__tab {
+  flex: 1;
+  padding: 14px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
+  transition: color 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+}
+
+.hits-tabs__tab:hover:not(.hits-tabs__tab--active) {
+  color: var(--color-text-primary);
+}
+
+.hits-tabs__tab--active {
+  background: var(--color-accent-bg);
+  color: var(--color-accent-text);
+  border-bottom-color: var(--color-accent);
+}
+
 /* ── TOP CHASES ────────────────────────────────────────────────────────── */
 
 .box-profile-page__card-list {

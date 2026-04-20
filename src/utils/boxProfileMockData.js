@@ -99,6 +99,76 @@ export const MOCK_PULL_RATES = [
   },
 ];
 
+// Grail cards — print run ≤ 10. These are the rarest cards in the set.
+// Excluded from EV and ROI calculations (see CONTEXT.md for the /10 cutoff rationale).
+// circulationStatus maps to the circulation_status column on the cards table in the
+// real schema. The default value at data entry is 'unknown'.
+export const MOCK_GRAIL_CARDS = [
+  {
+    id: 'gr2023-001',
+    playerName: 'Shohei Ohtani',
+    variationName: 'Black 1/1 Auto',
+    printRun: 1,
+    isAutograph: true,
+    currentValue: 15000,
+    circulationStatus: 'unknown',
+  },
+  {
+    id: 'gr2023-002',
+    playerName: 'Gunnar Henderson',
+    variationName: 'Red /2 Refractor Auto',
+    printRun: 2,
+    isAutograph: true,
+    currentValue: 4200,
+    circulationStatus: 'in_circulation',
+  },
+  {
+    id: 'gr2023-003',
+    playerName: 'Corbin Carroll',
+    variationName: 'Orange Refractor /5',
+    printRun: 5,
+    isAutograph: false,
+    currentValue: 1200,
+    circulationStatus: 'pulled_sold',
+  },
+  {
+    id: 'gr2023-004',
+    playerName: 'Jackson Holliday',
+    variationName: 'Purple Refractor Auto /5',
+    printRun: 5,
+    isAutograph: true,
+    currentValue: 2800,
+    circulationStatus: 'unknown',
+  },
+  {
+    id: 'gr2023-005',
+    playerName: 'Julio Rodríguez',
+    variationName: 'Gold Refractor Auto /10',
+    printRun: 10,
+    isAutograph: true,
+    currentValue: 950,
+    circulationStatus: 'in_circulation',
+  },
+  {
+    id: 'gr2023-006',
+    playerName: 'Elly De La Cruz',
+    variationName: 'Red Refractor /10',
+    printRun: 10,
+    isAutograph: false,
+    currentValue: 620,
+    circulationStatus: 'unknown',
+  },
+  {
+    id: 'gr2023-007',
+    playerName: 'Adley Rutschman',
+    variationName: 'Sapphire Auto /10',
+    printRun: 10,
+    isAutograph: true,
+    currentValue: 580,
+    circulationStatus: 'pulled_sold',
+  },
+];
+
 // 12 months of sealed box market prices (used in the price trend chart)
 export const MOCK_PRICE_HISTORY = [
   { date: 'May 24', price: 215 },

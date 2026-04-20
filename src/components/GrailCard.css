@@ -1,0 +1,115 @@
+/*
+ * GrailCard — a single row in the Grails tab.
+ * Layout mirrors TopChaseRow.css. Badge colors are applied via data-status
+ * attribute selectors — no hardcoded hex values anywhere.
+ * No hardcoded hex values — all colors from index.css CSS variables.
+ */
+
+.grail-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0 14px 12px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  /* Subtle left accent border — visually distinguishes grails from regular top chases */
+  border-left: 3px solid var(--color-accent);
+}
+
+.grail-card:last-child {
+  border-bottom: none;
+}
+
+/* ── Print run ───────────────────────────────────────────────────────────── */
+
+/* e.g. "1/1", "#/5", "#/10" — prominent since it defines a grail */
+.grail-card__print-run {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-accent-text);
+  min-width: 40px;
+  text-align: center;
+}
+
+/* ── Player info ─────────────────────────────────────────────────────────── */
+
+.grail-card__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.grail-card__name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grail-card__player {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.grail-card__auto-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-accent-text);
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-accent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+
+.grail-card__variation {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* ── Circulation status badge ────────────────────────────────────────────── */
+
+/* Base badge styles — color overridden by data-status below */
+.grail-card__badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* In Circulation — green, signals the card is still out there to be pulled */
+.grail-card__badge[data-status="in_circulation"] {
+  color: var(--color-positive);
+  border-color: var(--color-positive);
+}
+
+/* Pulled & Sold — muted, this one is already in someone's collection */
+.grail-card__badge[data-status="pulled_sold"] {
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+/* Unknown — muted, circulation status has not been confirmed */
+.grail-card__badge[data-status="unknown"] {
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+/* ── Value ───────────────────────────────────────────────────────────────── */
+
+.grail-card__value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
+  min-width: 80px;
+}

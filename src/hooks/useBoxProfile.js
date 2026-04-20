@@ -14,6 +14,7 @@ import { useState, useEffect } from 'react';
 import {
   MOCK_BOX,
   MOCK_TOP_CHASES,
+  MOCK_GRAIL_CARDS,
   MOCK_PULL_RATES,
   MOCK_PRICE_HISTORY,
   MOCK_CHECKLIST_TIERS,
@@ -22,6 +23,7 @@ import {
 export function useBoxProfile(boxId) {
   const [box, setBox] = useState(null);
   const [topChases, setTopChases] = useState([]);
+  const [grailCards, setGrailCards] = useState([]);
   const [pullRates, setPullRates] = useState([]);
   const [priceHistory, setPriceHistory] = useState([]);
   const [checklistTiers, setChecklistTiers] = useState([]);
@@ -35,6 +37,7 @@ export function useBoxProfile(boxId) {
       try {
         setBox(MOCK_BOX);
         setTopChases(MOCK_TOP_CHASES);
+        setGrailCards(MOCK_GRAIL_CARDS);
         setPullRates(MOCK_PULL_RATES);
         setPriceHistory(MOCK_PRICE_HISTORY);
         setChecklistTiers(MOCK_CHECKLIST_TIERS);
@@ -48,5 +51,5 @@ export function useBoxProfile(boxId) {
     return () => clearTimeout(timeout);
   }, [boxId]);
 
-  return { box, topChases, pullRates, priceHistory, checklistTiers, isLoading, error };
+  return { box, topChases, grailCards, pullRates, priceHistory, checklistTiers, isLoading, error };
 }
