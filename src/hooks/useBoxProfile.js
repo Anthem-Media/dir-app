@@ -7,7 +7,7 @@
  * and nothing in the components needs to change.
  *
  * @param {string} boxId - The unique identifier for the box set
- * @returns {{ box, topChases, pullRates, priceHistory, checklistTiers, isLoading, error }}
+ * @returns {{ box, topChases, grailCards, pullRates, priceHistory, checklistTiers, isLoading, error }}
  */
 
 import { useState, useEffect } from 'react';
