@@ -1,0 +1,38 @@
+/*
+ * TierPriceTrendChart — card tier average sale price chart.
+ * Sits below the TierTrendTabs on BoxProfilePage.
+ * No hardcoded hex values — all colors from index.css CSS variables.
+ */
+
+.tier-chart {
+  width: 100%;
+  /* Recharts needs a defined height on the container when using ResponsiveContainer */
+  min-height: 240px;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 16px 8px 8px;
+}
+
+/* ── Tooltip ────────────────────────────────────────────────────────────── */
+
+.tier-chart__tooltip {
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tier-chart__tooltip-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.tier-chart__tooltip-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}

@@ -12,6 +12,7 @@
  * Each section's UI lives in a dedicated component.
  */
 
+import { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useBoxProfile } from '../hooks/useBoxProfile';
 import { FormatSwitcher } from '../components/FormatSwitcher';
@@ -20,7 +21,10 @@ import { TopChaseRow } from '../components/TopChaseRow';
 import { PullRateCard } from '../components/PullRateCard';
 import { PriceTrendChart } from '../components/PriceTrendChart';
 import { ChecklistTier } from '../components/ChecklistTier';
+import { TierTrendTabs } from '../components/TierTrendTabs';
+import { TierPriceTrendChart } from '../components/TierPriceTrendChart';
 import { DUMMY_FORMAT_DATA, FORMAT_ORDER } from '../utils/formatSwitcherData';
+import { DUMMY_TIER_TREND_DATA } from '../utils/tierPriceTrendData';
 import { formatCurrency, formatPercent, getRoiSentiment } from '../utils/formatters';
 import './BoxProfilePage.css';
 
@@ -45,6 +49,11 @@ export function BoxProfilePage() {
   function handleFormatChange(formatSlug) {
     setSearchParams({ format: formatSlug });
   }
+
+  // Active tier tab for the card value trend chart.
+  // Local state only — not in the URL. The format switcher is shareable (bookmark a
+  // specific format); the tier tab is not — it's a navigational detail within the page.
+  const [activeTierTab, setActiveTierTab] = useState('base');
 
   const { box, topChases, priceHistory, checklistTiers, isLoading, error } =
     useBoxProfile(slug);
@@ -199,6 +208,27 @@ export function BoxProfilePage() {
             <ChecklistTier key={tier.id} tier={tier} />
           ))}
         </div>
+      </section>
+
+      {/* ── CARD VALUE TRENDS ────────────────────────────────────────────── */}
+      {/* Shows average sale price over time for each card tier.
+          Tab state is local — not in the URL — because tier selection is a
+          navigational detail within the page, not a shareable view state. */}
+      <section className="box-profile-page__section">
+        <div className="box-profile-page__section-header">
+          <h2 className="box-profile-page__section-title">Card value trends</h2>
+          <p className="box-profile-page__section-subtitle">
+            Average sale price by tier over the past 12 months.
+          </p>
+        </div>
+        <TierTrendTabs
+          activeTier={activeTierTab}
+          onTierChange={setActiveTierTab}
+        />
+        <TierPriceTrendChart
+          data={DUMMY_TIER_TREND_DATA[activeTierTab]}
+          activeTier={activeTierTab}
+        />
       </section>
 
     </div>
