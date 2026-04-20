@@ -3,7 +3,7 @@
  * Loaded once in main.jsx and applies to the entire app.
  *
  * Design direction: clean and minimal, inspired by StockX.
- * Color scheme: white background, near-black text, green accent.
+ * Color scheme: dark mode, near-black backgrounds, purple accent.
  */
 
 /* ─── Design Tokens ───────────────────────────────────────────────────── */
@@ -13,39 +13,47 @@
   --color-red:            #dc2626;
 
   /* Text */
-  --color-text-primary:   #0a0a0a;
-  --color-text-secondary: #6b7280;
+  --color-text-primary:   #f0f0f0;
+  --color-text-secondary: #777777;
   --color-text-muted:     #9ca3af;
 
   /* Backgrounds */
-  --color-bg:             #ffffff;
-  --color-bg-subtle:      #f9fafb;
+  --color-background-primary:   #111214;  /* page-level background */
+  --color-background-secondary: #1e1f24;  /* cards, panels, elevated surfaces */
+  --color-background-tertiary:  #18191d;  /* inset areas, inputs, subtle wells */
+  --color-bg:             #111214;        /* alias for legacy usage */
+  --color-bg-subtle:      #18191d;        /* alias for legacy usage */
 
   /* Surface aliases — semantic names for card/panel/hover contexts.
      Values mirror existing bg/border tokens so they stay in sync. */
-  --color-surface:        var(--color-bg);            /* card and panel backgrounds */
-  --color-surface-alt:    var(--color-border-subtle); /* image placeholders, inset areas */
-  --color-surface-hover:  var(--color-bg-subtle);     /* hover state for list items */
+  --color-surface:        var(--color-background-secondary); /* card and panel backgrounds */
+  --color-surface-alt:    var(--color-background-tertiary);  /* image placeholders, inset areas */
+  --color-surface-hover:  var(--color-background-tertiary);  /* hover state for list items */
+
+  /* Accent */
+  --color-accent:         #7c6fff;  /* primary interactive color (buttons, links, focus rings) */
+  --color-accent-bg:      #2a2560;  /* tinted accent background for badges, highlights */
+  --color-accent-text:    #a89fff;  /* lighter accent for text on dark surfaces */
 
   /* Green shades */
   --color-green-dark:     #15803d;   /* hover-state darkening of --color-green */
 
   /* Borders */
-  --color-border:         #e5e7eb;
-  --color-border-subtle:  #f3f4f6;
-  --color-border-strong:  #d1d5db;
+  --color-border:         #2a2a2e;
+  --color-border-subtle:  #1e1f24;
+  --color-border-strong:  #3a3a3f;
 
   /* Nav bar */
-  --color-nav-bg:         #166534;
-  --color-nav-text:       #ffffff;
-  --color-nav-hover:      rgba(255, 255, 255, 0.12);
-  --color-nav-active:     rgba(255, 255, 255, 0.20);
+  --color-nav-bg:         #18191d;
+  --color-nav-text:       #f0f0f0;
+  --color-nav-hover:      rgba(255, 255, 255, 0.08);
+  --color-nav-active:     rgba(124, 111, 255, 0.20);
 
   /* Badge/tag tints — used for ROI badges, RC tags, etc. */
-  --color-green-bg:       #dcfce7;
-  --color-green-border:   #bbf7d0;
-  --color-red-bg:         #fee2e2;
-  --color-red-border:     #fecaca;
+  --color-green-bg:       #14532d;
+  --color-green-border:   #166534;
+  --color-red-bg:         #450a0a;
+  --color-red-border:     #7f1d1d;
 
   /* Typography */
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -73,7 +81,7 @@ body {
   font-size: 16px;
   line-height: 1.5;
   color: var(--color-text-primary);
-  background: var(--color-bg);
+  background: var(--color-background-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
