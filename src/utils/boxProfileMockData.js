@@ -119,6 +119,8 @@ export const MOCK_PRICE_HISTORY = [
 // the individual cards that appear in the checklist.
 // Tier 1-4 have more than 5 cards so the expand/collapse button appears.
 // Tier 5 has 4 cards (≤ 5) to demonstrate that the button is correctly absent.
+// Each card has a `number` field (card number from the set) so card-number search works.
+// In the real schema these fields are `player_name` and `card_number`.
 export const MOCK_CHECKLIST_TIERS = [
   {
     id: 'tier-1',
@@ -126,14 +128,14 @@ export const MOCK_CHECKLIST_TIERS = [
     cardCount: 220,
     avgValue: 3.5,
     cards: [
-      { id: 'c1-001', name: 'Shohei Ohtani',       category: 'Base',         value: 18 },
-      { id: 'c1-002', name: 'Mike Trout',           category: 'Base',         value: 12 },
-      { id: 'c1-003', name: 'Gunnar Henderson',     category: 'Base Rookie',  value: 8  },
-      { id: 'c1-004', name: 'Corbin Carroll',       category: 'Base Rookie',  value: 6  },
-      { id: 'c1-005', name: 'Jackson Holliday',     category: 'Base Rookie',  value: 5  },
-      { id: 'c1-006', name: 'Julio Rodríguez',      category: 'Base',         value: 9  },
-      { id: 'c1-007', name: 'Elly De La Cruz',      category: 'Base Rookie',  value: 7  },
-      { id: 'c1-008', name: 'Adley Rutschman',      category: 'Base',         value: 4  },
+      { id: 'c1-001', name: 'Shohei Ohtani',       number: '#1',       category: 'Base',         value: 18 },
+      { id: 'c1-002', name: 'Mike Trout',           number: '#27',      category: 'Base',         value: 12 },
+      { id: 'c1-003', name: 'Gunnar Henderson',     number: '#RC-GH',   category: 'Base Rookie',  value: 8  },
+      { id: 'c1-004', name: 'Corbin Carroll',       number: '#RC-CC',   category: 'Base Rookie',  value: 6  },
+      { id: 'c1-005', name: 'Jackson Holliday',     number: '#RC-JH',   category: 'Base Rookie',  value: 5  },
+      { id: 'c1-006', name: 'Julio Rodríguez',      number: '#RC-JR',   category: 'Base',         value: 9  },
+      { id: 'c1-007', name: 'Elly De La Cruz',      number: '#RC-EDL',  category: 'Base Rookie',  value: 7  },
+      { id: 'c1-008', name: 'Adley Rutschman',      number: '#RC-AR',   category: 'Base',         value: 4  },
     ],
   },
   {
@@ -142,13 +144,13 @@ export const MOCK_CHECKLIST_TIERS = [
     cardCount: 45,
     avgValue: 8.2,
     cards: [
-      { id: 'c2-001', name: 'Julio Rodríguez',      category: 'Insert',       value: 22 },
-      { id: 'c2-002', name: 'Shohei Ohtani',        category: 'Short Print',  value: 45 },
-      { id: 'c2-003', name: 'Elly De La Cruz',      category: 'Insert',       value: 15 },
-      { id: 'c2-004', name: 'Gunnar Henderson',     category: 'Short Print',  value: 28 },
-      { id: 'c2-005', name: 'Corbin Carroll',       category: 'Insert',       value: 12 },
-      { id: 'c2-006', name: 'Jackson Holliday',     category: 'Insert',       value: 10 },
-      { id: 'c2-007', name: 'Mike Trout',           category: 'Short Print',  value: 32 },
+      { id: 'c2-001', name: 'Julio Rodríguez',      number: '#FG-JR',   category: 'Insert',       value: 22 },
+      { id: 'c2-002', name: 'Shohei Ohtani',        number: '#SP-1',    category: 'Short Print',  value: 45 },
+      { id: 'c2-003', name: 'Elly De La Cruz',      number: '#FG-EDL',  category: 'Insert',       value: 15 },
+      { id: 'c2-004', name: 'Gunnar Henderson',     number: '#SP-3',    category: 'Short Print',  value: 28 },
+      { id: 'c2-005', name: 'Corbin Carroll',       number: '#FG-CC',   category: 'Insert',       value: 12 },
+      { id: 'c2-006', name: 'Jackson Holliday',     number: '#FG-JH',   category: 'Insert',       value: 10 },
+      { id: 'c2-007', name: 'Mike Trout',           number: '#SP-7',    category: 'Short Print',  value: 32 },
     ],
   },
   {
@@ -157,12 +159,12 @@ export const MOCK_CHECKLIST_TIERS = [
     cardCount: 80,
     avgValue: 35,
     cards: [
-      { id: 'c3-001', name: 'Gunnar Henderson',     category: 'Rookie Refractor',  value: 95  },
-      { id: 'c3-002', name: 'Jackson Holliday',     category: 'Rookie Refractor',  value: 75  },
-      { id: 'c3-003', name: 'Shohei Ohtani',        category: 'Refractor',         value: 55  },
-      { id: 'c3-004', name: 'Corbin Carroll',       category: 'Rookie Refractor',  value: 48  },
-      { id: 'c3-005', name: 'Julio Rodríguez',      category: 'Refractor',         value: 38  },
-      { id: 'c3-006', name: 'Elly De La Cruz',      category: 'Rookie Refractor',  value: 42  },
+      { id: 'c3-001', name: 'Gunnar Henderson',     number: '#RF-GH',   category: 'Rookie Refractor',  value: 95  },
+      { id: 'c3-002', name: 'Jackson Holliday',     number: '#RF-JH',   category: 'Rookie Refractor',  value: 75  },
+      { id: 'c3-003', name: 'Shohei Ohtani',        number: '#RF-1',    category: 'Refractor',         value: 55  },
+      { id: 'c3-004', name: 'Corbin Carroll',       number: '#RF-CC',   category: 'Rookie Refractor',  value: 48  },
+      { id: 'c3-005', name: 'Julio Rodríguez',      number: '#RF-JR',   category: 'Refractor',         value: 38  },
+      { id: 'c3-006', name: 'Elly De La Cruz',      number: '#RF-EDL',  category: 'Rookie Refractor',  value: 42  },
     ],
   },
   {
@@ -171,12 +173,12 @@ export const MOCK_CHECKLIST_TIERS = [
     cardCount: 40,
     avgValue: 120,
     cards: [
-      { id: 'c4-001', name: 'Jackson Holliday',     category: 'Base Auto',          value: 320 },
-      { id: 'c4-002', name: 'Corbin Carroll',       category: 'Refractor Auto',     value: 280 },
-      { id: 'c4-003', name: 'Julio Rodríguez',      category: 'Numbered Autograph', value: 450 },
-      { id: 'c4-004', name: 'Gunnar Henderson',     category: 'Refractor Auto',     value: 195 },
-      { id: 'c4-005', name: 'Elly De La Cruz',      category: 'Base Auto',          value: 160 },
-      { id: 'c4-006', name: 'Adley Rutschman',      category: 'Base Auto',          value: 85  },
+      { id: 'c4-001', name: 'Jackson Holliday',     number: '#CA-JH',   category: 'Base Auto',          value: 320 },
+      { id: 'c4-002', name: 'Corbin Carroll',       number: '#CA-CC',   category: 'Refractor Auto',     value: 280 },
+      { id: 'c4-003', name: 'Julio Rodríguez',      number: '#CA-JR',   category: 'Numbered Autograph', value: 450 },
+      { id: 'c4-004', name: 'Gunnar Henderson',     number: '#CA-GH',   category: 'Refractor Auto',     value: 195 },
+      { id: 'c4-005', name: 'Elly De La Cruz',      number: '#CA-EDL',  category: 'Base Auto',          value: 160 },
+      { id: 'c4-006', name: 'Adley Rutschman',      number: '#CA-AR',   category: 'Base Auto',          value: 85  },
     ],
   },
   {
@@ -186,10 +188,10 @@ export const MOCK_CHECKLIST_TIERS = [
     cardCount: 15,
     avgValue: 450,
     cards: [
-      { id: 'c5-001', name: 'Gunnar Henderson',     category: 'Superfractor',       value: 4500 },
-      { id: 'c5-002', name: 'Julio Rodríguez',      category: 'Patch Auto /10',     value: 1800 },
-      { id: 'c5-003', name: 'Corbin Carroll',       category: 'Patch Auto /25',     value: 950  },
-      { id: 'c5-004', name: 'Jackson Holliday',     category: 'Gold Refractor /50', value: 620  },
+      { id: 'c5-001', name: 'Gunnar Henderson',     number: '#SF-1',    category: 'Superfractor',       value: 4500 },
+      { id: 'c5-002', name: 'Julio Rodríguez',      number: '#PA-JR',   category: 'Patch Auto /10',     value: 1800 },
+      { id: 'c5-003', name: 'Corbin Carroll',       number: '#PA-CC',   category: 'Patch Auto /25',     value: 950  },
+      { id: 'c5-004', name: 'Jackson Holliday',     number: '#GR-JH',   category: 'Gold Refractor /50', value: 620  },
     ],
   },
 ];

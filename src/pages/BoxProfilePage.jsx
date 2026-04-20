@@ -55,12 +55,16 @@ export function BoxProfilePage() {
   // specific format); the tier tab is not — it's a navigational detail within the page.
   const [activeTierTab, setActiveTierTab] = useState('base');
 
-  // Tracks which checklist tiers are expanded (showing all cards vs. the first 5).
-  // Lives here — not inside ChecklistTier — so the page controls all tiers from one
-  // place. This also keeps ChecklistTier a simple controlled component with no state.
+  // All checklist tier state (expand and search) lives here — not inside ChecklistTier.
+  // Keeping it at the page level makes ChecklistTier a fully controlled component with
+  // no state of its own, and lets the page coordinate related actions (e.g. clearing
+  // a tier's search query when the user collapses it).
   const [expandedTiers, setExpandedTiers] = useState(new Set());
+  // Search queries keyed by tier ID. Missing keys are treated as empty strings.
+  const [tierSearchQueries, setTierSearchQueries] = useState({});
 
   function handleTierToggle(tierId) {
+    const isCurrentlyExpanded = expandedTiers.has(tierId);
     setExpandedTiers((prev) => {
       const next = new Set(prev);
       if (next.has(tierId)) {
@@ -70,6 +74,14 @@ export function BoxProfilePage() {
       }
       return next;
     });
+    // Clear this tier's search query when collapsing so re-expanding starts fresh.
+    if (isCurrentlyExpanded) {
+      setTierSearchQueries((prev) => ({ ...prev, [tierId]: '' }));
+    }
+  }
+
+  function handleTierSearchChange(tierId, query) {
+    setTierSearchQueries((prev) => ({ ...prev, [tierId]: query }));
   }
 
   const { box, topChases, priceHistory, checklistTiers, isLoading, error } =
@@ -227,6 +239,8 @@ export function BoxProfilePage() {
               tier={tier}
               isExpanded={expandedTiers.has(tier.id)}
               onToggle={() => handleTierToggle(tier.id)}
+              searchQuery={tierSearchQueries[tier.id] || ''}
+              onSearchChange={(query) => handleTierSearchChange(tier.id, query)}
             />
           ))}
         </div>
