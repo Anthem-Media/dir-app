@@ -73,9 +73,10 @@
   top: 100%;
   left: 0;
   width: 100%;
-  background: var(--color-bg);
+  /* Elevated above page-level background for contrast on dark mode */
+  background: var(--color-background-secondary);
   border-bottom: 1px solid var(--color-border);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.09);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40);
   /* Ensure it appears above page content */
   z-index: 1;
 }

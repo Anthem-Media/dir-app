@@ -34,12 +34,12 @@
 }
 
 .search-bar__input:hover {
-  background: var(--color-bg);
+  background: var(--color-background-secondary);
   border-color: var(--color-border-strong);
 }
 
 .search-bar__input:focus {
-  background: var(--color-bg);
+  background: var(--color-background-secondary);
   border-color: var(--color-green);
   box-shadow: 0 0 0 3px var(--color-green-bg);
 }

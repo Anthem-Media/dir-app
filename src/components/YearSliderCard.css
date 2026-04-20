@@ -26,8 +26,8 @@
 .year-slider-card__display {
   width: 100%;
   aspect-ratio: 3 / 4;
-  /* Dark background — the year number pops against it */
-  background: var(--color-text-primary);
+  /* Elevated card surface — year number pops against dark background */
+  background: var(--color-background-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,7 +36,7 @@
 .year-slider-card__year {
   font-size: 36px;
   font-weight: 800;
-  color: var(--color-bg);
+  color: var(--color-text-primary);
   letter-spacing: -2px;
   line-height: 1;
   user-select: none;
