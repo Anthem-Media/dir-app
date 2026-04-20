@@ -9,8 +9,11 @@
 /* ─── Design Tokens ───────────────────────────────────────────────────── */
 :root {
   /* Brand colors */
-  --color-green:          #16a34a;
+  --color-green:          #7c6fff;  /* now aliases --color-accent; all non-financial green uses become purple */
   --color-red:            #dc2626;
+
+  /* Financial sentiment — green/red for positive/negative ROI and EV values only */
+  --color-positive:       #16a34a;  /* positive ROI, positive EV — stay green for semantic correctness */
 
   /* Text */
   --color-text-primary:   #f0f0f0;
@@ -35,8 +38,8 @@
   --color-accent-bg:      #2a2560;  /* tinted accent background for badges, highlights */
   --color-accent-text:    #a89fff;  /* lighter accent for text on dark surfaces */
 
-  /* Green shades */
-  --color-green-dark:     #15803d;   /* hover-state darkening of --color-green */
+  /* Green-dark — hover state for --color-green (now a darker purple) */
+  --color-green-dark:     #6355e8;
 
   /* Borders */
   --color-border:         #2a2a2e;
@@ -49,9 +52,9 @@
   --color-nav-hover:      rgba(255, 255, 255, 0.08);
   --color-nav-active:     rgba(124, 111, 255, 0.20);
 
-  /* Badge/tag tints — used for ROI badges, RC tags, etc. */
-  --color-green-bg:       #14532d;
-  --color-green-border:   #166534;
+  /* Badge/tag tints — used for accent badges, RC tags, focus rings, etc. */
+  --color-green-bg:       #2a2560;  /* accent background tint (aliases --color-accent-bg) */
+  --color-green-border:   #7c6fff;  /* accent border/text on dark surfaces (aliases --color-accent) */
   --color-red-bg:         #450a0a;
   --color-red-border:     #7f1d1d;
 

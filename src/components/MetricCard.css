@@ -26,7 +26,7 @@
 
 /* Sentiment variants — used to color ROI red/green */
 .metric-card__value--positive {
-  color: var(--color-green);
+  color: var(--color-positive);
 }
 
 .metric-card__value--negative {

@@ -61,13 +61,13 @@
 }
 
 .box-set-card__roi--positive {
-  background-color: var(--color-green);
-  color: #fff;
+  background-color: var(--color-positive);
+  color: var(--color-nav-text);
 }
 
 .box-set-card__roi--negative {
   background-color: var(--color-red);
-  color: #fff;
+  color: var(--color-nav-text);
 }
 
 /* ── Body ─────────────────────────────────────────────────────────────────── */
