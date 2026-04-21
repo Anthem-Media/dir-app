@@ -295,6 +295,27 @@ export function BoxProfilePage() {
         <PriceTrendChart data={priceHistory} />
       </section>
 
+      {/* ── CARD VALUE TRENDS ────────────────────────────────────────────── */}
+      {/* Shows average sale price over time for each card tier.
+          Tab state is local — not in the URL — because tier selection is a
+          navigational detail within the page, not a shareable view state. */}
+      <section className="box-profile-page__section">
+        <div className="box-profile-page__section-header">
+          <h2 className="box-profile-page__section-title">Card value trends</h2>
+          <p className="box-profile-page__section-subtitle">
+            Average sale price by tier over the past 12 months.
+          </p>
+        </div>
+        <TierTrendTabs
+          activeTier={activeTierTab}
+          onTierChange={setActiveTierTab}
+        />
+        <TierPriceTrendChart
+          data={DUMMY_TIER_TREND_DATA[activeTierTab]}
+          activeTier={activeTierTab}
+        />
+      </section>
+
       {/* ── FULL CHECKLIST ───────────────────────────────────────────────── */}
       {/* Checklist is the same across all formats — only odds and pricing change */}
       <section className="box-profile-page__section">
@@ -318,27 +339,6 @@ export function BoxProfilePage() {
             />
           ))}
         </div>
-      </section>
-
-      {/* ── CARD VALUE TRENDS ────────────────────────────────────────────── */}
-      {/* Shows average sale price over time for each card tier.
-          Tab state is local — not in the URL — because tier selection is a
-          navigational detail within the page, not a shareable view state. */}
-      <section className="box-profile-page__section">
-        <div className="box-profile-page__section-header">
-          <h2 className="box-profile-page__section-title">Card value trends</h2>
-          <p className="box-profile-page__section-subtitle">
-            Average sale price by tier over the past 12 months.
-          </p>
-        </div>
-        <TierTrendTabs
-          activeTier={activeTierTab}
-          onTierChange={setActiveTierTab}
-        />
-        <TierPriceTrendChart
-          data={DUMMY_TIER_TREND_DATA[activeTierTab]}
-          activeTier={activeTierTab}
-        />
       </section>
 
     </div>
