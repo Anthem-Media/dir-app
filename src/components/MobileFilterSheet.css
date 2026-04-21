@@ -1,0 +1,192 @@
+/*
+ * MobileFilterSheet — bottom sheet filter panel for mobile Browse.
+ *
+ * Both the sheet and the overlay are hidden entirely on desktop via the
+ * default rules at the top. All mobile styles live inside the media query.
+ *
+ * Animation approach:
+ *   - Sheet uses CSS transform: translateY(100%) → translateY(0)
+ *   - Overlay uses opacity: 0 → 1 with pointer-events toggled
+ *   - Both transitions run at 280ms ease-out — no JS animation libraries
+ *
+ * z-index stack:
+ *   AppNav        200
+ *   Overlay       250  (above nav, tappable to close)
+ *   Sheet         251  (above overlay, receives all tap events)
+ *   HamburgerMenu 300  (intentionally above both — separate concern)
+ */
+
+/* ── Desktop: hidden entirely ────────────────────────────────────────────── */
+/* The sheet and overlay must never appear on screens 768px and wider. */
+
+.mobile-filter-sheet,
+.mobile-filter-sheet__overlay {
+  display: none;
+}
+
+/* ── Mobile only ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+
+  /* ── Overlay ─────────────────────────────────────────────────────────────
+     Covers the full viewport so the grid area above the sheet is tappable.
+     Opacity starts at 0 with pointer-events disabled so it is invisible and
+     non-interactive when the sheet is closed. When --visible is applied both
+     transition in simultaneously with the sheet slide animation. */
+
+  .mobile-filter-sheet__overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    /* rgba exception: no CSS variable exists for overlay transparency.
+       0.3 opacity keeps the grid visible (modal signal) without hiding it. */
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 250;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease-out;
+  }
+
+  /* Applied when isOpen is true — overlay fades in and becomes tappable */
+  .mobile-filter-sheet__overlay--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ── Sheet ───────────────────────────────────────────────────────────────
+     Fixed to the bottom edge of the viewport, full width, 60% of viewport
+     height. Starts translateY(100%) so it sits completely below the screen.
+     The --open modifier slides it up to its natural position. */
+
+  .mobile-filter-sheet {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60vh;
+    background: var(--color-background-secondary);
+    border-top: 1px solid var(--color-border);
+    border-radius: 16px 16px 0 0;
+    z-index: 251;
+    padding: 12px 20px 0;
+    /* Sheet begins fully off-screen below the viewport */
+    transform: translateY(100%);
+    /* CSS transition drives the slide animation — 280ms ease-out matches spec */
+    transition: transform 0.28s ease-out;
+    overflow: hidden;
+  }
+
+  /* Applied when isOpen is true — sheet slides up into view */
+  .mobile-filter-sheet--open {
+    transform: translateY(0);
+  }
+
+  /* ── Drag handle ─────────────────────────────────────────────────────────
+     Short wide bar centered at the top of the sheet. Visual affordance only —
+     drag-to-dismiss is not implemented; the overlay tap handles close. */
+
+  .mobile-filter-sheet__handle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-border-strong);
+    margin: 0 auto 16px;
+    flex-shrink: 0;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────────────
+     "Filters" title on the left, "Clear all" on the right. */
+
+  .mobile-filter-sheet__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+  }
+
+  .mobile-filter-sheet__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .mobile-filter-sheet__clear {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    color: var(--color-accent-text);
+    text-decoration: underline;
+  }
+
+  /* ── Body — scrollable section container ────────────────────────────────
+     flex: 1 fills remaining sheet height. overflow-y: auto lets the user
+     scroll through all four filter sections on short devices.
+     env(safe-area-inset-bottom) keeps content clear of the iOS home indicator. */
+
+  .mobile-filter-sheet__body {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ── Filter section ──────────────────────────────────────────────────────
+     One block per filter dimension (Sport, Manufacturer, Year, Format). */
+
+  .mobile-filter-sheet__section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* All-caps section label above the chip row */
+  .mobile-filter-sheet__section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  /* Chip row — wraps naturally when options exceed screen width */
+  .mobile-filter-sheet__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ── Chip buttons ────────────────────────────────────────────────────────
+     Pill-shaped tap targets. Active state uses accent colors;
+     inactive state uses secondary surface + border. */
+
+  .mobile-filter-chip {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.1s ease, border-color 0.1s ease, color 0.1s ease;
+  }
+
+  /* Active chip — accent background, accent text, accent border */
+  .mobile-filter-chip--active {
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    border-color: var(--color-accent);
+  }
+
+}

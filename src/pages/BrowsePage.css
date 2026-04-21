@@ -62,6 +62,13 @@
   text-decoration: underline;
 }
 
+/* ── Filters button (mobile only) ────────────────────────────────────────── */
+/* Hidden on desktop — only rendered visually on mobile screens. */
+
+.browse-page__filters-btn {
+  display: none;
+}
+
 /* ── Responsive: mobile layout below 768px ───────────────────────────────── */
 
 @media (max-width: 767px) {
@@ -80,5 +87,22 @@
   /* Two equal columns filling the full available width */
   .browse-page__grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Filters button — pill shape, shown only on mobile */
+  .browse-page__filters-btn {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    white-space: nowrap;
   }
 }
