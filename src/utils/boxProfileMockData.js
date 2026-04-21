@@ -187,8 +187,7 @@ export const MOCK_PRICE_HISTORY = [
 
 // The five tiers from the project brief, each with a card count and
 // the individual cards that appear in the checklist.
-// Tier 1-4 have more than 5 cards so the expand/collapse button appears.
-// Tier 5 has 4 cards (≤ 5) to demonstrate that the button is correctly absent.
+// All tiers have more than 5 cards so the expand/collapse button renders on each.
 // Each card has a `number` field (card number from the set) so card-number search works.
 // In the real schema these fields are `player_name` and `card_number`.
 export const MOCK_CHECKLIST_TIERS = [
@@ -252,16 +251,20 @@ export const MOCK_CHECKLIST_TIERS = [
     ],
   },
   {
-    // Tier 5 intentionally has 4 cards (≤ 5) — the toggle button should NOT appear here.
+    // TODO: Replace with real Tier 5 cards from cards table — Patch Autos, Numbered Patch Autos, Memorabilia/Relic, Superfractor
     id: 'tier-5',
     label: 'Tier 5 — Premium Hits',
     cardCount: 15,
     avgValue: 450,
     cards: [
-      { id: 'c5-001', name: 'Gunnar Henderson',     number: '#SF-1',    category: 'Superfractor',       value: 4500 },
-      { id: 'c5-002', name: 'Julio Rodríguez',      number: '#PA-JR',   category: 'Patch Auto /10',     value: 1800 },
-      { id: 'c5-003', name: 'Corbin Carroll',       number: '#PA-CC',   category: 'Patch Auto /25',     value: 950  },
-      { id: 'c5-004', name: 'Jackson Holliday',     number: '#GR-JH',   category: 'Gold Refractor /50', value: 620  },
+      { id: 'c5-001', name: 'Gunnar Henderson',     number: '#SF-1',    category: 'Superfractor',              value: 4500 },
+      { id: 'c5-002', name: 'Julio Rodríguez',      number: '#PA-JR',   category: 'Patch Auto /10',            value: 1800 },
+      { id: 'c5-003', name: 'Corbin Carroll',       number: '#PA-CC',   category: 'Patch Auto /25',            value: 950  },
+      { id: 'c5-004', name: 'Jackson Holliday',     number: '#GR-JH',   category: 'Gold Refractor /50',        value: 620  },
+      { id: 'c5-005', name: 'Mike Trout',           number: '#PA-MT',   category: 'Patch Auto /10',            value: 2200 },
+      { id: 'c5-006', name: 'Shohei Ohtani',        number: '#PA-SO',   category: 'Patch Auto /50',            value: 750  },
+      { id: 'c5-007', name: 'Elly De La Cruz',      number: '#NPA-EDL', category: 'Numbered Patch Auto /25',   value: 1100 },
+      { id: 'c5-008', name: 'Adley Rutschman',      number: '#MR-AR',   category: 'Memorabilia Relic',         value: 280  },
     ],
   },
 ];
