@@ -94,6 +94,12 @@
   padding: 20px 40px 24px;
 }
 
+/* Mobile flat-list inner — hidden by default on desktop.
+   Shown only inside the @media (max-width: 767px) block below. */
+.site-nav-bar__dropdown-inner--mobile {
+  display: none;
+}
+
 /* ── Shared column styles ───────────────────────────────────────────────── */
 
 .nav-dropdown__col {
@@ -246,5 +252,61 @@
 
   .nav-dropdown__trending {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Mobile dropdown layout (below 768px) ───────────────────────────────── */
+/* All changes in this block are mobile-only. Desktop is completely unchanged. */
+
+@media (max-width: 767px) {
+  /* Clamp the dropdown panel to the viewport — prevents any column min-width
+     or fixed-width content from causing horizontal overflow on narrow screens. */
+  .site-nav-bar__dropdown {
+    overflow: hidden;
+  }
+
+  /* Hide the complex desktop mega-menu; show the flat mobile list instead */
+  .site-nav-bar__dropdown-inner--desktop {
+    display: none;
+  }
+
+  .site-nav-bar__dropdown-inner--mobile {
+    display: block;
+    padding: 8px 16px 16px;
+  }
+
+  /* Flat single-column list container for mobile dropdowns */
+  .nav-dropdown__mobile-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* Tighter item padding for a compact mobile list feel.
+     min-height removed — natural text height is sufficient at this size. */
+  .nav-dropdown__mobile-list .nav-dropdown__item {
+    min-height: unset;
+    padding: 10px 14px;
+    white-space: normal;
+  }
+
+  /* "More" button — accent colors make it visually distinct from filter items,
+     so it reads as an action (see all results) rather than a selectable option. */
+  .nav-dropdown__mobile-more {
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    font-weight: 600;
+    justify-content: center;
+    margin-top: 4px;
+  }
+
+  /* Keep accent color on hover — do not let the base item hover override it */
+  .nav-dropdown__mobile-more:hover {
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
   }
 }

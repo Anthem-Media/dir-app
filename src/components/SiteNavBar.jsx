@@ -16,11 +16,16 @@
  *   list     → "Brands", "Sports", "Year" tabs: multi-column item list
  *   sport    → sport tabs: brands column + years column + popular boxes column
  *
- * Item cap rules:
+ * Desktop item cap rules:
  *   - Max 5 items per column in every dropdown
  *   - Max 2 columns per dropdown (10 items total visible)
  *   - Any list exceeding the cap gets a "More →" link as the final item,
  *     routed to /browse with the appropriate query parameters pre-applied
+ *
+ * Mobile item cap rules:
+ *   - Complex multi-column layouts are replaced by a single flat list
+ *   - Maximum 6 items shown; excess items get a "More" button (7th position)
+ *   - "More" navigates to /browse with the tab's filter pre-applied
  *
  * Active tab: determined by useLocation() — the tab whose destination URL
  * matches the current route is highlighted with site-nav-bar__tab--active.
@@ -34,8 +39,12 @@ import './SiteNavBar.css';
 // How long (ms) to wait before closing the dropdown after mouse-leave.
 const CLOSE_DELAY_MS = 200;
 
-// Maximum items to display in a single column before the list is capped.
+// Maximum items to display in a single column before the list is capped (desktop).
 const ITEMS_PER_COL = 5;
+
+// Maximum items to display in the mobile flat-list dropdown before a "More" button
+// appears as the 7th item. Keeps the panel compact on narrow screens.
+const MOBILE_ITEMS_CAP = 6;
 
 // The URL each tab navigates to when clicked directly.
 const TAB_LINKS = {
@@ -381,6 +390,100 @@ export function SiteNavBar({ tabs }) {
     );
   }
 
+  // ── Mobile dropdown renderer ─────────────────────────────────────────────
+  // Replaces all complex multi-column layouts with a single flat list on mobile.
+  // Every dropdown type is reduced to a { label, to } array, capped at
+  // MOBILE_ITEMS_CAP (6). When more items exist, a "More" button appears as the
+  // 7th item and navigates to /browse with the tab's filter pre-applied (via
+  // TAB_LINKS[openTab]), letting the user see the full filtered set.
+  function renderMobileDropdown() {
+    const data = NAV_DROPDOWN_DATA[openTab];
+    if (!data) return null;
+
+    let items = [];
+
+    switch (data.type) {
+      case 'cascade':
+        // "All" tab: entry points into the cascade — one item per sport
+        items = data.sports.map((sport) => ({
+          label: sport,
+          to:    `/browse?sport=${sport}`,
+        }));
+        break;
+
+      case 'trending':
+        // "Trending" tab: one item per sport section, linking to that sport's browse page
+        items = data.sections.map((section) => ({
+          label: section.sport,
+          to:    `/browse?sport=${section.sport}`,
+        }));
+        break;
+
+      case 'list':
+        // "Brands", "Sports", "Year" tabs: flat map of each item to its browse URL
+        items = data.items.map((option) => {
+          const value = String(option);
+          if (openTab === 'Brands') return { label: value, to: `/browse?manufacturer=${value}` };
+          if (openTab === 'Sports') return { label: value, to: `/browse?sport=${value}` };
+          if (openTab === 'Year')   return { label: value, to: `/browse?year=${value}` };
+          return { label: value, to: '/browse' };
+        });
+        break;
+
+      case 'sport':
+        // Sport tabs: brands first (e.g. Panini), then years (e.g. 2026, 2025…)
+        // Brands link to sport+manufacturer; years link to sport+year
+        items = [
+          ...data.brands.map((brand) => ({
+            label: brand,
+            to:    `/browse?sport=${openTab}&manufacturer=${brand}`,
+          })),
+          ...data.years.map((year) => ({
+            label: String(year),
+            to:    `/browse?sport=${openTab}&year=${year}`,
+          })),
+        ];
+        break;
+
+      default:
+        return null;
+    }
+
+    const visibleItems = items.slice(0, MOBILE_ITEMS_CAP);
+    const hasMore      = items.length > MOBILE_ITEMS_CAP;
+    // "More" lands on the tab's own browse URL so the category filter is pre-applied
+    const moreUrl      = TAB_LINKS[openTab] ?? '/browse';
+
+    return (
+      <ul className="nav-dropdown__mobile-list">
+        {visibleItems.map(({ label, to }) => (
+          <li key={label}>
+            <Link
+              to={to}
+              className="nav-dropdown__item"
+              onClick={closeDropdown}
+            >
+              {label}
+            </Link>
+          </li>
+        ))}
+        {/* More button — only when items exceed MOBILE_ITEMS_CAP.
+            Accent-colored so it reads as an action, not a filter option. */}
+        {hasMore && (
+          <li>
+            <Link
+              to={moreUrl}
+              className="nav-dropdown__item nav-dropdown__mobile-more"
+              onClick={closeDropdown}
+            >
+              More
+            </Link>
+          </li>
+        )}
+      </ul>
+    );
+  }
+
   function renderDropdownContent() {
     const data = NAV_DROPDOWN_DATA[openTab];
     if (!data) return null;
@@ -465,8 +568,14 @@ export function SiteNavBar({ tabs }) {
           onMouseEnter={cancelClose}
           onMouseLeave={scheduleClose}
         >
-          <div className="site-nav-bar__dropdown-inner">
+          {/* Desktop: multi-column mega-menu layout. Hidden on mobile via CSS. */}
+          <div className="site-nav-bar__dropdown-inner site-nav-bar__dropdown-inner--desktop">
             {renderDropdownContent()}
+          </div>
+          {/* Mobile: flat single-column list, capped at 6 items + More button.
+              Hidden on desktop via CSS. Constrained to the viewport width. */}
+          <div className="site-nav-bar__dropdown-inner site-nav-bar__dropdown-inner--mobile">
+            {renderMobileDropdown()}
           </div>
         </div>
       )}
