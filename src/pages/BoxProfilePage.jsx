@@ -219,6 +219,17 @@ export function BoxProfilePage() {
               subtext="vs. MSRP"
             />
           </div>
+
+          {/* ── BUY NOW ──────────────────────────────────────────────────── */}
+          <div className="box-profile-page__buy-now">
+            {/* TODO: Wire to distributor affiliate link system — see distributor_listings table in schema. Populated by Cam during beta when distributor partnerships are established. */}
+            <button className="box-profile-page__buy-now-btn" type="button">
+              Buy Now
+            </button>
+            <p className="box-profile-page__buy-now-disclaimer">
+              Prices sourced from authorized distributors
+            </p>
+          </div>
         </div>
       </section>
 
