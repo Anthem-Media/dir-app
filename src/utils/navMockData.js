@@ -19,6 +19,12 @@
  *
  * When the real backend is connected, replace this file with a useNavData()
  * hook that fetches from the API. The shape of NAV_DROPDOWN_DATA stays the same.
+ *
+ * Year scope: 2018–present only. Pre-2018 years are excluded from all nav
+ * dropdowns — the database only has full profiles for 2018+.
+ *
+ * Manufacturers: four major brands only — Topps, Panini, Upper Deck, Bowman.
+ * Sport-specific filtering applies (e.g. Hockey is Upper Deck exclusive).
  */
 
 import { BOXES } from './homePageMockData';
@@ -27,6 +33,10 @@ import { BOXES } from './homePageMockData';
 function pick(...ids) {
   return ids.map((id) => BOXES[id]);
 }
+
+// Years in scope for the nav — 2018 through current year, descending.
+// Pre-2018 years are excluded: the database only carries full profiles from 2018 onward.
+const NAV_YEARS = [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018];
 
 // ─── Tab labels ────────────────────────────────────────────────────────────
 // Order determines left-to-right position in the nav bar.
@@ -45,20 +55,20 @@ export const NAV_DROPDOWN_DATA = {
     type: 'cascade',
     // Level 1 options
     sports: ['Baseball', 'Football', 'Basketball', 'Hockey'],
-    // Level 2 options — brands available per sport
+    // Level 2 options — brands available per sport (four majors, sport-filtered)
     brandsBySport: {
       Baseball:   ['Bowman', 'Panini', 'Topps'],
       Football:   ['Panini'],
       Basketball: ['Panini'],
-      Hockey:     ['Panini', 'Upper Deck'],
+      Hockey:     ['Upper Deck'], // Upper Deck holds the NHL exclusive license
     },
-    // Level 3 options — years (same list regardless of brand in mock data)
-    years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013],
+    // Level 3 options — years in scope (2018–present, descending)
+    years: NAV_YEARS,
   },
 
   Trending: {
     type: 'trending',
-    // One column per sport, each with 10 top boxes this week
+    // One column per sport — SiteNavBar caps display at 5 per column + "More →"
     sections: [
       {
         sport: 'Baseball',
@@ -125,11 +135,8 @@ export const NAV_DROPDOWN_DATA = {
 
   Brands: {
     type: 'list',
-    items: [
-      'Bowman', 'Donruss', 'Fleer', 'Hoops', 'Leaf',
-      'Mosaic', 'Pacific', 'Panini', 'Prizm', 'Score',
-      'Select', 'Skybox', 'Topps', 'Upper Deck',
-    ],
+    // Four major brands only — matches the manufacturers seeded in the database schema.
+    items: ['Bowman', 'Panini', 'Topps', 'Upper Deck'],
   },
 
   Sports: {
@@ -139,13 +146,17 @@ export const NAV_DROPDOWN_DATA = {
 
   Year: {
     type: 'list',
-    items: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013],
+    // 2018–present in descending order. Pre-2018 excluded (no full profiles).
+    items: NAV_YEARS,
   },
 
   Baseball: {
     type: 'sport',
-    brands: ['Bowman', 'Panini', 'Topps', 'Upper Deck'],
-    years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013],
+    // Bowman is a Topps sub-brand but listed separately as it has distinct product lines.
+    // Upper Deck excluded — they do not hold a current MLB license.
+    brands: ['Bowman', 'Panini', 'Topps'],
+    years: NAV_YEARS,
+    // Full list kept here; SiteNavBar caps display at 5 + "More →"
     popularBoxes: pick(
       'topps-chrome-2024-hobby',
       'bowman-chrome-2024-jumbo',
@@ -162,8 +173,8 @@ export const NAV_DROPDOWN_DATA = {
 
   Football: {
     type: 'sport',
-    brands: ['Panini'],
-    years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013],
+    brands: ['Panini'], // Panini holds the NFL exclusive license
+    years: NAV_YEARS,
     popularBoxes: pick(
       'panini-prizm-football-2024-hobby',
       'panini-nt-football-2024-hobby',
@@ -180,8 +191,8 @@ export const NAV_DROPDOWN_DATA = {
 
   Basketball: {
     type: 'sport',
-    brands: ['Panini'],
-    years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013],
+    brands: ['Panini'], // Panini holds the NBA exclusive license
+    years: NAV_YEARS,
     popularBoxes: pick(
       'panini-flawless-bball-2425-hobby',
       'panini-nt-bball-2425-hobby',
@@ -198,8 +209,8 @@ export const NAV_DROPDOWN_DATA = {
 
   Hockey: {
     type: 'sport',
-    brands: ['Panini', 'Upper Deck'],
-    years: [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013],
+    brands: ['Upper Deck'], // Upper Deck holds the NHL exclusive license
+    years: NAV_YEARS,
     popularBoxes: pick(
       'ud-black-diamond-hockey-2425-hobby',
       'ud-ice-hockey-2425-hobby',

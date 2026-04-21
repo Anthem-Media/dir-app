@@ -14,6 +14,12 @@
  *   list     → "Brands", "Sports", "Year" tabs: multi-column item list
  *   sport    → sport tabs: brands column + years column + popular boxes column
  *
+ * Item cap rules:
+ *   - Max 5 items per column in every dropdown
+ *   - Max 2 columns per dropdown (10 items total visible)
+ *   - Any list exceeding the cap gets a "More →" link as the final item,
+ *     routed to /browse with the appropriate query parameters pre-applied
+ *
  * Active tab: determined by useLocation() — the tab whose destination URL
  * matches the current route is highlighted with site-nav-bar__tab--active.
  */
@@ -25,6 +31,9 @@ import './SiteNavBar.css';
 
 // How long (ms) to wait before closing the dropdown after mouse-leave.
 const CLOSE_DELAY_MS = 200;
+
+// Maximum items to display in a single column before the list is capped.
+const ITEMS_PER_COL = 5;
 
 // The URL each tab navigates to when clicked directly.
 const TAB_LINKS = {
@@ -40,7 +49,7 @@ const TAB_LINKS = {
 };
 
 export function SiteNavBar({ tabs }) {
-  const [openTab, setOpenTab]         = useState(null);
+  const [openTab, setOpenTab]           = useState(null);
   const [cascadeSport, setCascadeSport] = useState(null);
   const [cascadeBrand, setCascadeBrand] = useState(null);
   const closeTimerRef = useRef(null);
@@ -99,7 +108,11 @@ export function SiteNavBar({ tabs }) {
   // ── Dropdown content renderers ───────────────────────────────────────────
 
   // "All" tab — 3-level cascading menu: sport → brand → year
+  // Years are capped at ITEMS_PER_COL; overflow gets a "More →" link.
   function renderCascadeDropdown(data) {
+    const visibleYears = data.years.slice(0, ITEMS_PER_COL);
+    const hasMoreYears = data.years.length > ITEMS_PER_COL;
+
     return (
       <div className="nav-dropdown__cascade">
         {/* Level 1: Sports */}
@@ -142,11 +155,12 @@ export function SiteNavBar({ tabs }) {
           </div>
         )}
 
-        {/* Level 3: Years — only visible after a brand is highlighted */}
+        {/* Level 3: Years — only visible after a brand is highlighted.
+            Capped at ITEMS_PER_COL; "More →" links to the sport+brand browse filter. */}
         {cascadeBrand && (
           <div className="nav-dropdown__col">
             <p className="nav-dropdown__col-heading">Year</p>
-            {data.years.map((year) => (
+            {visibleYears.map((year) => (
               <Link
                 key={year}
                 to={`/browse?sport=${cascadeSport}&manufacturer=${cascadeBrand}&year=${year}`}
@@ -156,38 +170,61 @@ export function SiteNavBar({ tabs }) {
                 {year}
               </Link>
             ))}
+            {hasMoreYears && (
+              <Link
+                to={`/browse?sport=${cascadeSport}&manufacturer=${cascadeBrand}`}
+                className="nav-dropdown__item nav-dropdown__item--more"
+                onClick={closeDropdown}
+              >
+                More →
+              </Link>
+            )}
           </div>
         )}
       </div>
     );
   }
 
-  // "Trending" tab — 4 columns, one per sport, each with the top boxes this week.
-  // Box items link directly to the box profile page, not to a browse filter.
+  // "Trending" tab — 4 columns, one per sport, each capped at ITEMS_PER_COL.
+  // "More →" routes to the sport's browse page.
   function renderTrendingDropdown(data) {
     return (
       <div className="nav-dropdown__trending">
-        {data.sections.map((section) => (
-          <div key={section.sport} className="nav-dropdown__col">
-            <p className="nav-dropdown__col-heading">{section.sport}</p>
-            {section.boxes.map((box) => (
-              <Link
-                key={box.id}
-                to={`/box/${box.id}`}
-                className="nav-dropdown__item nav-dropdown__item--dense"
-                onClick={closeDropdown}
-              >
-                {box.name}
-              </Link>
-            ))}
-          </div>
-        ))}
+        {data.sections.map((section) => {
+          const visible  = section.boxes.slice(0, ITEMS_PER_COL);
+          const hasMore  = section.boxes.length > ITEMS_PER_COL;
+          return (
+            <div key={section.sport} className="nav-dropdown__col">
+              <p className="nav-dropdown__col-heading">{section.sport}</p>
+              {visible.map((box) => (
+                <Link
+                  key={box.id}
+                  to={`/box/${box.id}`}
+                  className="nav-dropdown__item nav-dropdown__item--dense"
+                  onClick={closeDropdown}
+                >
+                  {box.name}
+                </Link>
+              ))}
+              {hasMore && (
+                <Link
+                  to={`/browse?sport=${section.sport}`}
+                  className="nav-dropdown__item nav-dropdown__item--more"
+                  onClick={closeDropdown}
+                >
+                  More →
+                </Link>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   }
 
-  // "Brands", "Sports", "Year" tabs — simple multi-column item list.
-  // tabKey tells us which query param to use so the URL is built correctly.
+  // "Brands", "Sports", "Year" tabs — item list, up to 2 columns of ITEMS_PER_COL.
+  // If a second column is needed and items still overflow, a "More →" link appears
+  // at the bottom of the second column.
   function renderListDropdown(data, tabKey) {
     function getUrl(item) {
       if (tabKey === 'Brands') return `/browse?manufacturer=${item}`;
@@ -196,27 +233,69 @@ export function SiteNavBar({ tabs }) {
       return '/browse';
     }
 
+    const MAX_VISIBLE = ITEMS_PER_COL * 2; // 10 items max across both columns
+    const visible   = data.items.slice(0, MAX_VISIBLE);
+    const hasMore   = data.items.length > MAX_VISIBLE;
+    const col1      = visible.slice(0, ITEMS_PER_COL);
+    const col2      = visible.slice(ITEMS_PER_COL);
+    const needsCols = col2.length > 0;
+
     return (
-      <div className="nav-dropdown__list">
-        {data.items.map((item) => (
-          <Link
-            key={item}
-            to={getUrl(item)}
-            className="nav-dropdown__item"
-            onClick={closeDropdown}
-          >
-            {String(item)}
-          </Link>
-        ))}
+      <div className="nav-dropdown__list-cols">
+        {/* Column 1 — always present */}
+        <div className="nav-dropdown__col">
+          {col1.map((item) => (
+            <Link
+              key={item}
+              to={getUrl(item)}
+              className="nav-dropdown__item"
+              onClick={closeDropdown}
+            >
+              {String(item)}
+            </Link>
+          ))}
+        </div>
+
+        {/* Column 2 — only rendered when there are overflow items */}
+        {needsCols && (
+          <div className="nav-dropdown__col">
+            {col2.map((item) => (
+              <Link
+                key={item}
+                to={getUrl(item)}
+                className="nav-dropdown__item"
+                onClick={closeDropdown}
+              >
+                {String(item)}
+              </Link>
+            ))}
+            {hasMore && (
+              <Link
+                to="/browse"
+                className="nav-dropdown__item nav-dropdown__item--more"
+                onClick={closeDropdown}
+              >
+                More →
+              </Link>
+            )}
+          </div>
+        )}
       </div>
     );
   }
 
   // Sport tabs (Baseball, Football, etc.) — brands + years + popular boxes.
-  // tabKey is the sport name (e.g. "Baseball"), used to scope the brand/year URLs.
+  // Years and popular boxes are both capped at ITEMS_PER_COL.
+  // "More →" for years and boxes both route to the sport's browse page.
   function renderSportDropdown(data, tabKey) {
+    const visibleYears    = data.years.slice(0, ITEMS_PER_COL);
+    const hasMoreYears    = data.years.length > ITEMS_PER_COL;
+    const visibleBoxes    = data.popularBoxes.slice(0, ITEMS_PER_COL);
+    const hasMoreBoxes    = data.popularBoxes.length > ITEMS_PER_COL;
+
     return (
       <div className="nav-dropdown__sport">
+        {/* Brands column — typically 1–4 items, no cap needed */}
         <div className="nav-dropdown__col">
           <p className="nav-dropdown__col-heading">Brands</p>
           {data.brands.map((brand) => (
@@ -230,9 +309,11 @@ export function SiteNavBar({ tabs }) {
             </Link>
           ))}
         </div>
+
+        {/* Years column — capped at ITEMS_PER_COL */}
         <div className="nav-dropdown__col">
           <p className="nav-dropdown__col-heading">Year</p>
-          {data.years.map((year) => (
+          {visibleYears.map((year) => (
             <Link
               key={year}
               to={`/browse?sport=${tabKey}&year=${year}`}
@@ -242,10 +323,21 @@ export function SiteNavBar({ tabs }) {
               {year}
             </Link>
           ))}
+          {hasMoreYears && (
+            <Link
+              to={`/browse?sport=${tabKey}`}
+              className="nav-dropdown__item nav-dropdown__item--more"
+              onClick={closeDropdown}
+            >
+              More →
+            </Link>
+          )}
         </div>
+
+        {/* Popular Boxes column — capped at ITEMS_PER_COL */}
         <div className="nav-dropdown__col nav-dropdown__col--wide">
           <p className="nav-dropdown__col-heading">Popular Boxes</p>
-          {data.popularBoxes.map((box) => (
+          {visibleBoxes.map((box) => (
             <Link
               key={box.id}
               to={`/box/${box.id}`}
@@ -255,6 +347,15 @@ export function SiteNavBar({ tabs }) {
               {box.name}
             </Link>
           ))}
+          {hasMoreBoxes && (
+            <Link
+              to={`/browse?sport=${tabKey}`}
+              className="nav-dropdown__item nav-dropdown__item--more"
+              onClick={closeDropdown}
+            >
+              More →
+            </Link>
+          )}
         </div>
       </div>
     );

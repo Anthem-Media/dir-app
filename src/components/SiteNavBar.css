@@ -121,6 +121,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  min-height: 36px;
   padding: 6px 8px;
   font-size: 13px;
   font-weight: 500;
@@ -148,10 +149,20 @@
   font-weight: 600;
 }
 
-/* Dense variant — for long box names that need tighter vertical spacing */
+/* Dense variant — for long box names; smaller text but same height as standard items */
 .nav-dropdown__item--dense {
   font-size: 12px;
-  padding: 4px 8px;
+}
+
+/* "More →" link — styled as a distinct action, not a plain nav item */
+.nav-dropdown__item--more {
+  color: var(--color-accent-text);
+  font-weight: 600;
+}
+
+.nav-dropdown__item--more:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-accent-text);
 }
 
 .nav-dropdown__chevron {
@@ -191,13 +202,11 @@
 }
 
 /* ── List layout (Brands / Sports / Year tabs) ──────────────────────────── */
-/* Auto-flow grid so items wrap into however many columns fit */
+/* Two side-by-side columns, each containing up to 5 items */
 
-.nav-dropdown__list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 2px 12px;
-  max-width: 640px;
+.nav-dropdown__list-cols {
+  display: flex;
+  gap: 0;
 }
 
 /* ── Sport layout (Baseball / Football / Basketball / Hockey tabs) ──────── */
