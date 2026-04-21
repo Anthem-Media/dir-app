@@ -1,0 +1,302 @@
+/*
+ * HamburgerMenu — full-screen mobile navigation overlay.
+ * Slides in from the right with a 0.3s ease transition.
+ * Completely hidden on desktop (min-width: 901px) — never interferes with
+ * the desktop header layout.
+ * No hardcoded hex values — all colors from index.css CSS variables.
+ */
+
+/* ── Overlay container ──────────────────────────────────────────────────── */
+
+.hamburger-menu {
+  /* Fill the full viewport and sit above the sticky header (z-index 200) */
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--color-background-secondary);
+
+  /* Start off-screen to the right; slides in when --open is added */
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+
+  /* Clip content during the slide-in so it doesn't bleed into the visible area */
+  overflow: hidden;
+}
+
+.hamburger-menu--open {
+  transform: translateX(0);
+}
+
+/* Hide entirely on desktop — this component is mobile-only */
+@media (min-width: 901px) {
+  .hamburger-menu {
+    display: none;
+  }
+}
+
+/* ── Header row (close button) ──────────────────────────────────────────── */
+
+.hamburger-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  /* Match the top bar height so the X button visually aligns with it */
+  height: 64px;
+  padding: 0 16px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.hamburger-menu__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  border-radius: 6px;
+  transition: color 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hamburger-menu__close:hover {
+  color: var(--color-text-primary);
+}
+
+/* ── Scrollable content area ────────────────────────────────────────────── */
+
+.hamburger-menu__content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Sport list items ───────────────────────────────────────────────────── */
+
+.hamburger-menu__sport-item {
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Sport header row — either a <button> (accordion) or a <Link> (direct nav).
+   Shared styles applied to both class users. */
+.hamburger-menu__sport-btn {
+  /* Reset button and <a> defaults */
+  background: none;
+  border: none;
+  text-decoration: none;
+  font-family: var(--font-sans);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 20px;
+
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s ease;
+}
+
+.hamburger-menu__sport-btn:hover {
+  background: var(--color-background-tertiary);
+}
+
+/* Chevron — right-pointing by default, rotates 90° when accordion is open */
+.hamburger-menu__chevron {
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.hamburger-menu__chevron--open {
+  transform: rotate(90deg);
+}
+
+/* ── Accordion sub-items ────────────────────────────────────────────────── */
+/*
+ * CSS grid-template-rows trick for height 0 → auto animation.
+ * The grid item is sized to 0fr (zero fraction) when collapsed and 1fr
+ * (full content height) when open. The inner wrapper uses min-height: 0
+ * so the grid cell CAN shrink below its natural content height, and
+ * overflow: hidden clips the content during the transition.
+ *
+ * This avoids the max-height hack (which causes uneven timing when
+ * max-height >> actual content height).
+ */
+
+.hamburger-menu__sub-items {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+}
+
+.hamburger-menu__sub-items--open {
+  grid-template-rows: 1fr;
+}
+
+.hamburger-menu__sub-items-inner {
+  /* min-height: 0 is critical — without it the grid cell cannot collapse
+     below its content's natural height, breaking the animation */
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 20px;
+}
+
+/* Add vertical breathing room only when open — avoids visible space when
+   the accordion is mid-animation in the closed direction */
+.hamburger-menu__sub-items--open .hamburger-menu__sub-items-inner {
+  padding: 10px 20px 20px;
+}
+
+.hamburger-menu__sub-group {
+  margin-bottom: 16px;
+}
+
+.hamburger-menu__sub-heading {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-secondary);
+  margin: 0 0 6px;
+}
+
+/* Sub-item links — each applies to <Link> elements */
+.hamburger-menu__sub-link {
+  display: block;
+  padding: 5px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: color 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hamburger-menu__sub-link:hover {
+  color: var(--color-accent-text);
+}
+
+/* "Browse all [Sport] →" shortcut link at the bottom of each accordion */
+.hamburger-menu__sub-link--all {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-accent-text);
+}
+
+.hamburger-menu__sub-link--all:hover {
+  color: var(--color-text-primary);
+}
+
+/* ── Divider ─────────────────────────────────────────────────────────────── */
+
+.hamburger-menu__divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 4px 0;
+}
+
+/* ── Extra page links ────────────────────────────────────────────────────── */
+
+.hamburger-menu__extra-link {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-border);
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.12s ease, background 0.12s ease;
+}
+
+.hamburger-menu__extra-link:hover {
+  color: var(--color-text-primary);
+  background: var(--color-background-tertiary);
+}
+
+/* ── Auth buttons — anchored to the bottom ─────────────────────────────── */
+/*
+ * Styled to exactly match the desktop header buttons in AppNav.css:
+ *   sign-in  → outlined secondary (--color-border-strong border, transparent bg)
+ *   sign-up  → solid accent fill (--color-green background, --color-nav-text text)
+ * The only differences: full-width flex layout and slightly taller tap target
+ * (44px vs 32px) for comfortable mobile use.
+ */
+
+.hamburger-menu__auth {
+  flex-shrink: 0;
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  /* env(safe-area-inset-bottom) adds extra space on iOS notched devices
+     so the buttons don't sit behind the home indicator */
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--color-border);
+}
+
+/* Sign in — outlined secondary button, matches .site-top-bar__sign-in */
+.hamburger-menu__sign-in {
+  flex: 1;
+  height: 44px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.1s ease, color 0.1s ease;
+}
+
+.hamburger-menu__sign-in:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-muted);
+}
+
+/* Sign up — solid accent fill button, matches .site-top-bar__sign-up */
+.hamburger-menu__sign-up {
+  flex: 1;
+  height: 44px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--color-nav-text);
+  background: var(--color-green);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.1s ease;
+}
+
+.hamburger-menu__sign-up:hover {
+  background: var(--color-green-dark);
+}
