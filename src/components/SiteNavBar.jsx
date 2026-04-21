@@ -53,13 +53,24 @@ export function SiteNavBar({ tabs }) {
   const [cascadeSport, setCascadeSport] = useState(null);
   const [cascadeBrand, setCascadeBrand] = useState(null);
   const closeTimerRef    = useRef(null);
-  // Touch gesture tracking — used to differentiate a deliberate tap from a scroll.
-  // touchMovedRef: set true when touchmove fires between touchstart and touchend.
-  // isTouchActiveRef: true while a finger is on the screen.
-  // Both are checked before opening/closing the dropdown so that a scroll gesture
-  // does not accidentally trigger dropdown open (onMouseEnter fires on mobile scroll).
+  // Touch gesture tracking — three refs working together:
+  //
+  //   isTouchActiveRef — true while a finger is on the screen (touchstart → touchend).
+  //                      Used to suppress onMouseEnter, which mobile browsers fire as
+  //                      a finger scrolls across buttons.
+  //
+  //   touchMovedRef    — set true when touchmove fires; stays true until next touchstart.
+  //                      Used in onClick to ignore scroll gestures that end over a button.
+  //
+  //   wasTouchTapRef   — set true at touchstart; read and cleared in onClick.
+  //                      Tells the click handler whether the interaction came from a
+  //                      finger tap (true) or a desktop mouse click (false/undefined).
+  //                      This is how we give mobile and desktop different tab-click behavior:
+  //                        mobile tap   → dropdown only, no navigation
+  //                        desktop click → dropdown + navigate (unchanged behavior)
   const touchMovedRef    = useRef(false);
   const isTouchActiveRef = useRef(false);
+  const wasTouchTapRef   = useRef(false);
   const navigate  = useNavigate();
   const location  = useLocation();
 
@@ -391,7 +402,7 @@ export function SiteNavBar({ tabs }) {
           dropdown from opening when the user scrolls across tabs on mobile. */}
       <div
         className="site-nav-bar__inner"
-        onTouchStart={() => { isTouchActiveRef.current = true; touchMovedRef.current = false; }}
+        onTouchStart={() => { isTouchActiveRef.current = true; touchMovedRef.current = false; wasTouchTapRef.current = true; }}
         onTouchMove={() => { touchMovedRef.current = true; }}
         onTouchEnd={() => { isTouchActiveRef.current = false; }}
         onTouchCancel={() => { isTouchActiveRef.current = false; touchMovedRef.current = false; }}
@@ -408,7 +419,27 @@ export function SiteNavBar({ tabs }) {
               // If the touch included movement, the user was scrolling — not tapping.
               // Suppress the dropdown toggle so scrolling never opens a menu.
               if (touchMovedRef.current) return;
-              handleTabClick(tab);
+
+              // Read and immediately clear the touch-tap flag.
+              // wasTouchTapRef is set at touchstart and stays true through onClick.
+              // A desktop mouse click never sets it, so it stays false/undefined.
+              const isMobileTap = wasTouchTapRef.current;
+              wasTouchTapRef.current = false;
+
+              if (isMobileTap) {
+                // Mobile tap: toggle the dropdown only. Do NOT navigate away —
+                // the user needs to see the dropdown and tap a specific option
+                // (e.g. a year or brand) before navigation should occur.
+                if (openTab === tab) {
+                  closeDropdown();
+                } else {
+                  openDropdown(tab);
+                }
+              } else {
+                // Desktop mouse click: existing behavior unchanged —
+                // toggle dropdown AND navigate to the tab's destination.
+                handleTabClick(tab);
+              }
             }}
             onMouseEnter={() => {
               // On mobile, onMouseEnter fires as a finger scrolls across buttons.
