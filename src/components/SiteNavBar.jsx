@@ -4,9 +4,11 @@
  * Dark green secondary navigation bar with a mega-menu dropdown system.
  * Sits below the top bar (sticky at top: 64px, which is the top bar height).
  *
- * Each tab navigates to /browse with query params on click and shows a
- * dropdown panel on hover. The panel closes after a 200ms delay on mouse-leave
- * so the user can move the cursor from the tab to the panel without it closing.
+ * Desktop: each tab opens its dropdown on hover and navigates to /browse on click.
+ * Mobile: each tab opens its dropdown on tap only — no navigation occurs at the tab
+ * level. Navigation happens when the user taps a specific option inside the dropdown.
+ * The panel closes after a 200ms delay on mouse-leave so the cursor can move from
+ * the tab to the panel without it closing.
  *
  * Dropdown types (defined in NAV_DROPDOWN_DATA):
  *   cascade  → "All" tab: 3-level cascading sport → brand → year
