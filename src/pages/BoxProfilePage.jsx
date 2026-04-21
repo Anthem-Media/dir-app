@@ -28,6 +28,7 @@ import { DUMMY_FORMAT_DATA, FORMAT_ORDER } from '../utils/formatSwitcherData';
 import { DUMMY_TIER_TREND_DATA } from '../utils/tierPriceTrendData';
 import { formatCurrency, formatPercent, getRoiSentiment } from '../utils/formatters';
 import { filterGrailCards } from '../utils/grailsUtils';
+import { sortTiersByValue } from '../utils/checklistUtils';
 import './BoxProfilePage.css';
 
 export function BoxProfilePage() {
@@ -116,6 +117,11 @@ export function BoxProfilePage() {
   // Apply the canonical /10 filter. filterGrailCards is the single source of truth
   // for which cards qualify as grails — the cutoff must not be re-implemented elsewhere.
   const grailCardsList = filterGrailCards(grailCards);
+
+  // Sort tiers so the most valuable appear first. The schema assigns tier numbers
+  // with 1 = Base and 5 = Premium Hits, so descending order gives collectors the
+  // best cards up top. See sortTiersByValue comment for database-phase follow-up.
+  const sortedChecklistTiers = sortTiersByValue(checklistTiers);
 
   // Build the ordered formats array for the tab row — label and slug only, no extra data.
   const formatTabs = FORMAT_ORDER.map((key) => ({
@@ -273,7 +279,7 @@ export function BoxProfilePage() {
           </p>
         </div>
         <div className="box-profile-page__checklist">
-          {checklistTiers.map((tier) => (
+          {sortedChecklistTiers.map((tier) => (
             <ChecklistTier
               key={tier.id}
               tier={tier}

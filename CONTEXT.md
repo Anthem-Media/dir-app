@@ -137,6 +137,7 @@ Dark mode color scheme implemented and deployed. UI polish pass starting now. Al
 - ⚠️ Soccer needs to be added to the UI navigation alongside the other four sports
 - ⚠️ iOS app is auth-only — no in-app purchases, no signup flow, no free tier. All acquisition and payment through web/Stripe. Do not deviate without architectural review.
 - ⚠️ Payment processor is Stripe (web only). Do not design any iOS purchase flow.
+- ⚠️ Database phase: flip tier numbering in dir_database_schema.sql and seed data so Tier 1 = Premium Hits and Tier 5 = Base/Rookies. Update sortTiersByValue in checklistUtils.js to sort ascending once the schema is corrected. Currently sorts descending as a workaround for the inverted schema.
 
 ## Development Guidelines
 - Use this Project chat for planning, strategy, and decisions
