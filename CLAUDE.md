@@ -87,25 +87,34 @@ iOS app is auth-only — no in-app purchases, no signup flow, no free tier. See 
 
 ## Box Profile Page — Features
 
+### Section Order (locked)
+Hero (format switcher + stats + Buy Now) → Top Chases / Grails → Pull Rates → Price Trends → Card Value Trends → Full Checklist
+
+### Buy Now
+Placed directly below the hero stats row (Market Price, MSRP, EV, ROI). Full-width button on mobile, ~220px on desktop. UI placeholder only — wired to `distributor_listings` table during database phase. Falls back to eBay affiliate link when no distributor carries the box. See TODO comment in BoxProfilePage.jsx.
+
 ### Format Switcher
-Tab row at the top of the box profile page. Switches between available formats (Hobby, Jumbo, Blaster, Mega, Retail). Only shows formats that exist for the current set. Switching format updates MSRP, pull rates, EV, and ROI. Checklist cards stay the same — only odds and pricing change. URL updates via query parameter: `/box/slug?format=hobby`. Requires `parent_set_id` on `box_sets` table (database phase). Build with dummy data during UI polish pass.
+Tab row at the top of the box profile page. Switches between available formats (Hobby, Jumbo, Blaster, Mega, Retail). Only shows formats that exist for the current set. Switching format updates MSRP, pull rates, EV, and ROI. Checklist cards stay the same — only odds and pricing change. URL updates via query parameter: `/box/slug?format=hobby`. Requires `parent_set_id` on `box_sets` table (database phase). Built with dummy data — wire to real data during database phase. No horizontal scroll on mobile — tabs use `flex: 1` to distribute evenly across full width.
 
 ### Top Chases vs. Grails
 Two separate tabs for high-value cards:
 - **Top Chases** — cards with `print_run` > 10 or no print run. Realistically pullable. Drive all EV/ROI calculations.
 - **Grails** — cards with `print_run` ≤ 10 (including all 1/1s and Superfractors). The /10 cutoff is a hard product decision. Excluded from EV and ROI math entirely. Display `circulation_status` badge: `Unknown`, `In Circulation`, or `Pulled/Sold`. Status defaults to `Unknown` at data entry.
 
+### Pull Rates
+Grid layout — 4 columns on desktop, 2 columns on mobile. Categories displayed: Base, Refractor, Rookie Refractor, Numbered, Base Auto, Refractor Auto, Patch Auto, Case Hit, Auto Relic, Relic. Boxes sized to fit cleanly at all screen widths without overflow.
+
 ### Price Trend Charts
 Two charts:
 1. **Sealed box price trend** — in the hero section. Market price of the sealed box over time. Powers the "is now a good time to buy?" question.
-2. **Card value trend by tier** — below the checklist. Average sale price of cards within each tier over time. Toggle tabs above the chart: Base, Rookies, Autos, Patch Autos. Powers the "are the hits in this set appreciating or tanking?" question.
-Both charts use `--color-positive` (#16a34a) for the trend line. Build with dummy data — wire to real data via `price_history` and `box_price_history` tables during database phase.
+2. **Card Value Trend by tier** — below the Pull Rates section. Average sale price of the top 10 eBay sold listings per tier per time period. Toggle tabs above the chart: Base, Rookies, Autos, Patch Autos. Data sourced from `price_history` table filtered by tier and `source = 'ebay'`. Powers the "are the hits in this set appreciating or tanking?" question.
+Both charts use `--color-positive` (#16a34a) for the trend line. Built with dummy data — wire to real data via `price_history` and `box_price_history` tables during database phase.
 
 ### Checklist Expand/Collapse
-Each tier in the checklist shows 5 cards by default. "More cards" button at the bottom of each tier expands that tier inline. Clicking again collapses back to 5. No page navigation — expands in place.
+Tiers are collapsed by default — no cards visible until the tier header is clicked. Clicking the tier header toggles it open or closed (accordion pattern). When open: search bar appears at top, first 5 cards are shown, "Show more" button appears at the bottom if the tier has more than 5 cards. "Show more" reveals the complete remaining card list — no secondary limit. Tiers display in descending value order: Premium Hits first, Base last. Sort handled by `sortTiersByValue` in `checklistUtils.js`. Search resets when a tier is collapsed.
 
 ### Card Search Within Tiers
-Each expanded tier has a lightweight search input at the top. Filters cards in real time as the user types. Searches player name and card number. Only visible when the tier is expanded. Scoped to the current box only.
+Each expanded tier has a lightweight search input at the top. Filters cards in real time as the user types. Searches player name and card number. Only visible when the tier is expanded. Scoped to the current box only. Works on both web and mobile.
 
 ## Routing Architecture
 
@@ -140,10 +149,16 @@ Buy Now system: price comparison with multiple distributors. Fallback to "Find o
 
 ## Current Status
 
-- Dark mode color scheme implemented and deployed
-- All colors are CSS variables — no hardcoded hex values in codebase
-- UI polish pass starting now
-- New box profile features to build first (with dummy data): format switcher, tier price trend chart, checklist expand/collapse, card search within tiers, Grails tab
-- Then page-by-page polish: Header/Nav → Homepage → Browse → Box Profile → About → News → Help → Contact → Sign In → Sign Up
+- Box Profile features complete: format switcher, tier price trend chart, checklist expand/collapse, card search within tiers, Grails tab, tier sort order, soccer added to nav
+- Consolidation audit passed — all five features verified clean together, no conflicts, no rule violations
+- All colors are CSS variables — no hardcoded hex values in codebase (Recharts SVG exception documented in TierPriceTrendChart.jsx and PriceTrendChart.jsx)
+- Box Profile visual polish pass is next, then page-by-page: Header/Nav → Homepage → Browse → About → News → Help → Contact → Sign In → Sign Up
 - End every page session with a code audit before committing
 - See CONTEXT.md for full task list and detailed status
+
+## Known Refactor Tasks (database phase)
+
+- `DUMMY_TIER_TREND_DATA` is consumed inline in `BoxProfilePage.jsx`, bypassing the hook. At database phase this data must move into `useBoxProfile` — this is a refactor task, not just a data swap.
+- `DUMMY_FORMAT_DATA` drives `formatData` in `BoxProfilePage.jsx` — needs to come from `useBoxProfile` once `parent_set_id` is live on `box_sets`.
+- `useBoxProfile` hook has orphaned `MOCK_PULL_RATES` data — at database phase, pull rates must return from the hook keyed by format slug so the format switcher can request per-format odds.
+- Tier numbering in `dir_database_schema.sql` needs to be flipped so Tier 1 = Premium Hits and Tier 5 = Base/Rookies. Once done, update `sortTiersByValue` in `checklistUtils.js` to sort ascending instead of descending.

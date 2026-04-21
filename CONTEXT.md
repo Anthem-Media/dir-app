@@ -1,7 +1,7 @@
 # Context
 
 ## Current State
-Dark mode color scheme implemented and deployed. UI polish pass starting now. All major business decisions from Cam call (April 13, 2026) and follow-up conversation (April 20, 2026) are locked and documented below.
+UI polish pass in progress. Box Profile page features complete and audited. Box Profile visual polish pass is next, then page-by-page polish starting with Header/Nav. All major business decisions from Cam call (April 13, 2026) and follow-up conversation (April 20, 2026) are locked and documented below.
 
 ## What's Been Decided and Locked
 - **Scope:** Baseball, Football, Basketball, Hockey, Soccer at launch. All sports need full database population for beta — not just baseball. No TCG categories.
@@ -26,7 +26,7 @@ Dark mode color scheme implemented and deployed. UI polish pass starting now. Al
 - **Cascading filter logic:** Selecting a filter narrows the options in downstream filters. Example: selecting "Baseball" limits manufacturers to only those with baseball products. Prevents dead-end filter combinations with zero results.
 - **Landing pages:** About, News, Contact, Help, Sign In, Sign Up. Dummy content for now. These do NOT need to be locked down before database/backend work — they're independent static pages that can be updated any time.
 - **Auth:** Supabase Auth (planned). Sign In and Sign Up pages are built as visual templates. Will be wired to Supabase when auth is implemented. Users table in schema includes email, display_name, password_hash, plan columns. Email opt-in checkbox on sign-up form (add `email_opt_in` boolean to users table during auth implementation).
-- **Buy Now / affiliate system — LOCKED:** Price comparison with multiple distributors on box profile pages. Starts with 1-2 distributors, grows over time. Boxes without distributor listings fall back to "Find on eBay" affiliate link. System gets designed and built but launches empty — populated when Cam has distributor partnerships (during beta). No distributor outreach until app is ready. New database tables needed: `distributors` and `distributor_listings`.
+- **Buy Now / affiliate system — LOCKED:** Price comparison with multiple distributors on box profile pages. Starts with 1-2 distributors, grows over time. Boxes without distributor listings fall back to "Find on eBay" affiliate link. System gets designed and built but launches empty — populated when Cam has distributor partnerships (during beta). No distributor outreach until app is ready. New database tables needed: `distributors` and `distributor_listings`. Buy Now button is built as a UI placeholder on the box profile page — wired to distributor_listings table during database phase.
 - **eBay Partner Network:** Free to join, 1-4% commission (collectibles on the higher end at 3-4%), 24-hour cookie window. Sign up when real data is live on the site (Phase 10-12 timeframe) — signing up with dummy data risks rejection.
 - **Data entry — LOCKED:** Zach handles all data entry during beta (5-10 hrs/week). No data engineer hire until revenue or investors. Pipeline needs to be founder-operable. AI-assisted workflow: paste raw data from sources into Claude (or Cowork) for structuring, output to spreadsheets matching database schema, bulk import when database is live. Spreadsheet templates created (drafts) — will be finalized when Zach brings real box data to cross-reference against schema.
 - **Data entry sources by sport:**
@@ -42,10 +42,13 @@ Dark mode color scheme implemented and deployed. UI polish pass starting now. Al
 - **Images strategy — LOCKED:** Don't let images block data entry. Enter checklist/pricing/pull rate data first, leave image_url blank. Primary image source is distributor product feeds (Dave & Adam's, Blowout Cards, Steel City, etc.) — clean, standardized, high-res box art pulled automatically as a byproduct of price scraping, same method Waxstat uses for their 27k+ box library. eBay API (Phase 13) is the fallback for boxes no distributor carries. Manufacturer sites are a tertiary source. Placeholder images acceptable for beta. Images are never manually sourced.
 - **Grails tab — LOCKED:** Box profile page has two separate tabs for high-value cards. Top Chases shows cards with `print_run` > 10 or no print run (base autos, standard parallels, refractors — realistically pullable cards that drive EV/ROI math). Grails tab shows cards with `print_run` ≤ 10, including all 1/1s and Superfractors. The /10 cutoff is a hard product decision, not a preference. Grails are excluded from EV and ROI calculations entirely — their pull probability is effectively zero for any individual buyer and including them would inflate EV misleadingly. Grails display a `circulation_status` badge: `Unknown`, `In Circulation`, or `Pulled/Sold`. Status defaults to `Unknown` at data entry and is updated when reliable data exists. The `cards` table requires a `circulation_status` column (values: `unknown`, `in_circulation`, `pulled_sold` — default `unknown`).
 - **Color scheme — LOCKED:** Dark mode. Background #111214, surfaces #1e1f24, hero sections #18191d, borders #2a2a2e, primary text #f0f0f0, secondary text #777777, accent #7c6fff, accent background #2a2560, accent text #a89fff. Positive financial indicators (ROI, positive price movement) use #16a34a (green) via `--color-positive` — intentional, must not be changed to purple. Price trend chart line is #16a34a. All colors are CSS variables in index.css. May change post-beta based on user feedback — CSS variables make this a one-file change.
-- **Format switcher — LOCKED:** Box profile page has a tab row at the top to switch between available formats (Hobby, Jumbo, Blaster, Mega, Retail). Switching format updates MSRP, pull rates, EV, and ROI. Checklist cards are the same across formats — only odds and pricing change. URL updates via query parameter (e.g. `/box/2024-topps-chrome-baseball?format=hobby`). Only formats that actually exist for a set are shown. Requires `parent_set_id INT REFERENCES box_sets(id)` on `box_sets` table to group formats together. Data sources for format-level odds: Cardboard Connection, Chasing Majors, Checklist Insider. Build with dummy data during UI polish pass — wire to real data during database phase.
-- **Price trend charts — LOCKED:** Two charts on box profile page. (1) Sealed box price trend in hero section — market price of the sealed box over time. (2) Card value trend by tier below the checklist — average sale price of cards within each tier over time, with toggle tabs: Base, Rookies, Autos, Patch Autos. Both charts use #16a34a (green) for the trend line. Build with dummy data during UI polish pass — wire to real data during database phase via `price_history` table.
-- **Checklist expand/collapse — LOCKED:** Each tier in the checklist shows 5 cards by default. "More cards" button at the bottom of each tier expands that tier inline to show all cards. Clicking again collapses back to 5. Expands in place — no page navigation.
-- **Card search within checklist tiers — LOCKED:** Each expanded tier has a lightweight search input at the top that filters cards in real time as the user types. Searches player name and card number. Search input only appears when the tier is expanded. Scoped to the current box only — global card search is a separate post-launch feature.
+- **Format switcher — LOCKED:** Box profile page has a tab row at the top to switch between available formats (Hobby, Jumbo, Blaster, Mega, Retail). Switching format updates MSRP, pull rates, EV, and ROI. Checklist cards are the same across formats — only odds and pricing change. URL updates via query parameter (e.g. `/box/2024-topps-chrome-baseball?format=hobby`). Only formats that actually exist for a set are shown. Requires `parent_set_id INT REFERENCES box_sets(id)` on `box_sets` table to group formats together. Data sources for format-level odds: Cardboard Connection, Chasing Majors, Checklist Insider. Built with dummy data during UI polish pass — wire to real data during database phase.
+- **Price trend charts — LOCKED:** Two charts on box profile page. (1) Sealed box price trend in hero section — market price of the sealed box over time. (2) Card Value Trend by tier — average sale price of the top 10 eBay sold listings per tier per time period, with toggle tabs: Base, Rookies, Autos, Patch Autos. Data sourced from `price_history` table filtered by tier and `source = 'ebay'`. Both charts use #16a34a (green) for the trend line. Built with dummy data during UI polish pass — wire to real data during database phase.
+- **Checklist expand/collapse — LOCKED:** Tiers are collapsed by default — no cards visible until the tier header is clicked. Clicking the tier header toggles it open or closed (accordion pattern). When open: search bar appears at top, first 5 cards are shown, "Show more" button appears at the bottom if the tier has more than 5 cards. "Show more" reveals the complete remaining card list — no secondary limit. Tiers display in descending value order: Premium Hits first, Base last. Sort handled by `sortTiersByValue` in `checklistUtils.js`. Search resets when a tier is collapsed.
+- **Card search within checklist tiers — LOCKED:** Each expanded tier has a lightweight search input at the top that filters cards in real time as the user types. Searches player name and card number. Search input only appears when the tier is expanded. Scoped to the current box only — global card search is a separate post-launch feature. Works on both web and mobile.
+- **Pull rates display — LOCKED:** Pull rate categories shown on box profile page: Base, Refractor, Rookie Refractor, Numbered, Base Auto, Refractor Auto, Patch Auto, Case Hit, Auto Relic, Relic. Grid displays 4 columns on desktop, 2 columns on mobile. Boxes sized to fit cleanly at all screen widths.
+- **Box profile page section order — LOCKED:** Hero (format switcher + stats + Buy Now) → Top Chases / Grails → Pull Rates → Price Trends → Card Value Trends → Full Checklist.
+- **Checklist tier display order — LOCKED:** Tiers display in descending value order: Premium Hits first, Base & Rookies last. Current order: (1) Premium Hits, (2) Autographs, (3) Refractors, (4) Inserts & Short Prints, (5) Base & Rookies. Controlled by `sortTiersByValue` in `checklistUtils.js` which sorts descending by tier number. NOTE: This is a workaround — the database schema currently numbers tiers with 1 = Base and 5 = Premium Hits (inverted). During database phase the schema tier numbers will be flipped and `sortTiersByValue` updated to sort ascending.
 - **Coming soon / upcoming releases — POST-LAUNCH:** A "Coming Soon" section on the homepage showing upcoming box releases with countdown timers. No new schema needed — uses existing `release_date` and `is_active` columns on `box_sets`. Unreleased boxes entered with `is_active = FALSE` and a future `release_date`. On release day `is_active` flips to `TRUE` automatically. Zach will build a personal notification tool to alert him when new boxes are announced. Post-launch only — not in beta scope.
 
 ## Hard No List (v1)
@@ -84,6 +87,17 @@ Dark mode color scheme implemented and deployed. UI polish pass starting now. Al
 14. ✅ Deployed to Vercel (live URL available)
 15. ✅ All major business decisions locked with Cam (revenue model, data strategy, affiliate approach, sport scope, timeline)
 16. ✅ Dark mode color scheme implemented and deployed
+17. ✅ Soccer added to navigation
+18. ✅ Box Profile features built and audited (five features across separate sessions, consolidation audit passed):
+    - Format switcher: tab row at top, updates MSRP/pull rates/EV/ROI by format, URL query param support
+    - Tier price trend chart: line chart with four toggle tabs (Base, Rookies, Autos, Patch Autos)
+    - Checklist expand/collapse: accordion pattern collapsed by default, 5 cards then Show more reveals full list
+    - Card search within tiers: real-time filter per tier when expanded, resets on collapse, works on mobile
+    - Grails tab: second tab alongside Top Chases, print_run ≤ 10, circulation status badges, excluded from EV/ROI
+    - Tier display order: Premium Hits first, Base last via sortTiersByValue in checklistUtils.js
+    - Consolidation audit: all five features verified clean together — no conflicts, no rule violations
+    - useBoxProfile JSDoc updated to include grailCards in @returns
+    - All TODO comments in place on every dummy data section
 
 ## Full Roadmap
 1. ~~Codebase audit~~ ✅
@@ -92,17 +106,11 @@ Dark mode color scheme implemented and deployed. UI polish pass starting now. Al
 4. ~~Deploy to Vercel~~ ✅
 5. ~~Dark mode color scheme~~ ✅
 6. UI polish pass ← CURRENT
-   - New box profile features first (build with dummy data):
-     - Format switcher tabs
-     - Tier price trend chart with toggle
-     - Checklist expand/collapse (5 cards default, expand per tier)
-     - Card search within tiers
-     - Grails tab (cards with print_run ≤ 10)
+   - Box Profile visual polish pass ← NEXT
    - Then page-by-page polish + code audit (end each session with audit before committing):
      - Header/Nav
      - Homepage (add Coming Soon placeholder section)
      - Browse
-     - Box Profile
      - About
      - News
      - Help
@@ -129,15 +137,17 @@ Dark mode color scheme implemented and deployed. UI polish pass starting now. Al
 ## Reminders & Flags
 - ⚠️ Switch Claude Code to Opus for auth system, database connection layer, and backend API work. Sonnet for all UI and mechanical tasks.
 - ⚠️ When we get to database phases: add `circulation_status VARCHAR(20) DEFAULT 'unknown'` to `cards` table; add `parent_set_id INT REFERENCES box_sets(id)` to `box_sets` table; add `distributors` and `distributor_listings` tables
-- ⚠️ Use CSS variables for ALL colors during polish pass — no hardcoded hex values in any new code
+- ⚠️ DUMMY_TIER_TREND_DATA bypasses the hook and is consumed inline in BoxProfilePage.jsx — at database phase this needs to move into useBoxProfile, not just be replaced with real data. This is a refactor task, not just a data swap.
+- ⚠️ DUMMY_FORMAT_DATA drives formatData in BoxProfilePage.jsx — needs to come from useBoxProfile once parent_set_id is live on box_sets. This is a refactor task, not just a data swap.
+- ⚠️ useBoxProfile hook has orphaned MOCK_PULL_RATES data — at database phase, pull rates must return from the hook keyed by format slug so the format switcher can request per-format odds.
+- ⚠️ Database phase: flip tier numbering in dir_database_schema.sql and seed data so Tier 1 = Premium Hits and Tier 5 = Base/Rookies. Update sortTiersByValue in checklistUtils.js to sort ascending once schema is corrected. Currently sorts descending as a workaround for the inverted schema.
+- ⚠️ Use CSS variables for ALL colors during polish pass — no hardcoded hex values in any new code. Only known exception: CHART_COLORS objects in TierPriceTrendChart.jsx and PriceTrendChart.jsx use hex constants because Recharts passes values directly to SVG attributes where CSS var() doesn't work. Each value has a comment mapping it to its CSS variable.
 - ⚠️ Positive financial indicators must stay green (#16a34a via --color-positive) — do not change to purple accent
-- ⚠️ Format switcher requires `parent_set_id` on `box_sets` — build UI with dummy data now, wire to real data during database phase
+- ⚠️ Format switcher requires parent_set_id on box_sets — built with dummy data, wire to real data during database phase
 - ⚠️ End every polish pass page session with a code audit before committing
 - ⚠️ Spreadsheet templates need review with real box data before any data entry begins
-- ⚠️ Soccer needs to be added to the UI navigation alongside the other four sports
 - ⚠️ iOS app is auth-only — no in-app purchases, no signup flow, no free tier. All acquisition and payment through web/Stripe. Do not deviate without architectural review.
 - ⚠️ Payment processor is Stripe (web only). Do not design any iOS purchase flow.
-- ⚠️ Database phase: flip tier numbering in dir_database_schema.sql and seed data so Tier 1 = Premium Hits and Tier 5 = Base/Rookies. Update sortTiersByValue in checklistUtils.js to sort ascending once the schema is corrected. Currently sorts descending as a workaround for the inverted schema.
 
 ## Development Guidelines
 - Use this Project chat for planning, strategy, and decisions
