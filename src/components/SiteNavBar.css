@@ -20,9 +20,11 @@
   padding: 0 40px;
   display: flex;
   align-items: stretch;
-  /* Horizontal scroll on very small screens so tabs never wrap */
+  /* Tabs must never wrap to a second line — single row always */
+  flex-wrap: nowrap;
+  /* Horizontal scroll when tabs overflow the strip width */
   overflow-x: auto;
-  scrollbar-width: none;
+  scrollbar-width: none; /* Firefox — hide scrollbar track */
 }
 
 .site-nav-bar__inner::-webkit-scrollbar {
@@ -212,6 +214,12 @@
 @media (max-width: 900px) {
   .site-nav-bar__inner {
     padding: 0 20px;
+    /* Smooth momentum scrolling on iOS for the horizontal tab strip */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent horizontal overscroll (rubber-band) from propagating into
+       vertical page scroll — this is what causes the sticky strip to appear
+       to bounce vertically when the user reaches the end of the tab row */
+    overscroll-behavior-x: contain;
   }
 
   .site-nav-bar__tab {
