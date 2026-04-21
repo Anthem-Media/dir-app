@@ -83,11 +83,19 @@ export function TierPriceTrendChart({ data, activeTier }) {
           />
 
           <YAxis
+            label={{
+              value: 'Avg Sale Price (Top 10)',
+              angle: -90,
+              position: 'insideLeft',
+              style: { fontSize: 9, fill: CHART_COLORS.axis },
+              // dy shifts the label down so it sits centered in the chart height
+              dy: 70,
+            }}
             tickFormatter={(v) => `$${v}`}
             tick={{ fontSize: 11, fill: CHART_COLORS.axis }}
             axisLine={false}
             tickLine={false}
-            width={48}
+            width={68}
             tickCount={5}
           />
 
