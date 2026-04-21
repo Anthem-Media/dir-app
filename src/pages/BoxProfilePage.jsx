@@ -62,14 +62,23 @@ export function BoxProfilePage() {
   // specific format); the tier tab is not — it's a navigational detail within the page.
   const [activeTierTab, setActiveTierTab] = useState('base');
 
-  // All checklist tier state (expand and search) lives here — not inside ChecklistTier.
-  // Keeping it at the page level makes ChecklistTier a fully controlled component with
-  // no state of its own, and lets the page coordinate related actions (e.g. clearing
-  // a tier's search query when the user collapses it).
+  // All checklist tier state (expand, card-list expansion, and search) lives here — not
+  // inside ChecklistTier. Keeping it at the page level makes ChecklistTier a fully
+  // controlled component with no state of its own, and lets the page coordinate related
+  // actions (e.g. resetting card-list and search state when a tier is collapsed).
+
+  // Which tier headers are open (collapsed by default — empty Set).
   const [expandedTiers, setExpandedTiers] = useState(new Set());
+
+  // Which open tiers are showing the full card list beyond the initial 5.
+  // Separate from expandedTiers so closing and reopening a tier resets to the 5-card view.
+  const [expandedCardLists, setExpandedCardLists] = useState(new Set());
+
   // Search queries keyed by tier ID. Missing keys are treated as empty strings.
   const [tierSearchQueries, setTierSearchQueries] = useState({});
 
+  // Toggle a tier open or closed. Closing resets both the card-list expansion and search
+  // query for that tier so re-opening always starts at the 5-card default view.
   function handleTierToggle(tierId) {
     const isCurrentlyExpanded = expandedTiers.has(tierId);
     setExpandedTiers((prev) => {
@@ -81,10 +90,27 @@ export function BoxProfilePage() {
       }
       return next;
     });
-    // Clear this tier's search query when collapsing so re-expanding starts fresh.
     if (isCurrentlyExpanded) {
       setTierSearchQueries((prev) => ({ ...prev, [tierId]: '' }));
+      setExpandedCardLists((prev) => {
+        const next = new Set(prev);
+        next.delete(tierId);
+        return next;
+      });
     }
+  }
+
+  // Toggle between the initial 5-card view and the full card list within an open tier.
+  function handleShowAllToggle(tierId) {
+    setExpandedCardLists((prev) => {
+      const next = new Set(prev);
+      if (next.has(tierId)) {
+        next.delete(tierId);
+      } else {
+        next.add(tierId);
+      }
+      return next;
+    });
   }
 
   function handleTierSearchChange(tierId, query) {
@@ -285,6 +311,8 @@ export function BoxProfilePage() {
               tier={tier}
               isExpanded={expandedTiers.has(tier.id)}
               onToggle={() => handleTierToggle(tier.id)}
+              isShowingAll={expandedCardLists.has(tier.id)}
+              onShowAllToggle={() => handleShowAllToggle(tier.id)}
               searchQuery={tierSearchQueries[tier.id] || ''}
               onSearchChange={(query) => handleTierSearchChange(tier.id, query)}
             />

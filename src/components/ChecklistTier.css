@@ -1,6 +1,7 @@
 /*
- * ChecklistTier — one collapsible tier in the box profile checklist.
- * Shows 5 cards by default; toggle button expands to all cards.
+ * ChecklistTier — one accordion tier in the box profile checklist.
+ * Collapsed by default. Clicking the header opens the tier.
+ * Shows 5 cards when open; "Show all" reveals the full list.
  * No hardcoded hex values — all colors from index.css CSS variables.
  */
 
@@ -12,7 +13,7 @@
   border-bottom: none;
 }
 
-/* ── Tier header (display only — not interactive) ───────────────────────── */
+/* ── Tier header (interactive toggle — button element) ──────────────────── */
 
 .checklist-tier__header {
   width: 100%;
@@ -20,13 +21,28 @@
   align-items: center;
   gap: 12px;
   padding: 16px 0;
+  /* Reset button defaults */
+  background: none;
+  border: none;
+  font-family: var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+  /* Suppress the tap highlight flash on mobile — we have our own hover/focus styles */
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.12s ease;
+}
+
+.checklist-tier__header:hover .checklist-tier__label,
+.checklist-tier__header:hover .checklist-tier__chevron {
+  color: var(--color-accent-text);
 }
 
 .checklist-tier__label {
+  flex: 1;
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text-primary);
-  flex: 1;
+  transition: color 0.12s ease;
 }
 
 .checklist-tier__meta {
@@ -47,10 +63,29 @@
   text-align: right;
 }
 
+/* Chevron — points right when closed, rotates to point down when open */
+
+.checklist-tier__chevron {
+  font-size: 16px;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  display: inline-block;
+  transform: rotate(0deg);
+  transition: transform 0.2s ease, color 0.12s ease;
+  /* Prevent the character from contributing to line-height jumps */
+  vertical-align: middle;
+}
+
+.checklist-tier__chevron--open {
+  transform: rotate(90deg);
+}
+
 /* ── Search input ───────────────────────────────────────────────────────── */
 
 .checklist-tier__search-wrapper {
   padding: 0 0 12px;
+  touch-action: manipulation;
 }
 
 .checklist-tier__search {
@@ -63,6 +98,9 @@
   font-family: var(--font-sans);
   color: var(--color-text-primary);
   outline: none;
+  /* iOS resets */
+  -webkit-appearance: none;
+  touch-action: manipulation;
   transition: border-color 0.12s ease;
 }
 
@@ -92,26 +130,25 @@
   flex: 1;
   font-size: 13px;
   color: var(--color-text-primary);
+  /* Prevent very long names from pushing other columns off screen */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .checklist-tier__card-number {
   font-size: 12px;
   color: var(--color-text-secondary);
   min-width: 72px;
+  flex-shrink: 0;
 }
 
 .checklist-tier__card-category {
   font-size: 12px;
   color: var(--color-text-muted);
   min-width: 160px;
-}
-
-/* Empty search state */
-.checklist-tier__empty {
-  padding: 12px 0 12px 28px;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  border-top: 1px solid var(--color-bg-subtle);
+  flex-shrink: 0;
 }
 
 .checklist-tier__card-value {
@@ -120,6 +157,15 @@
   color: var(--color-text-primary);
   min-width: 72px;
   text-align: right;
+  flex-shrink: 0;
+}
+
+/* Empty search state */
+.checklist-tier__empty {
+  padding: 12px 0 12px 28px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  border-top: 1px solid var(--color-bg-subtle);
 }
 
 /* ── Toggle button ───────────────────────────────────────────────────────── */
@@ -137,9 +183,48 @@
   color: var(--color-accent-text);
   text-align: center;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition: color 0.12s ease;
 }
 
 .checklist-tier__toggle:hover {
   color: var(--color-accent);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  /* Reduce indent and column gaps on narrow screens */
+  .checklist-tier__card-row {
+    padding-left: 12px;
+    gap: 8px;
+  }
+
+  /* Shrink the fixed-width columns so all four stay visible on a 375px screen.
+     Name column keeps flex: 1 so it absorbs remaining space. */
+  .checklist-tier__card-number {
+    min-width: 52px;
+  }
+
+  .checklist-tier__card-category {
+    min-width: 80px;
+    font-size: 11px;
+  }
+
+  .checklist-tier__card-value {
+    min-width: 56px;
+    font-size: 12px;
+  }
+
+  /* Increase font-size to 16px on mobile to prevent iOS from auto-zooming
+     the viewport when the user taps the input — the zoom disrupts the layout
+     and can make the input appear non-functional. */
+  .checklist-tier__search {
+    font-size: 16px;
+  }
+
+  /* Collapse the avg value on very small screens to give the label more room */
+  .checklist-tier__avg {
+    display: none;
+  }
 }
