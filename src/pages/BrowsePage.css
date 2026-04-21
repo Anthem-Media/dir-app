@@ -62,16 +62,23 @@
   text-decoration: underline;
 }
 
-/* ── Responsive: collapse sidebar below 640px ────────────────────────────── */
+/* ── Responsive: mobile layout below 768px ───────────────────────────────── */
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
   .browse-page {
-    flex-direction: column;
+    /* No gap needed — sidebar is hidden, only one child is visible */
+    gap: 0;
+    /* Tighter padding on mobile: less vertical breathing room, narrower gutters */
+    padding: 16px 12px 60px;
   }
 
-  /* Sidebar becomes full-width and loses sticky behavior on small screens */
+  /* Hide the sidebar entirely — replaced by a bottom sheet filter panel */
   .browse-page .filter-sidebar {
-    width: 100%;
-    position: static;
+    display: none;
+  }
+
+  /* Two equal columns filling the full available width */
+  .browse-page__grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
