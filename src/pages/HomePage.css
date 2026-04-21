@@ -34,11 +34,49 @@
   animation: spin 0.7s linear infinite; /* @keyframes spin defined in index.css */
 }
 
+/* ── Mobile search bar ─────────────────────────────────────────────────── */
+/*
+ * Visible on mobile only — hidden on desktop via min-width media query.
+ * Sits between the two sticky header bars and the page content.
+ * Uses the existing SearchBar component with color overrides for this context.
+ */
+
+.home-page__mobile-search {
+  /* Hidden on desktop — this block is the desktop default (display: none) */
+  display: none;
+}
+
+/* Color overrides for the SearchBar component when used in the mobile search bar.
+   SearchBar uses --color-bg-subtle and --color-text-muted by default; this
+   context calls for the spec colors: --color-background-secondary and
+   --color-text-secondary. */
+.home-page__mobile-search .search-bar__input {
+  background: var(--color-background-secondary);
+  /* font-size: 16px prevents iOS from auto-zooming the viewport on input focus */
+  font-size: 16px;
+}
+
+.home-page__mobile-search .search-bar__input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.home-page__mobile-search .search-bar__icon {
+  color: var(--color-text-secondary);
+}
+
 /* ── Responsive ────────────────────────────────────────────────────────── */
 
 @media (max-width: 900px) {
   .home-page {
     padding: 28px 20px 48px;
     gap: 40px;
+  }
+
+  /* Show the mobile search bar and apply its layout */
+  .home-page__mobile-search {
+    display: block;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-background-primary);
   }
 }
