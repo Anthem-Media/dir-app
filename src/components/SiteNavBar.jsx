@@ -52,7 +52,14 @@ export function SiteNavBar({ tabs }) {
   const [openTab, setOpenTab]           = useState(null);
   const [cascadeSport, setCascadeSport] = useState(null);
   const [cascadeBrand, setCascadeBrand] = useState(null);
-  const closeTimerRef = useRef(null);
+  const closeTimerRef    = useRef(null);
+  // Touch gesture tracking — used to differentiate a deliberate tap from a scroll.
+  // touchMovedRef: set true when touchmove fires between touchstart and touchend.
+  // isTouchActiveRef: true while a finger is on the screen.
+  // Both are checked before opening/closing the dropdown so that a scroll gesture
+  // does not accidentally trigger dropdown open (onMouseEnter fires on mobile scroll).
+  const touchMovedRef    = useRef(false);
+  const isTouchActiveRef = useRef(false);
   const navigate  = useNavigate();
   const location  = useLocation();
 
@@ -378,8 +385,17 @@ export function SiteNavBar({ tabs }) {
 
   return (
     <nav className="site-nav-bar" aria-label="Browse categories">
-      {/* Tab row */}
-      <div className="site-nav-bar__inner">
+      {/* Tab row
+          Touch event listeners on the container track whether the current gesture
+          is a scroll (touchmove fired) or a tap (no movement). This prevents the
+          dropdown from opening when the user scrolls across tabs on mobile. */}
+      <div
+        className="site-nav-bar__inner"
+        onTouchStart={() => { isTouchActiveRef.current = true; touchMovedRef.current = false; }}
+        onTouchMove={() => { touchMovedRef.current = true; }}
+        onTouchEnd={() => { isTouchActiveRef.current = false; }}
+        onTouchCancel={() => { isTouchActiveRef.current = false; touchMovedRef.current = false; }}
+      >
         {tabs.map((tab) => (
           <button
             key={tab}
@@ -388,8 +404,18 @@ export function SiteNavBar({ tabs }) {
               openTab === tab    ? 'site-nav-bar__tab--open'   : '',
               isTabActive(tab)   ? 'site-nav-bar__tab--active' : '',
             ].join(' ')}
-            onClick={() => handleTabClick(tab)}
-            onMouseEnter={() => openDropdown(tab)}
+            onClick={() => {
+              // If the touch included movement, the user was scrolling — not tapping.
+              // Suppress the dropdown toggle so scrolling never opens a menu.
+              if (touchMovedRef.current) return;
+              handleTabClick(tab);
+            }}
+            onMouseEnter={() => {
+              // On mobile, onMouseEnter fires as a finger scrolls across buttons.
+              // Guard against this by ignoring mouseenter while a touch is active.
+              if (isTouchActiveRef.current) return;
+              openDropdown(tab);
+            }}
             onMouseLeave={scheduleClose}
             aria-expanded={openTab === tab}
             aria-haspopup={Boolean(NAV_DROPDOWN_DATA[tab])}

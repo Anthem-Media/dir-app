@@ -24,6 +24,10 @@
   flex-wrap: nowrap;
   /* Horizontal scroll when tabs overflow the strip width */
   overflow-x: auto;
+  /* Lock vertical axis — prevents the strip from drifting up/down during a
+     horizontal swipe, which causes the browser to snap the scroll position
+     back on finger release (the "bounces to center" bug on mobile). */
+  overflow-y: hidden;
   scrollbar-width: none; /* Firefox — hide scrollbar track */
 }
 
