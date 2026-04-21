@@ -1,32 +1,52 @@
+/*
+ * PullRateCard — one pull rate tile in the pull rates grid.
+ * No hardcoded hex values — all colors from index.css CSS variables.
+ */
+
 .pull-rate-card {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 24px;
-  background: var(--color-bg-subtle);
+  gap: 4px;
+  padding: 12px;
+  background: var(--color-background-secondary);
   border: 1px solid var(--color-border);
-  border-radius: 10px;
-  flex: 1;
+  border-radius: 6px;
 }
 
+/* Category is the primary label — what kind of card the collector is pulling */
 .pull-rate-card__category {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-secondary);
-}
-
-.pull-rate-card__odds {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: var(--color-text-primary);
-  line-height: 1;
-}
-
-.pull-rate-card__percent {
   font-size: 13px;
-  color: var(--color-green);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* Odds are the secondary detail — "1 in X packs" */
+.pull-rate-card__odds {
+  font-size: 12px;
   font-weight: 500;
+  color: var(--color-text-secondary);
+  line-height: 1.3;
+}
+
+/* Percentage is tertiary context — probability per pack as a decimal */
+.pull-rate-card__percent {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .pull-rate-card {
+    padding: 10px;
+  }
+
+  .pull-rate-card__category {
+    font-size: 12px;
+  }
+
+  .pull-rate-card__odds {
+    font-size: 11px;
+  }
 }

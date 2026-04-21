@@ -223,8 +223,9 @@
 /* ── PULL RATES ────────────────────────────────────────────────────────── */
 
 .box-profile-page__pull-rate-grid {
-  display: flex;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
 }
 
 /* ── CHECKLIST ─────────────────────────────────────────────────────────── */
@@ -258,11 +259,13 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .box-profile-page__pull-rate-grid {
-    flex-direction: column;
-  }
-
   .box-profile-page__buy-now-btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .box-profile-page__pull-rate-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

@@ -20,6 +20,7 @@
 
 import { calculateRoi } from './formatters';
 
+// TODO: Replace with real pull rate data from pull_rates table joined with card_categories
 export const DUMMY_FORMAT_DATA = {
   hobby: {
     label: 'Hobby',
@@ -33,7 +34,11 @@ export const DUMMY_FORMAT_DATA = {
     pullRates: [
       { id: 'pr-base',      category: 'Base & Rookies', probability: 1.0      }, // guaranteed every pack
       { id: 'pr-refractor', category: 'Refractors',     probability: 1 / 4    }, // 1:4 packs
+      { id: 'pr-numbered',  category: 'Numbered',       probability: 1 / 12   }, // 1:12 packs
+      { id: 'pr-relic',     category: 'Relic',          probability: 1 / 24   }, // 1:24 packs
       { id: 'pr-auto',      category: 'Autographs',     probability: 1 / 6    }, // 1:6 packs
+      { id: 'pr-auto-relic',category: 'Auto Relic',     probability: 1 / 48   }, // 1:48 packs
+      { id: 'pr-case-hit',  category: 'Case Hit',       probability: 1 / 96   }, // 1:96 packs
     ],
   },
 
@@ -49,7 +54,11 @@ export const DUMMY_FORMAT_DATA = {
     pullRates: [
       { id: 'pr-base',      category: 'Base & Rookies', probability: 1.0      },
       { id: 'pr-refractor', category: 'Refractors',     probability: 1 / 2    }, // 1:2 packs — better than hobby
+      { id: 'pr-numbered',  category: 'Numbered',       probability: 1 / 8    }, // 1:8 packs
+      { id: 'pr-relic',     category: 'Relic',          probability: 1 / 18   }, // 1:18 packs
       { id: 'pr-auto',      category: 'Autographs',     probability: 1 / 3    }, // 1:3 packs
+      { id: 'pr-auto-relic',category: 'Auto Relic',     probability: 1 / 36   }, // 1:36 packs
+      { id: 'pr-case-hit',  category: 'Case Hit',       probability: 1 / 72   }, // 1:72 packs
     ],
   },
 
@@ -65,7 +74,11 @@ export const DUMMY_FORMAT_DATA = {
     pullRates: [
       { id: 'pr-base',      category: 'Base & Rookies', probability: 1.0      },
       { id: 'pr-refractor', category: 'Refractors',     probability: 1 / 12   }, // 1:12 packs
+      { id: 'pr-numbered',  category: 'Numbered',       probability: 1 / 28   }, // 1:28 packs
+      { id: 'pr-relic',     category: 'Relic',          probability: 1 / 42   }, // 1:42 packs
       { id: 'pr-auto',      category: 'Autographs',     probability: 1 / 36   }, // 1:36 packs — rare in blasters
+      { id: 'pr-auto-relic',category: 'Auto Relic',     probability: 1 / 84   }, // 1:84 packs
+      { id: 'pr-case-hit',  category: 'Case Hit',       probability: 1 / 144  }, // 1:144 packs
     ],
   },
 
@@ -81,7 +94,11 @@ export const DUMMY_FORMAT_DATA = {
     pullRates: [
       { id: 'pr-base',      category: 'Base & Rookies', probability: 1.0      },
       { id: 'pr-refractor', category: 'Refractors',     probability: 1 / 10   }, // 1:10 packs
+      { id: 'pr-numbered',  category: 'Numbered',       probability: 1 / 20   }, // 1:20 packs
+      { id: 'pr-relic',     category: 'Relic',          probability: 1 / 40   }, // 1:40 packs
       { id: 'pr-auto',      category: 'Autographs',     probability: 1 / 28   }, // 1:28 packs
+      { id: 'pr-auto-relic',category: 'Auto Relic',     probability: 1 / 60   }, // 1:60 packs
+      { id: 'pr-case-hit',  category: 'Case Hit',       probability: 1 / 120  }, // 1:120 packs
     ],
   },
 
@@ -97,7 +114,11 @@ export const DUMMY_FORMAT_DATA = {
     pullRates: [
       { id: 'pr-base',      category: 'Base & Rookies', probability: 1.0      },
       { id: 'pr-refractor', category: 'Refractors',     probability: 1 / 24   }, // 1:24 packs
+      { id: 'pr-numbered',  category: 'Numbered',       probability: 1 / 48   }, // 1:48 packs
+      { id: 'pr-relic',     category: 'Relic',          probability: 1 / 72   }, // 1:72 packs
       { id: 'pr-auto',      category: 'Autographs',     probability: 1 / 72   }, // 1:72 packs — very rare
+      { id: 'pr-auto-relic',category: 'Auto Relic',     probability: 1 / 144  }, // 1:144 packs
+      { id: 'pr-case-hit',  category: 'Case Hit',       probability: 1 / 288  }, // 1:288 packs
     ],
   },
 };
