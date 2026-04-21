@@ -17,6 +17,13 @@ export function AppNav() {
     <header className="site-top-bar">
       <div className="site-top-bar__inner">
 
+        {/* Mobile hamburger — hidden on desktop, shown on mobile in place of the left column */}
+        <button className="site-top-bar__hamburger" type="button" aria-label="Open menu">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+        </button>
+
         {/* Left — brand (links to homepage) */}
         <Link to="/" className="site-top-bar__brand">
           <span className="site-top-bar__logo">DIR</span>

@@ -122,17 +122,20 @@ UI polish pass in progress. Box Profile page features complete and audited. Box 
 9. Database setup and backend API (add `circulation_status` and `parent_set_id` to schema; add `distributors` and `distributor_listings` tables)
 10. Connect frontend to real data
 11. Admin panel for data entry
-12. Seed database with all sports (Baseball, Football, Basketball, Hockey, Soccer) — 2018-present full profiles, 1995-2017 legacy profiles
-13. eBay API integration (card pricing + box pricing + images from distributor feeds + eBay fallback)
-14. Claude API integration for photo scan feature
-15. Buy Now / affiliate link system (UI built, populated when Cam has distributor partnerships)
-16. Price alerts and notifications
-17. User features (saved boxes, collection tracker, wishlist)
-18. Search functionality
-19. Pro audit #2 (full-stack dev — is the complete app ready for real users? ~8-15 hours at $50-150/hr = $400-2,250)
-20. Beta launch
-21. Pro audit #3 (specialist based on what breaks — performance, security, or both. ~5-10 hours at $75-200/hr = $375-2,000)
-22. Post-launch: Coming Soon / release calendar, AI trend summaries, portfolio tracking, light/dark mode toggle in settings, Legacy Boxes marketplace tab (if validated)
+12. eBay API proof of concept — small targeted test after admin panel is live. Write a script that takes a card name, hits the eBay sold listings endpoint, and returns the last 10 sales with an average price. Use it to price out one test box set (2024 Topps Chrome Baseball). Confirms the API works before building the full pipeline.
+13. Pull rate scraper test — target Cardboard Connection for 2024 Topps Chrome Baseball. Output structured data matching the pull_rates schema. Review output for accuracy. If clean, this becomes the repeatable workflow for full seeding. If not, fall back to hybrid paste-into-Claude method.
+14. Seed one test box set end to end (2024 Topps Chrome Baseball — already in schema as example data). Fully populate with real scraped pull rates and real eBay pricing from proof of concept script. Confirm EV, ROI, checklist, format switcher, and price charts all work correctly with real data. If pipeline is solid, proceed to full seed.
+15. eBay API full integration (card pricing + box pricing + images from distributor feeds + eBay fallback) — build the full automated pipeline and scheduled refresh now that the proof of concept is validated.
+16. Seed database with all sports (Baseball, Football, Basketball, Hockey, Soccer) — 2018-present full profiles, 1995-2017 legacy profiles. Card pricing sourced via eBay API. Pull rates via scraper or hybrid paste workflow.
+17. Claude API integration for photo scan feature
+18. Buy Now / affiliate link system (UI built, populated when Cam has distributor partnerships)
+19. Price alerts and notifications
+20. User features (saved boxes, collection tracker, wishlist)
+21. Search functionality
+22. Pro audit #2 (full-stack dev — is the complete app ready for real users? ~8-15 hours at $50-150/hr = $400-2,250)
+23. Beta launch
+24. Pro audit #3 (specialist based on what breaks — performance, security, or both. ~5-10 hours at $75-200/hr = $375-2,000)
+25. Post-launch: Coming Soon / release calendar, AI trend summaries, portfolio tracking, light/dark mode toggle in settings, Legacy Boxes marketplace tab (if validated)
 
 ## Reminders & Flags
 - ⚠️ Switch Claude Code to Opus for auth system, database connection layer, and backend API work. Sonnet for all UI and mechanical tasks.
@@ -146,6 +149,10 @@ UI polish pass in progress. Box Profile page features complete and audited. Box 
 - ⚠️ Format switcher requires parent_set_id on box_sets — built with dummy data, wire to real data during database phase
 - ⚠️ End every polish pass page session with a code audit before committing
 - ⚠️ Spreadsheet templates need review with real box data before any data entry begins
+- ⚠️ Do not manually enter card prices. Ever. Card pricing comes from the eBay API proof of concept script (post admin panel) and the full eBay API pipeline (Phase 15). Manual eBay lookup card-by-card is not a viable workflow at any scale.
+- ⚠️ Pull rate sourcing strategy: try scraper first (targeting Cardboard Connection), fall back to hybrid paste-into-Claude workflow if scraper hits walls. Do not copy-paste and manually organize pull rate tables — too much room for error at scale.
+- ⚠️ Do not begin full database seeding until the end-to-end pipeline test with one box set (2024 Topps Chrome Baseball) passes completely. Confirm EV, ROI, checklist, format switcher, and charts all work with real data before committing to full seed.
+- ⚠️ Data accuracy before beta does not matter — only Zach and Cam will see the app until the eBay API is live and pricing is automated. Focus on pipeline correctness, not data completeness, during the database build phase.
 - ⚠️ iOS app is auth-only — no in-app purchases, no signup flow, no free tier. All acquisition and payment through web/Stripe. Do not deviate without architectural review.
 - ⚠️ Payment processor is Stripe (web only). Do not design any iOS purchase flow.
 

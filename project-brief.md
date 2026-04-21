@@ -112,9 +112,11 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 
 ### Data Entry Workflow
 - **Who:** Zach handles all data entry during beta. No data engineer hire until revenue or investors.
-- **Pipeline:** AI-assisted workflow — paste raw data from sources (TCDB, Cardboard Connection, Beckett, etc.) into Claude or Cowork for structuring. Output to spreadsheets matching database schema. Bulk import when database is live.
+- **Card pricing — never manual:** Do not manually look up eBay sold listings card by card. This is not viable at scale. Card pricing comes exclusively from the eBay API. After the admin panel is built, a targeted eBay API proof of concept script is built first to validate pricing before the full pipeline. The full seed does not begin until the eBay API is live.
+- **Pull rates — scraper first, hybrid fallback:** Primary approach is a Claude Code-written scraper targeting Cardboard Connection (and Chasing Majors for format-level odds). If the scraper hits walls or produces messy output, fall back to the hybrid method: paste raw published odds into Claude, let Claude structure it to match the pull_rates schema, output to spreadsheet, bulk import. Do not manually organize pull rate tables — too much room for error.
+- **Test before full seed:** Before seeding all sports, do a complete end-to-end pipeline test with one box set (2024 Topps Chrome Baseball — already in schema). Fully populate with real scraped pull rates and real eBay pricing from the proof of concept script. Confirm EV, ROI, checklist, format switcher, and charts all work. Only proceed to full seed once this passes.
+- **Data accuracy pre-beta:** Accurate numbers do not matter until the eBay API is live and pricing is automated. Only Zach and Cam see the app during this phase. Focus on pipeline correctness, not data completeness.
 - **Spreadsheet templates:** Draft templates created for box_sets, cards (checklist), and pull_rates. Will be finalized when real box data is used to cross-reference against the database schema.
-- **Cowork pipeline:** Test with one box set first before committing to full data pull. Set up repeatable workflow: drop raw data into folder → Cowork processes into structured spreadsheet → output to designated folder.
 - **Target speed:** 100+ boxes per day once pipeline is dialed in.
 - **Admin panel:** Form-based interface (Phase 11) so data entry never requires raw SQL after initial seeding.
 - **Post-automation:** Data engineer hire on Upwork ($15-25/hr, ~10hrs/week) once revenue justifies it. Until then, eBay API pipeline needs to be founder-operable.

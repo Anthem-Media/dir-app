@@ -144,20 +144,76 @@
   background: var(--color-green-dark);
 }
 
+/* ── Hamburger ─────────────────────────────────────────────────────────── */
+
+/* Hidden on desktop — only appears on mobile */
+.site-top-bar__hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: color 0.1s ease;
+}
+
+.site-top-bar__hamburger:hover {
+  color: var(--color-text-primary);
+}
+
 /* ── Responsive ────────────────────────────────────────────────────────── */
 
 @media (max-width: 900px) {
+  /* Switch to flex so we can use position:absolute on the brand for true centering.
+     Three zones: [hamburger] [DIR logo — centered] [sign-in + sign-up].
+     The brand is pulled out of flow via position:absolute so left/right zones
+     never push it off-center regardless of their width difference. */
   .site-top-bar__inner {
-    padding: 0 20px;
-    grid-template-columns: auto 1fr auto;
-    gap: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    padding: 0 16px;
+    gap: 0;
+  }
+
+  /* Show the hamburger in the left zone */
+  .site-top-bar__hamburger {
+    display: flex;
+  }
+
+  /* Brand sits in the exact horizontal center of the bar via position:absolute */
+  .site-top-bar__brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .site-top-bar__logo-name {
     display: none;
   }
 
+  /* Hide the search bar — no room on mobile */
+  .site-top-bar__search {
+    display: none;
+  }
+
+  /* Actions: hide About/News/Help links and notification bell.
+     Only Sign In and Sign Up remain, forming the right zone. */
   .site-top-bar__link {
     display: none;
+  }
+
+  .site-top-bar__icon-btn {
+    display: none;
+  }
+
+  .site-top-bar__actions {
+    gap: 8px;
   }
 }
