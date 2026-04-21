@@ -45,6 +45,8 @@ export function BoxProfilePage() {
 
   // All format-specific values (MSRP, EV, ROI, pull rates, pack config) come from here.
   // Format-independent values (market price, top chases, checklist) come from the hook below.
+  // TODO: Replace DUMMY_FORMAT_DATA with real per-format data from useBoxProfile once
+  // parent_set_id is added to box_sets and the backend API returns format-specific data.
   const formatData = DUMMY_FORMAT_DATA[selectedFormat];
 
   // Update the URL query parameter when the user clicks a format tab.
@@ -307,14 +309,16 @@ export function BoxProfilePage() {
       </section>
 
       {/* ── CARD VALUE TRENDS ────────────────────────────────────────────── */}
-      {/* Shows average sale price over time for each card tier.
+      {/* Shows average sale price of top 10 eBay sold listings per tier over time.
           Tab state is local — not in the URL — because tier selection is a
-          navigational detail within the page, not a shareable view state. */}
+          navigational detail within the page, not a shareable view state.
+          TODO: Replace DUMMY_TIER_TREND_DATA with real data from useBoxProfile — sourced
+          from price_history where source = 'ebay', averaged per tier per time period. */}
       <section className="box-profile-page__section">
         <div className="box-profile-page__section-header">
           <h2 className="box-profile-page__section-title">Card value trends</h2>
           <p className="box-profile-page__section-subtitle">
-            Average sale price by tier over the past 12 months.
+            Average sale price by tier over the past 8 weeks.
           </p>
         </div>
         <TierTrendTabs

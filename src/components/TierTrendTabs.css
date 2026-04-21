@@ -1,23 +1,19 @@
 /*
  * TierTrendTabs — tab row for switching between card tiers on the tier price trend chart.
  * Styling mirrors FormatSwitcher.css exactly — same padding, same active/inactive states,
- * same border treatment. Only the class name differs.
+ * same border treatment, same no-scroll responsive behavior. Only the class name differs.
  * No hardcoded hex values — all colors from index.css CSS variables.
  */
 
 .tier-trend-tabs {
   display: flex;
+  width: 100%;
   background: var(--color-background-secondary);
   border: 1px solid var(--color-border);
   border-radius: 10px;
   overflow: hidden;
-  /* Allow horizontal scroll on narrow screens so all tabs remain reachable */
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.tier-trend-tabs::-webkit-scrollbar {
-  display: none;
+  /* No overflow-x: auto — tabs must never scroll horizontally.
+     flex: 1 on each tab distributes the full width equally at any screen size. */
 }
 
 /* ── Tab buttons ────────────────────────────────────────────────────────── */
@@ -34,7 +30,8 @@
   /* Bottom border acts as the active indicator — transparent by default */
   border-bottom: 2px solid transparent;
   cursor: pointer;
-  white-space: nowrap;
+  /* Allow label text to wrap rather than overflow the tab's flex cell */
+  white-space: normal;
   text-align: center;
   transition: color 0.12s ease, background 0.12s ease, border-color 0.12s ease;
 }
@@ -49,4 +46,15 @@
   background: var(--color-accent-bg);
   color: var(--color-accent-text);
   border-bottom-color: var(--color-accent);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+/* Reduce tab font size on narrow screens so four labels fit without overflow.
+   Labels are never truncated — only the size shrinks. */
+@media (max-width: 480px) {
+  .tier-trend-tabs__tab {
+    padding: 12px 6px;
+    font-size: 11px;
+  }
 }

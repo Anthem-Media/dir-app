@@ -1,8 +1,20 @@
+/*
+ * PriceTrendChart — sealed box market price chart.
+ * Container styling matches TierPriceTrendChart.css for visual consistency.
+ * No hardcoded hex values — all colors from index.css CSS variables.
+ */
+
 .price-chart {
   width: 100%;
   /* Recharts needs a defined height on the container when using ResponsiveContainer */
   min-height: 240px;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 16px 8px 8px;
 }
+
+/* ── Tooltip ────────────────────────────────────────────────────────────── */
 
 .price-chart__tooltip {
   background: var(--color-background-secondary);
