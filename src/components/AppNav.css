@@ -169,31 +169,42 @@
 /* ── Responsive ────────────────────────────────────────────────────────── */
 
 @media (max-width: 900px) {
-  /* Switch to flex so we can use position:absolute on the brand for true centering.
-     Three zones: [hamburger] [DIR logo — centered] [sign-in + sign-up].
-     The brand is pulled out of flow via position:absolute so left/right zones
-     never push it off-center regardless of their width difference. */
+  /* Two-zone mobile layout: [hamburger · Sign In · Sign Up] ··· [DIR logo]
+     Items are reordered with CSS `order` so no JSX restructuring is needed.
+     `margin-left: auto` on the brand pushes it to the far right regardless
+     of how wide the left group is — no absolute positioning required. */
   .site-top-bar__inner {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    position: relative;
     padding: 0 16px;
-    gap: 0;
+    /* gap provides the 8px spacing between hamburger and Sign In/Sign Up;
+       margin-left: auto on the brand handles the separation to the right side */
+    gap: 8px;
   }
 
-  /* Show the hamburger in the left zone */
+  /* Hamburger — left-most item */
   .site-top-bar__hamburger {
     display: flex;
+    order: 1;
+    flex-shrink: 0;
   }
 
-  /* Brand sits in the exact horizontal center of the bar via position:absolute */
+  /* Sign In / Sign Up — grouped directly after the hamburger */
+  .site-top-bar__actions {
+    order: 2;
+    gap: 8px;
+    /* Prevent the buttons from ever wrapping to a second line */
+    flex-wrap: nowrap;
+  }
+
+  /* DIR logo — pushed to the far right by margin-left: auto */
   .site-top-bar__brand {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    order: 3;
+    margin-left: auto;
+    flex-shrink: 0;
   }
 
+  /* "Diamond in the Rough" tagline — no room on mobile */
   .site-top-bar__logo-name {
     display: none;
   }
@@ -203,17 +214,13 @@
     display: none;
   }
 
-  /* Actions: hide About/News/Help links and notification bell.
-     Only Sign In and Sign Up remain, forming the right zone. */
+  /* Hide About / News / Help links — moved to the hamburger menu on mobile */
   .site-top-bar__link {
     display: none;
   }
 
+  /* Hide notification bell — no room on mobile */
   .site-top-bar__icon-btn {
     display: none;
-  }
-
-  .site-top-bar__actions {
-    gap: 8px;
   }
 }
