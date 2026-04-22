@@ -264,6 +264,22 @@
   color: var(--color-green);
 }
 
+/* ── Form error message ──────────────────────────────────────────────── */
+/* Rendered by SignInPage.jsx when validation or the Supabase call fails.
+   Visual treatment mirrors .signup-form__error so the two auth pages
+   speak the same error language. */
+
+.signin-form__error {
+  font-size: 13px;
+  color: var(--color-red);
+  background: var(--color-red-bg);
+  border: 1px solid var(--color-red-border);
+  border-left-width: 3px;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 0 0 4px;
+}
+
 /* ── Submit button ───────────────────────────────────────────────────── */
 
 .signin-form__submit {

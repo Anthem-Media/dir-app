@@ -5,16 +5,19 @@
  * on the right. The panel carries the visual personality so the form can
  * stay focused and uncluttered.
  *
- * Authentication is not wired up yet. The form calls e.preventDefault()
- * on submit. Wire up to Supabase auth when the backend is ready:
- *  - handleSubmit: call supabase.auth.signInWithPassword({ email, password })
- *  - Google button: call supabase.auth.signInWithOAuth({ provider: 'google' })
+ * Email/password sign-in is wired to Supabase Auth via
+ * supabase.auth.signInWithPassword — on success the user is redirected to
+ * the homepage; on failure Supabase's error.message is displayed inline.
+ * Google OAuth is still a placeholder pending separate Google Cloud setup.
+ * The "Forgot password?" link is a placeholder pending the password reset
+ * flow (built in a later auth phase step).
  *
  * All text is placeholder — update copy strings directly in this file.
  */
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '../api/supabaseClient';
 import './SignInPage.css';
 
 export function SignInPage() {
@@ -23,14 +26,48 @@ export function SignInPage() {
   // Controls whether the password field shows plain text or bullets
   const [showPassword, setShowPassword] = useState(false);
 
-  function handleSubmit(e) {
+  // Inline error shown above the submit button when validation or sign-in fails
+  const [errorMessage, setErrorMessage] = useState('');
+  // Disables the submit button and swaps its label while the request is in flight
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    // TODO: wire up to Supabase — supabase.auth.signInWithPassword({ email, password })
+    setErrorMessage('');
+
+    if (!email) {
+      setErrorMessage('Please enter your email.');
+      return;
+    }
+    if (!password) {
+      setErrorMessage('Please enter your password.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        setErrorMessage(error.message);
+        return;
+      }
+
+      navigate('/');
+    } catch {
+      // Catches unexpected exceptions (network drop, SDK throw) that aren't
+      // returned as the structured { error } response from Supabase.
+      setErrorMessage('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function handleGoogle(e) {
     e.preventDefault();
-    // TODO: wire up to Supabase — supabase.auth.signInWithOAuth({ provider: 'google' })
+    // TODO: Google OAuth — requires Google Cloud project setup. Deferred until pre-launch polish.
   }
 
   return (
@@ -107,7 +144,7 @@ export function SignInPage() {
             <div className="signin-form__field">
               <div className="signin-form__label-row">
                 <label className="signin-form__label" htmlFor="signin-password">Password</label>
-                {/* Doesn't link anywhere yet — wire to forgot-password flow later */}
+                {/* TODO: Forgot password flow — wire up to supabase.auth.resetPasswordForEmail() when the password reset page exists (later auth phase step). */}
                 <a href="#" className="signin-form__forgot" onClick={(e) => e.preventDefault()}>
                   Forgot password?
                 </a>
@@ -134,8 +171,19 @@ export function SignInPage() {
               </div>
             </div>
 
+            {/* Inline error — rendered only when something fails (validation or Supabase) */}
+            {errorMessage && (
+              <p className="signin-form__error">{errorMessage}</p>
+            )}
+
             {/* Primary CTA */}
-            <button type="submit" className="signin-form__submit">Sign in</button>
+            <button
+              type="submit"
+              className="signin-form__submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Signing in...' : 'Sign in'}
+            </button>
 
             {/* Divider */}
             <div className="signin-form__divider">
