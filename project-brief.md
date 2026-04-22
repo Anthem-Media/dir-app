@@ -2,7 +2,7 @@
 
 **Working Name:** DIR (Diamond in the Rough)
 **Tagline:** "Think inside the box."
-**Last Updated:** April 20, 2026
+**Last Updated:** April 22, 2026
 
 ---
 
@@ -37,6 +37,7 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - Card search within checklist tiers — real time filter by player name or card number, visible only when tier is expanded
 - Market trend charts over time (box price and card values)
 - Manufacturer-published pull rate display
+- Auth system (required from day one — see Beta Access Model below)
 
 ### Priority 4 — Navigation
 - AI photo scan → box identification → profile page (Claude Vision API)
@@ -69,6 +70,40 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - Box break data aggregation from external sources
 - In-app purchases on iOS (hard architectural decision — all payment through web/Stripe)
 - Free tier on iOS app (web-only free browsing experience)
+- Stripe integration during beta (no payment processing until beta ends)
+- Free-tier box profile access during beta (all beta users get plan='beta' with full access)
+
+---
+
+## Beta Access Model — LOCKED
+
+Auth is required from day one. There is no anonymous access to box profiles at any point in the product lifecycle — not during beta, not after.
+
+**During beta:**
+- All signups default to `plan = 'beta'` in the users table
+- Beta users get full premium access to every feature: box profiles, EV, ROI, pull rates, charts, everything
+- No Stripe. No payment processing. No subscription selection screen
+- Email opt-in checkbox on the signup form — captures beta tester emails from day one
+- iOS app works because it's auth-only by design — every beta signup is a valid iOS user
+
+**Paywall logic (write it this way from the start):**
+```
+Is user logged in?  →  no  →  redirect to /signin
+Is user's plan IN ('beta', 'paid')?  →  no  →  redirect to /upgrade (built post-beta)
+Both yes  →  show box profile
+```
+
+**After beta ends:**
+- Stripe gets wired in
+- New signups default to `plan = 'free'` (no box profile access)
+- Paywall logic still accepts `'beta'` OR `'paid'` — existing beta users keep access
+- Migration decision for beta users (grandfather vs prompt-to-upgrade) is deferred until end of beta
+
+**Why this approach:**
+- iOS app requires auth to function at all — auth-free beta would break iOS entirely
+- Email list is a locked strategic asset — capturing emails from day one is non-negotiable
+- The auth code written for beta is the exact code needed at launch — no rewrite at the finish line
+- Identifying beta users enables targeted feedback and marketing
 
 ---
 
@@ -79,14 +114,15 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - **Legacy profiles (1995-2017):** Checklist, card-level pricing, top chases, grails, pull rates where available. NO EV or ROI — the math doesn't apply to older product. Box profile page hides or gracefully handles missing EV/ROI sections for legacy boxes.
 
 ### Data Sources
-- **Card checklists:** Varies by sport (see Data Entry Sources below). Manual data entry into own database using AI-assisted workflow. Do not scrape verbatim — build own dataset from factual information.
-- **Card pricing:** eBay sold listings (primary source). eBay API for programmatic access. Card-level pricing is required for every card — not just top chases.
+- **Card checklists:** Varies by sport (see Data Entry Sources below). AI-assisted workflow — Cowork sources and structures data from reference sites into schema-ready spreadsheets. Do not scrape verbatim — build own dataset from factual information.
+- **Card pricing:** eBay sold listings (primary source). eBay API for programmatic access. Card-level pricing is required for every card — not just top chases. Never entered manually.
 - **Pull rates:** Manufacturer-published odds from packaging and official sites (Topps, Panini, Upper Deck). Cross-reference Beckett, Cardboard Connection, Chasing Majors, and Checklist Insider. TCDB does not publish pull rates. Chasing Majors and Checklist Insider provide format-level odds (Hobby vs Jumbo vs Blaster etc.) — required for the format switcher feature.
 - **Box pricing:** eBay sold listings for sealed box market prices.
-- **Images:** Don't let images block data entry. Enter data first, leave image_url blank. Primary image source is distributor product feeds (Dave & Adam's, Blowout Cards, Steel City, etc.) — clean, standardized, high-res box art pulled automatically as a byproduct of price scraping, same method Waxstat uses for their 27k+ box library. eBay API (Phase 13) is the fallback for boxes no distributor carries. Manufacturer sites are a tertiary source. Placeholder images acceptable for beta. Images are never manually sourced.
+- **Release dates / MSRP:** TCDB (tcdb.com) — each box set name links directly to its TCDB page. Use as fallback when release date or MSRP is not found on Cardboard Connection, Beckett, or Baseballcardpedia.
+- **Images:** Don't let images block data entry. Enter data first, leave image_url blank. Primary image source is distributor product feeds (Dave & Adam's, Blowout Cards, Steel City, etc.) — clean, standardized, high-res box art pulled automatically as a byproduct of price scraping, same method Waxstat uses for their 27k+ box library. eBay API (Phase 15) is the fallback for boxes no distributor carries. Manufacturer sites are a tertiary source. Placeholder images acceptable for beta. Images are never manually sourced.
 
 ### Data Entry Sources by Sport
-- **Baseball:** Beckett, Cardboard Connection, Topps, Baseballcardpedia
+- **Baseball:** Cardboard Connection, Beckett, Baseballcardpedia, TCDB (release date / MSRP fallback)
 - **Football:** TCDB (tcdb.com) — Panini exclusive until 2025, Topps post-2025
 - **Basketball:** TCDB — Panini exclusive license
 - **Hockey:** TCDB — Upper Deck exclusive license
@@ -98,6 +134,7 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - NO YouTube break scraping. Survivorship bias makes this unreliable.
 - Published manufacturer pull rates + real sold prices = clean, verifiable data.
 - Sets without published odds get flagged as "unavailable" — EV calculation is skipped for those boxes. Box profile still shows checklist and card values.
+- If data doesn't exist across all primary sources, it genuinely doesn't exist — mark as NULL. Display as N/A or "Unavailable" in the app. Never fabricate or estimate.
 
 ### Refresh Cadence
 - Beta: Weekly refresh is acceptable
@@ -110,21 +147,43 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - 40-60 new box set products per year per sport from major manufacturers
 - Each set has multiple formats (Hobby, Jumbo, Blaster, Mega, Retail) — each is a separate database entry linked by `parent_set_id`
 
-### Data Entry Workflow
-- **Who:** Zach handles all data entry during beta. No data engineer hire until revenue or investors.
-- **Card pricing — never manual:** Do not manually look up eBay sold listings card by card. This is not viable at scale. Card pricing comes exclusively from the eBay API. After the admin panel is built, a targeted eBay API proof of concept script is built first to validate pricing before the full pipeline. The full seed does not begin until the eBay API is live.
-- **Pull rates — scraper first, hybrid fallback:** Primary approach is a Claude Code-written scraper targeting Cardboard Connection (and Chasing Majors for format-level odds). If the scraper hits walls or produces messy output, fall back to the hybrid method: paste raw published odds into Claude, let Claude structure it to match the pull_rates schema, output to spreadsheet, bulk import. Do not manually organize pull rate tables — too much room for error.
-- **Test before full seed:** Before seeding all sports, do a complete end-to-end pipeline test with one box set (2024 Topps Chrome Baseball — already in schema). Fully populate with real scraped pull rates and real eBay pricing from the proof of concept script. Confirm EV, ROI, checklist, format switcher, and charts all work. Only proceed to full seed once this passes.
-- **Data accuracy pre-beta:** Accurate numbers do not matter until the eBay API is live and pricing is automated. Only Zach and Cam see the app during this phase. Focus on pipeline correctness, not data completeness.
-- **Spreadsheet templates:** Draft templates created for box_sets, cards (checklist), and pull_rates. Will be finalized when real box data is used to cross-reference against the database schema.
-- **Target speed:** 100+ boxes per day once pipeline is dialed in.
-- **Admin panel:** Form-based interface (Phase 11) so data entry never requires raw SQL after initial seeding.
-- **Post-automation:** Data engineer hire on Upwork ($15-25/hr, ~10hrs/week) once revenue justifies it. Until then, eBay API pipeline needs to be founder-operable.
+### Data Entry Workflow — LOCKED
+
+The full seeding pipeline runs in five steps. This workflow compresses what would be months of manual research into weeks. Do not deviate from this order.
+
+**Step 1 — Build the source document (Cowork)**
+Provide Cowork a list of box set names for a given sport and year. Cowork generates a structured source document — one row per set — with URLs pre-populated for Cardboard Connection, Beckett, Baseballcardpedia, and TCDB. The TCDB link is attached to the set name itself and is the fallback source for release date and MSRP when not found elsewhere. What takes an hour to build manually takes seconds with Cowork. Repeat per sport per year.
+
+**Step 2 — Populate the spreadsheet (Cowork)**
+Feed the source document back to Cowork. Cowork visits each URL, extracts checklist data, card numbers, pull rates, box configuration (packs per box, cards per pack), release date, MSRP, and formats everything into spreadsheet rows that match the database schema exactly. Output is one Excel file with one tab per schema table: `box_sets`, `cards`, `pull_rates`. Rules for this step:
+- `current_value` and `image_url` columns are always left blank — filled later by eBay API
+- `circulation_status` defaults to `unknown` for any card with `print_run ≤ 10`
+- Each format (Hobby, Jumbo, Blaster, Mega, Retail) is a separate row in `box_sets`, linked by a shared slug prefix
+- Pull rates differ per format — Hobby odds ≠ Blaster odds — each format gets its own rows in `pull_rates`
+- Any data not found across all sources gets a "needs review" flag in a dedicated column — it does not block the row from being included
+- Cowork pages with inconsistent formatting (pull rates buried in paragraph text vs. clean tables) may need a human review pass on flagged rows
+
+**Step 3 — Link tables using slugs (Claude Code script)**
+Each `box_sets` row uses a slug as its linking key (e.g. `2024-topps-chrome-baseball-hobby`). The `cards` and `pull_rates` tabs reference this slug rather than a numeric ID. Before import, run a small Claude Code-written script that looks up each slug in Supabase, retrieves its auto-assigned ID, and fills in the `box_set_id` column on `cards` and `pull_rates`. This is the slug-as-bridge approach — cleaner than manually assigning IDs and prevents collision errors on re-import. Claude Code writes this script when the database phase begins — it is not written in advance.
+
+**Step 4 — Import to Supabase**
+Export each spreadsheet tab as a CSV file. Import into Supabase using the table editor's CSV import button — no raw SQL required. Import in dependency order: `box_sets` first, then `cards` and `pull_rates` (both reference `box_set_id` and require box_sets rows to exist first). One CSV per table, not one combined file.
+
+**Step 5 — eBay API fills pricing**
+After import, the eBay API proof of concept script (Phase 12) prices out individual cards by name. The full pipeline (Phase 15) automates this at scale with scheduled refresh. `current_value` on `cards` and `current_market_price` on `box_sets` populate automatically. EV and ROI calculate from those values. Do not begin full seeding until the end-to-end pipeline test with 2024 Topps Chrome Baseball passes completely.
 
 ### Data Entry Maintenance
 - During beta: 5-10 hours/week (Zach only)
 - Post-automation: 2-3 hours/week monitoring
 - At scale: Part-time data contractor (~$15-25/hr, ~10hrs/week)
+
+### Additional Data Entry Rules
+- **Card pricing — never manual:** Do not look up eBay sold listings card by card. Not viable at any scale. Pricing comes exclusively from the eBay API.
+- **Pull rates — scraper first, hybrid fallback:** Primary approach is a Claude Code-written scraper targeting Cardboard Connection (and Chasing Majors for format-level odds). If the scraper hits walls or produces messy output, fall back to the hybrid method: paste raw published odds into Claude, Claude structures it to match the pull_rates schema, output to spreadsheet, bulk import. Do not manually organize pull rate tables.
+- **Test before full seed:** Before seeding all sports, run a complete end-to-end pipeline test with one box set (2024 Topps Chrome Baseball — already in schema as example data). Confirm EV, ROI, checklist, format switcher, and charts all work with real data. Only proceed to full seed once this passes.
+- **Data accuracy pre-beta:** Accurate numbers do not matter until the eBay API is live. Only Zach and Cam see the app during this phase. Focus on pipeline correctness, not data completeness.
+- **Admin panel:** Form-based interface (Phase 11) so data entry never requires raw SQL after initial seeding.
+- **Post-automation:** Data engineer hire on Upwork ($15-25/hr, ~10hrs/week) once revenue justifies it. Until then, the pipeline must be founder-operable.
 
 ---
 
@@ -162,10 +221,11 @@ Tier system:
 - **Frontend:** React, deployed on Vercel (shareable beta URL from day one)
 - **Backend:** Python or Node.js, deployed on Railway or Render (free tier to start)
 - **Database:** Supabase (managed PostgreSQL — scales from free tier to enterprise, see SCALING-REFERENCE.md)
-- **Auth:** Supabase Auth (handles sign up, sign in, sessions, password reset)
-- **Payments:** Stripe (web only — all subscription management and billing handled on DIRapp.com)
+- **Auth:** Supabase Auth (handles sign up, sign in, sessions, password reset, email verification). Supabase Auth manages passwords in its own `auth.users` table. Our `users` table becomes a profile table (display_name, plan, email_opt_in) linked by Supabase user ID. No passwords are stored in our `users` table.
+- **Payments:** Stripe (web only — all subscription management and billing handled on DIRapp.com). No Stripe integration during beta.
 - **AI Vision:** Claude API (photo → structured JSON → box match)
 - **AI Summaries:** Claude API (price data → plain English trend summary) — post-launch feature
+- **Data pipeline:** Cowork (source document generation + spreadsheet structuring), Claude Code (slug-bridge import script, pull rate scraper, eBay API integration)
 
 ---
 
@@ -177,11 +237,12 @@ Tier system:
 - **Strategy:** Leaning build-to-run (long-term operation). Not finalized but mindset has shifted from original build-to-sell framing.
 - **Potential acquirers (if strategy changes):** Fanatics, Topps, Panini
 - **Revenue model — LOCKED:** Fully paid box profiles. Free browsing on web only (homepage, browse, search, filtering). Paywall on box profile page (checklist, pull rates, EV, ROI, price trends). Conversion funnel: visit → browse → click box → paywall → pay. All payment via Stripe on the web. iOS app is auth-only — no in-app purchases ever.
+- **Beta access model — LOCKED:** Auth required from day one. All beta signups get `plan = 'beta'` with full premium access. No Stripe during beta. Paywall accepts `'beta'` OR `'paid'`. See Beta Access Model section above.
 - **Price range if subscription:** $4.99-$9.99/mo range
 - **Buy Now / affiliate system:** Price comparison with multiple distributors on box profile pages. Starts with 1-2 distributors, grows over time. Boxes without distributor listings fall back to "Find on eBay" affiliate link. Every box profile has a monetization path. System built but launches empty — populated when Cam has distributor partnerships (during beta). New database tables needed: `distributors` and `distributor_listings`.
 - **eBay Partner Network:** Free to join, 1-4% commission (collectibles 3-4%), 24-hour cookie. Sign up when real data is live (Phase 10-12). Don't apply with dummy data.
 - **Distributor outreach:** No conversations until app is ready for launch or in beta. Cam handles all distributor relationships.
-- **Email list:** All user emails are owned and stored in the database. Sign-up form includes email opt-in checkbox. A verified, opt-in email list of active sports card collectors is a valuable asset for marketing and for acquisition value.
+- **Email list:** All user emails are owned and stored in the database. Sign-up form includes email opt-in checkbox (`email_opt_in` boolean on users table). A verified, opt-in email list of active sports card collectors is a valuable asset for marketing and for acquisition value. Captured from day one during beta.
 - **Legal structure:** LLC deferred until demand is validated
 - **Competitive advantage:** First and only box-level analytics tool for sports cards. Waxstat does box price comparison but NOT analytics/EV/ROI.
 - **Distribution:** Starts with local card stores. Cam has direct access to the target audience through hobby network. Scales from local to broader during/after beta.
@@ -199,6 +260,8 @@ The app opens to a login screen with a single line directing users without crede
 This is an intentional architectural decision to avoid Apple's in-app purchase requirements and their associated revenue cut. It is not to be changed without a deliberate architectural review.
 
 The only free-facing feature in the entire product is the ability to browse card boxes by year — this exists on the web only, not in the app.
+
+During beta, the iOS app works the same way: beta users sign up on the web, then sign in on iOS with the same credentials. The iOS app does not distinguish between `plan = 'beta'` and `plan = 'paid'` — both get full access.
 
 **Do not build any of the following into the iOS app:**
 - Signup or account creation flow
@@ -221,18 +284,19 @@ The database schema supports all sports from day one. The UI supports all sports
 ## Future Features (Post-MVP Roadmap)
 
 In rough priority order:
-1. User accounts with saved/watchlisted boxes
-2. Personal collection tracker and wishlist
-3. Price alerts and notifications
-4. Coming Soon / upcoming releases section with countdown timers
-5. Plain English AI trend summaries
-6. Light/dark mode toggle in user settings
-7. Portfolio value tracking over time (graph your collection's total value)
-8. "Cards I need" auto-generated from checklist minus owned cards
-9. Community / social features
-10. Legacy Boxes marketplace tab (filtered list of pre-2018 boxes for sale through affiliate partners — only if validated and distributor partnerships exist)
-11. Marketplace exploration (StockX-style for cards — year two at earliest)
-12. AI price predictions (only if historical data is deep enough to be credible)
+1. Stripe integration (post-beta)
+2. User accounts with saved/watchlisted boxes
+3. Personal collection tracker and wishlist
+4. Price alerts and notifications
+5. Coming Soon / upcoming releases section with countdown timers
+6. Plain English AI trend summaries
+7. Light/dark mode toggle in user settings
+8. Portfolio value tracking over time (graph your collection's total value)
+9. "Cards I need" auto-generated from checklist minus owned cards
+10. Community / social features
+11. Legacy Boxes marketplace tab (filtered list of pre-2018 boxes for sale through affiliate partners — only if validated and distributor partnerships exist)
+12. Marketplace exploration (StockX-style for cards — year two at earliest)
+13. AI price predictions (only if historical data is deep enough to be credible)
 
 ---
 
@@ -257,7 +321,7 @@ In rough priority order:
    - /pages — full page views
    - /hooks — data fetching logic
    - /utils — helper functions (calculations, formatting)
-   - /api — backend communication
+   - /api — backend communication (Supabase client lives here)
 3. **Start every Claude session by loading project context** (handled by Project pinned files)
 4. **One job per file** — components render UI, hooks fetch data, utils calculate/format
 5. **Maintain this project-brief.md** — update it as decisions are made
@@ -268,6 +332,7 @@ In rough priority order:
 10. **Comment non-obvious code** — if a piece of logic isn't self-explanatory, add a brief comment explaining what it does and why
 11. **Keep dependencies minimal** — don't install packages for things that can be done simply. Every dependency is something a future dev has to understand and maintain.
 12. **Use CSS variables for ALL colors** — no hardcoded hex values in any component or CSS file. All color values live in index.css only.
+13. **Never commit secrets** — API keys, database passwords, Supabase service keys, Stripe keys all go in `.env.local` (local dev) and Vercel environment variables (production). `.env.local` must be in `.gitignore`. No exceptions.
 
 ---
 
@@ -297,12 +362,13 @@ dir-app/
 │   ├── pages/         # Full page views (BoxProfilePage, SearchPage, etc.)
 │   ├── hooks/         # Data fetching logic
 │   ├── utils/         # Helper functions (calculations, formatting)
-│   ├── api/           # Backend communication
+│   ├── api/           # Backend communication (Supabase client)
 │   ├── App.jsx
 │   ├── App.css
 │   ├── main.jsx
 │   └── index.css
 ├── public/
+├── .env.local         # Local-only, gitignored, holds Supabase keys
 ├── package.json
 ├── vite.config.js
 └── index.html
@@ -315,9 +381,10 @@ Three commands to save and push changes:
 3. `git push` — upload to GitHub
 
 ### Current Status
+- UI polish pass complete across all pages
+- Auth phase starting (roadmap item #7)
 - Dark mode color scheme implemented and deployed
 - All colors are CSS variables — no hardcoded hex in codebase
-- UI polish pass starting now — new box profile features first, then page-by-page polish
 - See CONTEXT.md for full task list and detailed progress tracking
 
 ---
@@ -333,3 +400,6 @@ The schema is complete with 13 tables, indexes, views, seed data, and example da
 - Add `parent_set_id INT REFERENCES box_sets(id) NULL` to the `box_sets` table. Groups all formats of the same set together (Hobby, Jumbo, Blaster, Mega, Retail). Powers the format switcher on the box profile page. NULL means no related formats exist.
 - Add `distributors` table for the Buy Now affiliate system.
 - Add `distributor_listings` table for the Buy Now affiliate system.
+- Add `email_opt_in BOOLEAN DEFAULT FALSE` to the `users` table. Captured from signup form checkbox.
+- Remove `password_hash` column from the `users` table. Supabase Auth manages passwords in its own `auth.users` table. Our `users` table becomes a profile table linked to Supabase auth users by ID.
+- Update `plan` column on `users` table to accept `'beta'` as a valid value alongside `'free'` and `'paid'`.
