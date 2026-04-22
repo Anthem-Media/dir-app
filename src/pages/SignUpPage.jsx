@@ -5,15 +5,19 @@
  * clean sign-up form on the right. The panel copy is tailored for someone
  * creating an account rather than returning to one.
  *
- * Authentication is not wired up yet. Wire up when backend is ready:
- *  - handleSubmit: call supabase.auth.signUp({ email, password, options: { data: { display_name } } })
- *  - Google button: call supabase.auth.signInWithOAuth({ provider: 'google' })
+ * Email/password signup is wired to Supabase Auth — successful signups
+ * create a user in Supabase's auth.users table and redirect to the homepage.
+ * Google OAuth is still a placeholder pending separate Google Cloud setup.
+ * Profile row creation in our users table (display_name, email_opt_in, plan)
+ * is handled in a later step once that table exists; for now, display_name
+ * and email_opt_in are attached to user metadata via options.data.
  *
  * All text is placeholder — update copy strings directly in this file.
  */
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '../api/supabaseClient';
 import './SignUpPage.css';
 
 export function SignUpPage() {
@@ -24,15 +28,62 @@ export function SignUpPage() {
   // Each password field has its own independent show/hide toggle
   const [showPassword, setShowPassword]           = useState(false);
   const [showConfirm, setShowConfirm]             = useState(false);
-  // Checked by default — user has to actively opt out
-  const [emailOptIn, setEmailOptIn]               = useState(true);
+  // Unchecked by default — user must actively opt in
+  const [emailOptIn, setEmailOptIn]               = useState(false);
 
-  function handleSubmit(e) {
+  // Inline error message shown above the submit button when signup fails
+  const [errorMessage, setErrorMessage]           = useState('');
+  // Disables the submit button and swaps its label while the request is in flight
+  const [isSubmitting, setIsSubmitting]           = useState(false);
+
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    // TODO: wire up to Supabase
-    // supabase.auth.signUp({ email, password, options: { data: { display_name: displayName } } })
+    setErrorMessage('');
+
+    if (!email) {
+      setErrorMessage('Please enter your email.');
+      return;
+    }
+    if (password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setErrorMessage('Passwords do not match.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: displayName,
+            email_opt_in: emailOptIn,
+          },
+        },
+      });
+
+      if (error) {
+        setErrorMessage(error.message);
+        return;
+      }
+
+      navigate('/');
+    } catch {
+      // Catches unexpected exceptions (network drop, SDK throw) that aren't
+      // returned as the structured { error } response from Supabase.
+      setErrorMessage('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
+  // TODO: Google OAuth — requires Google Cloud project setup. Skipped during initial auth wire-up.
   function handleGoogle(e) {
     e.preventDefault();
     // TODO: wire up to Supabase — supabase.auth.signInWithOAuth({ provider: 'google' })
@@ -170,7 +221,7 @@ export function SignUpPage() {
               </div>
             </div>
 
-            {/* Email opt-in — checked by default, user actively opts out */}
+            {/* Email opt-in — unchecked by default, user actively opts in */}
             <label className="signup-form__checkbox-label">
               <input
                 type="checkbox"
@@ -183,8 +234,19 @@ export function SignUpPage() {
               </span>
             </label>
 
+            {/* Inline error — rendered only when something fails (validation or Supabase) */}
+            {errorMessage && (
+              <p className="signup-form__error">{errorMessage}</p>
+            )}
+
             {/* Primary CTA */}
-            <button type="submit" className="signup-form__submit">Create account</button>
+            <button
+              type="submit"
+              className="signup-form__submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating account...' : 'Create account'}
+            </button>
 
             {/* Divider */}
             <div className="signup-form__divider">
