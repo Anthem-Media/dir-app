@@ -164,16 +164,57 @@
   margin-bottom: 16px;
 }
 
+/* Section label — matches the accent-colored labels in the SiteNavBar sport dropdowns */
 .hamburger-menu__sub-heading {
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: var(--color-text-secondary);
+  color: var(--color-accent-text);
   margin: 0 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-border);
 }
 
-/* Sub-item links — each applies to <Link> elements */
+/* 2-column grid — used by Brands and Year sub-sections.
+   column-gap: 12px is consistent across both grids.
+   Row spacing comes from item padding and border-bottom — no row-gap needed. */
+.hamburger-menu__sub-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 12px;
+}
+
+/* Compact item — used by Brands grid, Year grid, and Popular Boxes list.
+   border-bottom creates a divider between rows; last item retains the border
+   for visual consistency (avoids uneven row treatment in a grid context). */
+.hamburger-menu__sub-item {
+  display: block;
+  padding: 4px 0;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-border);
+  transition: color 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hamburger-menu__sub-item:hover {
+  color: var(--color-accent-text);
+}
+
+/* Truncation modifier — applied to Popular Boxes items whose names can be long.
+   Pure CSS: overflow:hidden + white-space:nowrap + text-overflow:ellipsis.
+   Never wraps to a second line. */
+.hamburger-menu__sub-item--ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* "Browse all [Sport] →" shortcut link at the bottom of each accordion */
 .hamburger-menu__sub-link {
   display: block;
   padding: 5px 0;
@@ -189,7 +230,6 @@
   color: var(--color-accent-text);
 }
 
-/* "Browse all [Sport] →" shortcut link at the bottom of each accordion */
 .hamburger-menu__sub-link--all {
   margin-top: 4px;
   font-size: 12px;

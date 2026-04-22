@@ -39,6 +39,47 @@ const EXTRA_LINKS = [
   { label: 'Help',    to: '/help'    },
 ];
 
+// Years shown in the Year sub-section of every sport accordion.
+// 9 items displayed in a 2-column × 5-row grid; the 10th slot is always "More…".
+// 2026 is excluded (too early for a full-profile season at launch);
+// 2017 included since legacy profiles exist for 1995–2017.
+const MENU_YEARS = [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017];
+
+// Hardcoded popular box entries per sport — 4 per sport to fill the sub-section.
+// TODO: replace with real box slugs and names fetched from the database at database phase.
+const POPULAR_BOXES = {
+  Baseball: [
+    { name: '2024 Topps Chrome Baseball',        slug: '2024-topps-chrome-baseball'         },
+    { name: '2024 Bowman Chrome Baseball Jumbo', slug: '2024-bowman-chrome-baseball-jumbo'  },
+    { name: '2024 Topps Museum Collection',      slug: '2024-topps-museum-collection'       },
+    { name: '2024 Panini Prizm Baseball',        slug: '2024-panini-prizm-baseball'         },
+  ],
+  Football: [
+    { name: '2024 Panini Prizm Football',        slug: '2024-panini-prizm-football'         },
+    { name: '2024 Panini National Treasures',    slug: '2024-panini-national-treasures-fb'  },
+    { name: '2024 Panini Immaculate Football',   slug: '2024-panini-immaculate-football'    },
+    { name: '2024 Panini Spectra Football',      slug: '2024-panini-spectra-football'       },
+  ],
+  Basketball: [
+    { name: '2024-25 Panini Flawless Basketball', slug: '2024-25-panini-flawless-basketball' },
+    { name: '2024-25 Panini NT Basketball',       slug: '2024-25-panini-nt-basketball'       },
+    { name: '2024-25 Panini Immaculate',          slug: '2024-25-panini-immaculate-bball'    },
+    { name: '2024-25 Panini Prizm Basketball',    slug: '2024-25-panini-prizm-basketball'    },
+  ],
+  Hockey: [
+    { name: '2024-25 Upper Deck Black Diamond',  slug: '2024-25-ud-black-diamond-hockey'    },
+    { name: '2024-25 Upper Deck Ice Hockey',     slug: '2024-25-ud-ice-hockey'              },
+    { name: '2024-25 Upper Deck SP Authentic',   slug: '2024-25-ud-sp-authentic-hockey'     },
+    { name: '2024-25 Upper Deck Artifacts',      slug: '2024-25-ud-artifacts-hockey'        },
+  ],
+  Soccer: [
+    { name: '2024-25 Panini Prizm Soccer',       slug: '2024-25-panini-prizm-soccer'        },
+    { name: '2024-25 Topps Champions League',    slug: '2024-25-topps-champions-league'     },
+    { name: '2024 Panini Donruss Soccer',        slug: '2024-panini-donruss-soccer'         },
+    { name: '2024 Topps Chrome Soccer',          slug: '2024-topps-chrome-soccer'           },
+  ],
+};
+
 export function HamburgerMenu({ isOpen, onClose }) {
   // Only one sport can be expanded at a time. Null means all collapsed.
   const [expandedSport, setExpandedSport] = useState(null);
@@ -137,49 +178,65 @@ export function HamburgerMenu({ isOpen, onClose }) {
                   <div className={`hamburger-menu__sub-items${isExpanded ? ' hamburger-menu__sub-items--open' : ''}`}>
                     <div className="hamburger-menu__sub-items-inner">
 
-                      {/* Brands */}
+                      {/* Brands — 2-column grid, up to 10 slots (max 5 rows).
+                          Most sports have 1–3 brands; empty grid slots are invisible. */}
                       {sportData.brands.length > 0 && (
                         <div className="hamburger-menu__sub-group">
                           <p className="hamburger-menu__sub-heading">Brands</p>
-                          {sportData.brands.map((brand) => (
-                            <Link
-                              key={brand}
-                              className="hamburger-menu__sub-link"
-                              to={`/browse?sport=${sport}&manufacturer=${brand}`}
-                              onClick={onClose}
-                            >
-                              {brand}
-                            </Link>
-                          ))}
+                          <div className="hamburger-menu__sub-grid">
+                            {sportData.brands.map((brand) => (
+                              <Link
+                                key={brand}
+                                className="hamburger-menu__sub-item"
+                                to={`/browse?sport=${sport}&manufacturer=${brand}`}
+                                onClick={onClose}
+                              >
+                                {brand}
+                              </Link>
+                            ))}
+                          </div>
                         </div>
                       )}
 
-                      {/* Years */}
-                      {sportData.years.length > 0 && (
-                        <div className="hamburger-menu__sub-group">
-                          <p className="hamburger-menu__sub-heading">Year</p>
-                          {sportData.years.map((year) => (
+                      {/* Year — 2-column × 5-row grid.
+                          9 hardcoded years (2025–2017) fill slots 1–9.
+                          The 10th slot (column B, row 5) is always "More…" — never conditional. */}
+                      <div className="hamburger-menu__sub-group">
+                        <p className="hamburger-menu__sub-heading">Year</p>
+                        <div className="hamburger-menu__sub-grid">
+                          {MENU_YEARS.map((year) => (
                             <Link
                               key={year}
-                              className="hamburger-menu__sub-link"
+                              className="hamburger-menu__sub-item"
                               to={`/browse?sport=${sport}&year=${year}`}
                               onClick={onClose}
                             >
                               {year}
                             </Link>
                           ))}
+                          {/* 10th slot — always present, styled identically to year items */}
+                          <Link
+                            className="hamburger-menu__sub-item"
+                            to="/browse?openFilter=year"
+                            onClick={onClose}
+                          >
+                            More…
+                          </Link>
                         </div>
-                      )}
+                      </div>
 
-                      {/* Popular Boxes — capped at 5 to keep accordion compact on mobile */}
-                      {sportData.popularBoxes.length > 0 && (
+                      {/* Popular Boxes — single-column list, 4 hardcoded entries per sport.
+                          Long names are truncated with ellipsis — never wrap to a second line.
+                          TODO: wire box names and slugs to real data from the database at database phase. */}
+                      {POPULAR_BOXES[sport] && (
                         <div className="hamburger-menu__sub-group">
                           <p className="hamburger-menu__sub-heading">Popular Boxes</p>
-                          {sportData.popularBoxes.slice(0, 5).map((box) => (
+                          {POPULAR_BOXES[sport].map((box) => (
+                            // TODO: replace hardcoded slug with real slug from database at database phase
                             <Link
-                              key={box.id}
-                              className="hamburger-menu__sub-link"
-                              to={`/box/${box.id}`}
+                              key={box.slug}
+                              className="hamburger-menu__sub-item hamburger-menu__sub-item--ellipsis"
+                              to={`/box/${box.slug}`}
                               onClick={onClose}
                             >
                               {box.name}
