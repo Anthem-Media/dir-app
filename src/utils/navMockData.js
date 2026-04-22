@@ -12,16 +12,17 @@
  * That's a one-way dependency: nav knows about boxes, not the other way around.
  *
  * Dropdown types:
- *   cascade  → "All" tab: 3-level cascading sport → brand → year
- *   trending → "Trending" tab: 4-column layout, one column per sport
- *   list     → "Brands", "Sports", "Year" tabs: multi-column item list
- *   sport    → sport tabs: brands column + years column + popular boxes column
+ *   cascade   → "All" tab: 3-level cascading sport → brand → year
+ *   trending  → "Trending" tab: 4-column layout, one column per sport
+ *   list      → "Brands", "Sports" tabs: multi-column item list
+ *   year-grid → "Year" tab: 4-column × 4-row grid of years 2025–2010
+ *   sport     → sport tabs: 3-column grid — Brands | Year | Popular Boxes
  *
  * When the real backend is connected, replace this file with a useNavData()
  * hook that fetches from the API. The shape of NAV_DROPDOWN_DATA stays the same.
  *
- * Year scope: 2018–present only. Pre-2018 years are excluded from all nav
- * dropdowns — the database only has full profiles for 2018+.
+ * NAV_YEARS scope: 2018–present — sport tabs and cascade only use full-profile years.
+ * The Year tab uses YEAR_TAB_ITEMS (2025–2010) which also includes legacy profiles.
  *
  * Manufacturers: four major brands only — Topps, Panini, Upper Deck, Bowman.
  * Sport-specific filtering applies (e.g. Hockey is Upper Deck exclusive).
@@ -34,16 +35,26 @@ function pick(...ids) {
   return ids.map((id) => BOXES[id]);
 }
 
-// Years in scope for the nav — 2018 through current year, descending.
+// Years in scope for sport tabs and cascade — 2018 through current year, descending.
 // Pre-2018 years are excluded: the database only carries full profiles from 2018 onward.
 const NAV_YEARS = [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018];
+
+// Extended year range for the Year tab grid — includes legacy profiles (1995–2017).
+// Legacy boxes have checklists and pricing but no EV or ROI — the box profile page
+// handles this gracefully. 2025–2010 gives a clean 4×4 grid (16 years).
+const YEAR_TAB_ITEMS = [
+  2025, 2024, 2023, 2022,
+  2021, 2020, 2019, 2018,
+  2017, 2016, 2015, 2014,
+  2013, 2012, 2011, 2010,
+];
 
 // ─── Tab labels ────────────────────────────────────────────────────────────
 // Order determines left-to-right position in the nav bar.
 
 export const NAV_TABS = [
   'All', 'Trending', 'Brands', 'Sports', 'Year',
-  'Baseball', 'Football', 'Basketball', 'Hockey',
+  'Baseball', 'Football', 'Basketball', 'Hockey', 'Soccer',
 ];
 
 // ─── Dropdown content ──────────────────────────────────────────────────────
@@ -54,13 +65,14 @@ export const NAV_DROPDOWN_DATA = {
   All: {
     type: 'cascade',
     // Level 1 options
-    sports: ['Baseball', 'Football', 'Basketball', 'Hockey'],
+    sports: ['Baseball', 'Football', 'Basketball', 'Hockey', 'Soccer'],
     // Level 2 options — brands available per sport (four majors, sport-filtered)
     brandsBySport: {
       Baseball:   ['Bowman', 'Panini', 'Topps'],
       Football:   ['Panini'],
       Basketball: ['Panini'],
       Hockey:     ['Upper Deck'], // Upper Deck holds the NHL exclusive license
+      Soccer:     ['Panini', 'Topps'], // Panini: Prizm Soccer; Topps: Champions League
     },
     // Level 3 options — years in scope (2018–present, descending)
     years: NAV_YEARS,
@@ -141,13 +153,14 @@ export const NAV_DROPDOWN_DATA = {
 
   Sports: {
     type: 'list',
-    items: ['Baseball', 'Basketball', 'Football', 'Hockey'],
+    items: ['Baseball', 'Basketball', 'Football', 'Hockey', 'Soccer'],
   },
 
   Year: {
-    type: 'list',
-    // 2018–present in descending order. Pre-2018 excluded (no full profiles).
-    items: NAV_YEARS,
+    type: 'year-grid',
+    // 2025–2010 in descending order — 16 years fills a clean 4×4 grid.
+    // Includes legacy years (2010–2017) which have checklist/pricing but no EV/ROI.
+    items: YEAR_TAB_ITEMS,
   },
 
   Baseball: {
@@ -223,5 +236,13 @@ export const NAV_DROPDOWN_DATA = {
       'ud-series2-hockey-2425-hobby',
       'ud-parkhurst-hockey-2425-hobby',
     ),
+  },
+
+  Soccer: {
+    type: 'sport',
+    brands: ['Panini', 'Topps'], // Panini: Prizm Soccer, Donruss; Topps: Champions League
+    years: NAV_YEARS,
+    // TODO: add Soccer box IDs to homePageMockData.js BOXES catalogue, then use pick() here
+    popularBoxes: [],
   },
 };

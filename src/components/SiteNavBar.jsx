@@ -11,10 +11,12 @@
  * the tab to the panel without it closing.
  *
  * Dropdown types (defined in NAV_DROPDOWN_DATA):
- *   cascade  → "All" tab: 3-level cascading sport → brand → year
- *   trending → "Trending" tab: 4-column layout, one column per sport
- *   list     → "Brands", "Sports", "Year" tabs: multi-column item list
- *   sport    → sport tabs: brands column + years column + popular boxes column
+ *   cascade   → "All" tab: 3-level cascading sport → brand → year
+ *   trending  → "Trending" tab: 4-column layout, one column per sport
+ *   list      → "Brands", "Sports" tabs: multi-column item list
+ *   year-grid → "Year" tab: 4-column × 4-row grid of years 2025–2010
+ *   sport     → sport tabs (Baseball/Football/Basketball/Hockey/Soccer):
+ *               3-column grid — Brands | Year | Popular Boxes
  *
  * Desktop item cap rules:
  *   - Max 5 items per column in every dropdown
@@ -57,6 +59,7 @@ const TAB_LINKS = {
   Football:   '/browse?sport=Football',
   Basketball: '/browse?sport=Basketball',
   Hockey:     '/browse?sport=Hockey',
+  Soccer:     '/browse?sport=Soccer',
 };
 
 export function SiteNavBar({ tabs }) {
@@ -92,7 +95,7 @@ export function SiteNavBar({ tabs }) {
 
   function isTabActive(tab) {
     if (location.pathname !== '/browse') return false;
-    const sportTabs = ['Baseball', 'Football', 'Basketball', 'Hockey'];
+    const sportTabs = ['Baseball', 'Football', 'Basketball', 'Hockey', 'Soccer'];
     if (sportTabs.includes(tab)) return currentSport === tab;
     if (tab === 'All')           return currentSport === null;
     return false; // Trending / Brands / Sports / Year don't map to a single URL pattern
@@ -313,25 +316,29 @@ export function SiteNavBar({ tabs }) {
     );
   }
 
-  // Sport tabs (Baseball, Football, etc.) — brands + years + popular boxes.
-  // Years and popular boxes are both capped at ITEMS_PER_COL.
-  // "More →" for years and boxes both route to the sport's browse page.
+  // Sport tabs (Baseball, Football, Basketball, Hockey, Soccer).
+  // Three-column grid: Brands | Year | Popular Boxes.
+  //   - Brands: all brands for this sport, link to sport+brand browse filter
+  //   - Year: 4 most recent full-profile seasons, link to sport+year browse filter
+  //   - Popular Boxes: first 4 from data.popularBoxes, link to box profile page.
+  //     Column is hidden when no boxes are available (e.g. Soccer has no boxes yet).
+  //     TODO: wire popularBoxes to real data from the database at database phase.
   function renderSportDropdown(data, tabKey) {
-    const visibleYears    = data.years.slice(0, ITEMS_PER_COL);
-    const hasMoreYears    = data.years.length > ITEMS_PER_COL;
-    const visibleBoxes    = data.popularBoxes.slice(0, ITEMS_PER_COL);
-    const hasMoreBoxes    = data.popularBoxes.length > ITEMS_PER_COL;
+    // Show 4 most recent years — these are the seasons with complete profiles
+    const DISPLAY_YEARS = [2025, 2024, 2023, 2022];
+    // Cap Popular Boxes at 4 items to match the 4-row height of the Year column
+    const displayBoxes = data.popularBoxes.slice(0, 4);
 
     return (
-      <div className="nav-dropdown__sport">
-        {/* Brands column — typically 1–4 items, no cap needed */}
-        <div className="nav-dropdown__col">
-          <p className="nav-dropdown__col-heading">Brands</p>
+      <div className="nav-dropdown__sport-grid">
+        {/* Column 1: Brands */}
+        <div className="nav-dropdown__sport-col">
+          <p className="nav-dropdown__sport-col-label">Brands</p>
           {data.brands.map((brand) => (
             <Link
               key={brand}
               to={`/browse?sport=${tabKey}&manufacturer=${brand}`}
-              className="nav-dropdown__item"
+              className="nav-dropdown__sport-item"
               onClick={closeDropdown}
             >
               {brand}
@@ -339,53 +346,58 @@ export function SiteNavBar({ tabs }) {
           ))}
         </div>
 
-        {/* Years column — capped at ITEMS_PER_COL */}
-        <div className="nav-dropdown__col">
-          <p className="nav-dropdown__col-heading">Year</p>
-          {visibleYears.map((year) => (
+        {/* Column 2: Year — 4 hardcoded recent seasons */}
+        <div className="nav-dropdown__sport-col">
+          <p className="nav-dropdown__sport-col-label">Year</p>
+          {DISPLAY_YEARS.map((year) => (
             <Link
               key={year}
               to={`/browse?sport=${tabKey}&year=${year}`}
-              className="nav-dropdown__item"
+              className="nav-dropdown__sport-item"
               onClick={closeDropdown}
             >
               {year}
             </Link>
           ))}
-          {hasMoreYears && (
-            <Link
-              to={`/browse?sport=${tabKey}`}
-              className="nav-dropdown__item nav-dropdown__item--more"
-              onClick={closeDropdown}
-            >
-              More →
-            </Link>
-          )}
         </div>
 
-        {/* Popular Boxes column — capped at ITEMS_PER_COL */}
-        <div className="nav-dropdown__col nav-dropdown__col--wide">
-          <p className="nav-dropdown__col-heading">Popular Boxes</p>
-          {visibleBoxes.map((box) => (
-            <Link
-              key={box.id}
-              to={`/box/${box.id}`}
-              className="nav-dropdown__item nav-dropdown__item--dense"
-              onClick={closeDropdown}
-            >
-              {box.name}
-            </Link>
-          ))}
-          {hasMoreBoxes && (
-            <Link
-              to={`/browse?sport=${tabKey}`}
-              className="nav-dropdown__item nav-dropdown__item--more"
-              onClick={closeDropdown}
-            >
-              More →
-            </Link>
-          )}
-        </div>
+        {/* Column 3: Popular Boxes — wider, long names truncated with ellipsis.
+            Hidden when no boxes exist for this sport (e.g. Soccer until box data is seeded). */}
+        {displayBoxes.length > 0 && (
+          <div className="nav-dropdown__sport-col nav-dropdown__sport-col--wide">
+            <p className="nav-dropdown__sport-col-label">Popular Boxes</p>
+            {displayBoxes.map((box) => (
+              <Link
+                key={box.id}
+                to={`/box/${box.id}`}
+                className="nav-dropdown__sport-item"
+                onClick={closeDropdown}
+              >
+                {box.name}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // "Year" tab — 16 years (2025–2010) in a 4-column × 4-row grid.
+  // No column labels — the grid speaks for itself.
+  // Includes legacy years (2010–2017) which have checklists/pricing but no EV/ROI.
+  function renderYearGridDropdown(data) {
+    return (
+      <div className="nav-dropdown__year-grid">
+        {data.items.map((year) => (
+          <Link
+            key={year}
+            to={`/browse?year=${year}`}
+            className="nav-dropdown__year-item"
+            onClick={closeDropdown}
+          >
+            {year}
+          </Link>
+        ))}
       </div>
     );
   }
@@ -420,14 +432,21 @@ export function SiteNavBar({ tabs }) {
         break;
 
       case 'list':
-        // "Brands", "Sports", "Year" tabs: flat map of each item to its browse URL
+        // "Brands", "Sports" tabs: flat map of each item to its browse URL
         items = data.items.map((option) => {
           const value = String(option);
           if (openTab === 'Brands') return { label: value, to: `/browse?manufacturer=${value}` };
           if (openTab === 'Sports') return { label: value, to: `/browse?sport=${value}` };
-          if (openTab === 'Year')   return { label: value, to: `/browse?year=${value}` };
           return { label: value, to: '/browse' };
         });
+        break;
+
+      case 'year-grid':
+        // "Year" tab: flat list of years, each linking to the year's browse filter
+        items = data.items.map((year) => ({
+          label: String(year),
+          to:    `/browse?year=${year}`,
+        }));
         break;
 
       case 'sport':
@@ -489,11 +508,12 @@ export function SiteNavBar({ tabs }) {
     if (!data) return null;
 
     switch (data.type) {
-      case 'cascade':  return renderCascadeDropdown(data);
-      case 'trending': return renderTrendingDropdown(data);
-      case 'list':     return renderListDropdown(data, openTab);
-      case 'sport':    return renderSportDropdown(data, openTab);
-      default:         return null;
+      case 'cascade':   return renderCascadeDropdown(data);
+      case 'trending':  return renderTrendingDropdown(data);
+      case 'list':      return renderListDropdown(data, openTab);
+      case 'year-grid': return renderYearGridDropdown(data);
+      case 'sport':     return renderSportDropdown(data, openTab);
+      default:          return null;
     }
   }
 

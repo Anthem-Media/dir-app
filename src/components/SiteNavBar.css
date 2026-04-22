@@ -211,7 +211,7 @@
   gap: 32px;
 }
 
-/* ── List layout (Brands / Sports / Year tabs) ──────────────────────────── */
+/* ── List layout (Brands / Sports tabs) ─────────────────────────────────── */
 /* Two side-by-side columns, each containing up to 5 items */
 
 .nav-dropdown__list-cols {
@@ -219,13 +219,94 @@
   gap: 0;
 }
 
-/* ── Sport layout (Baseball / Football / Basketball / Hockey tabs) ──────── */
-/* Brands and Years are narrow; Popular Boxes column fills remaining space */
+/* ── Sport grid layout (Baseball / Football / Basketball / Hockey / Soccer) ─ */
+/* Three-column grid: Brands (1fr) | Year (1fr) | Popular Boxes (1.4fr).
+   Popular Boxes is wider since box names tend to be long.
+   The column is conditionally rendered — absent for Soccer until box data is seeded. */
 
-.nav-dropdown__sport {
+.nav-dropdown__sport-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.4fr;
+  gap: 0 32px;
+}
+
+/* Each column in the sport grid */
+.nav-dropdown__sport-col {
   display: flex;
-  gap: 40px;
-  align-items: flex-start;
+  flex-direction: column;
+}
+
+/* Column label — uppercase accent, bottom-border divides label from items */
+.nav-dropdown__sport-col-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-accent-text);
+  margin: 0;
+  padding: 0 0 6px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Each item row — dense text, divider border, primary text color */
+.nav-dropdown__sport-item {
+  display: block;
+  padding: 5px 0;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-border);
+  transition: color 0.1s ease;
+}
+
+/* No border on the final item — avoid a trailing line at the bottom */
+.nav-dropdown__sport-item:last-child {
+  border-bottom: none;
+}
+
+.nav-dropdown__sport-item:hover {
+  color: var(--color-accent-text);
+}
+
+/* Popular Boxes column items — truncate long names with ellipsis */
+.nav-dropdown__sport-col--wide .nav-dropdown__sport-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Year grid layout (Year tab) ────────────────────────────────────────── */
+/* 16 years (2025–2010) arranged in a 4-column × 4-row grid.
+   No column labels — years are self-descriptive. */
+
+.nav-dropdown__year-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 80px);
+  gap: 0;
+}
+
+.nav-dropdown__year-item {
+  display: block;
+  padding: 5px 0;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-border);
+  transition: color 0.1s ease;
+  white-space: nowrap;
+}
+
+/* Remove border from the last row (items 13–16 of 16 in a 4-column grid) */
+.nav-dropdown__year-item:nth-last-child(-n+4) {
+  border-bottom: none;
+}
+
+.nav-dropdown__year-item:hover {
+  color: var(--color-accent-text);
 }
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
