@@ -13,15 +13,33 @@
  */
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { SearchBar } from './SearchBar';
 import { HamburgerMenu } from './HamburgerMenu';
+import { useAuth } from '../context/AuthContext';
 import './AppNav.css';
 
 export function AppNav() {
   // Controls whether the mobile full-screen menu overlay is visible.
   // Lives here (not in HamburgerMenu) so AppNav owns the open/close lifecycle.
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Auth state drives which buttons appear in the top-right actions slot.
+  // loading covers the brief window between mount and getSession() resolving;
+  // during that window we render nothing to avoid flashing the wrong state
+  // on refresh for an already-signed-in user.
+  const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleSignOut() {
+    await signOut();
+    // onAuthStateChange updates user to null; this just sends them home.
+    navigate('/');
+  }
+
+  // Falls back to email if display_name metadata is missing (older accounts,
+  // Google OAuth users, etc. — optional chaining keeps it safe either way).
+  const displayName = user?.user_metadata?.display_name || user?.email;
 
   return (
     <>
@@ -69,9 +87,27 @@ export function AppNav() {
               </svg>
             </button>
 
-            {/* Sign in: outlined secondary, Sign up: solid green primary */}
-            <Link className="site-top-bar__sign-in" to="/signin">Sign in</Link>
-            <Link className="site-top-bar__sign-up" to="/signup">Sign up</Link>
+            {/* Auth slot: Sign In / Sign Up when signed out, display name +
+                Sign Out when signed in. Renders nothing while auth is loading
+                to avoid flashing the wrong state on session restore. */}
+            {loading ? null : user ? (
+              <>
+                <span className="site-top-bar__link">{displayName}</span>
+                <button
+                  type="button"
+                  className="site-top-bar__sign-in"
+                  onClick={handleSignOut}
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Sign in: outlined secondary, Sign up: solid green primary */}
+                <Link className="site-top-bar__sign-in" to="/signin">Sign in</Link>
+                <Link className="site-top-bar__sign-up" to="/signup">Sign up</Link>
+              </>
+            )}
           </nav>
 
         </div>

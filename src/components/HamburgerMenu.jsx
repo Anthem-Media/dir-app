@@ -11,7 +11,10 @@
  *     Only one sport open at a time (opening a new one closes the previous).
  *   Divider line
  *   Extra page links — About, News, Contact, Help
- *   Auth buttons — Sign In (outlined) and Sign Up (filled), anchored to bottom.
+ *   Auth section — auth-aware via useAuth():
+ *     Signed out: Sign In (outlined) and Sign Up (filled) buttons.
+ *     Signed in:  "Signed in as <name>" row + full-width Sign Out button.
+ *     Loading:    renders nothing in the button row (no flicker on refresh).
  *     Styled to match the desktop header buttons in AppNav.css exactly.
  *
  * Completely hidden on desktop via CSS — no JS conditional rendering needed.
@@ -22,8 +25,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { NAV_DROPDOWN_DATA } from '../utils/navMockData';
+import { useAuth } from '../context/AuthContext';
 import './HamburgerMenu.css';
 
 // All five launch sports in the menu. Soccer has no desktop dropdown data yet
@@ -83,6 +87,20 @@ const POPULAR_BOXES = {
 export function HamburgerMenu({ isOpen, onClose }) {
   // Only one sport can be expanded at a time. Null means all collapsed.
   const [expandedSport, setExpandedSport] = useState(null);
+
+  // Drives the auth section at the bottom. Same source of truth as AppNav,
+  // so desktop and mobile always agree on whether the user is signed in.
+  const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleSignOut() {
+    await signOut();
+    onClose();         // close the overlay like the other nav actions do
+    navigate('/');     // the AuthContext listener clears user on its own
+  }
+
+  // Falls back to email when display_name metadata isn't set.
+  const displayName = user?.user_metadata?.display_name || user?.email;
 
   // Lock body scroll while the menu is open so the page behind doesn't scroll.
   useEffect(() => {
@@ -280,26 +298,49 @@ export function HamburgerMenu({ isOpen, onClose }) {
           ))}
         </nav>
 
+        {/* Signed-in identifier — only shown when a user is signed in.
+            Reuses .hamburger-menu__extra-link so its typography and bottom
+            border match the links above it without any new styles. */}
+        {!loading && user && (
+          <p className="hamburger-menu__extra-link">
+            Signed in as {displayName}
+          </p>
+        )}
+
       </div>
 
-      {/* ── Auth buttons — anchored to the bottom of the overlay ──────────── */}
+      {/* ── Auth section — anchored to the bottom of the overlay ──────────── */}
       {/* Padding-bottom accounts for the iOS home indicator on notched devices
-          via env(safe-area-inset-bottom). Falls back to 0 on other platforms. */}
+          via env(safe-area-inset-bottom). Falls back to 0 on other platforms.
+          Contents are auth-aware: Sign In / Sign Up when signed out, a single
+          full-width Sign Out button when signed in. */}
       <div className="hamburger-menu__auth">
-        <Link
-          className="hamburger-menu__sign-in"
-          to="/signin"
-          onClick={onClose}
-        >
-          Sign in
-        </Link>
-        <Link
-          className="hamburger-menu__sign-up"
-          to="/signup"
-          onClick={onClose}
-        >
-          Sign up
-        </Link>
+        {loading ? null : user ? (
+          <button
+            type="button"
+            className="hamburger-menu__sign-in"
+            onClick={handleSignOut}
+          >
+            Sign out
+          </button>
+        ) : (
+          <>
+            <Link
+              className="hamburger-menu__sign-in"
+              to="/signin"
+              onClick={onClose}
+            >
+              Sign in
+            </Link>
+            <Link
+              className="hamburger-menu__sign-up"
+              to="/signup"
+              onClick={onClose}
+            >
+              Sign up
+            </Link>
+          </>
+        )}
       </div>
 
     </div>
