@@ -36,6 +36,8 @@ import { SignInPage }     from './pages/SignInPage';
 import { SignUpPage }     from './pages/SignUpPage';
 import { CheckEmailPage } from './pages/CheckEmailPage';
 
+import { ProtectedRoute } from './components/ProtectedRoute';
+
 import { NAV_TABS } from './utils/navMockData';
 
 function App() {
@@ -47,7 +49,11 @@ function App() {
         <Routes>
           <Route path="/"          element={<HomePage />} />
           <Route path="/browse"    element={<BrowsePage />} />
-          <Route path="/box/:slug" element={<BoxProfilePage />} />
+          <Route path="/box/:slug" element={
+            <ProtectedRoute>
+              <BoxProfilePage />
+            </ProtectedRoute>
+          } />
           <Route path="/about"     element={<AboutPage />} />
           <Route path="/news"      element={<NewsPage />} />
           <Route path="/contact"   element={<ContactPage />} />
