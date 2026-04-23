@@ -6,7 +6,10 @@
  * creating an account rather than returning to one.
  *
  * Email/password signup is wired to Supabase Auth — successful signups
- * create a user in Supabase's auth.users table and redirect to the homepage.
+ * create a user in Supabase's auth.users table. On success the user is
+ * routed to /check-email (not the homepage) with their email passed in
+ * route state, so that page can echo the address and offer a resend link
+ * while they wait for the Supabase confirmation email.
  * Google OAuth is still a placeholder pending separate Google Cloud setup.
  * Profile row creation in our users table (display_name, email_opt_in, plan)
  * is handled in a later step once that table exists; for now, display_name
@@ -73,7 +76,9 @@ export function SignUpPage() {
         return;
       }
 
-      navigate('/');
+      // Email attached to route state so CheckEmailPage can echo it back
+      // and target the Supabase resend call.
+      navigate('/check-email', { state: { email } });
     } catch {
       // Catches unexpected exceptions (network drop, SDK throw) that aren't
       // returned as the structured { error } response from Supabase.

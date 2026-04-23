@@ -1,0 +1,285 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   CheckEmailPage — split layout styles.
+
+   Sibling to SignInPage.css and SignUpPage.css — same structural
+   patterns, same dark-mode visual language, different class namespace
+   (check-email-* vs signup-* / signin-*). The panel carries the
+   personality; the content side stays clean.
+
+   Layout: two equal columns, full viewport height minus header.
+   On mobile: panel hides, content takes the full width.
+
+   All colors use CSS variables. No hardcoded hex values.
+───────────────────────────────────────────────────────────────────────── */
+
+.check-email-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - 112px);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BRANDED PANEL (left)
+   Mirrors .signup-panel exactly — dark surface, decorative circles,
+   wordmark, short supportive copy.
+══════════════════════════════════════════════════════════════════════════ */
+
+.check-email-panel {
+  position: relative;
+  background: var(--color-nav-bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 64px 56px;
+}
+
+.check-email-panel__circle {
+  position: absolute;
+  border-radius: 50%;
+  border: 64px solid rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.check-email-panel__circle--large {
+  width: 500px;
+  height: 500px;
+  top: -160px;
+  right: -160px;
+}
+
+.check-email-panel__circle--small {
+  width: 280px;
+  height: 280px;
+  bottom: -80px;
+  left: -80px;
+}
+
+.check-email-panel__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.check-email-panel__wordmark {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: var(--color-nav-text);
+  margin: 0;
+}
+
+.check-email-panel__tagline {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  color: var(--color-nav-text);
+  margin: 0;
+}
+
+.check-email-panel__description {
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0;
+  max-width: 340px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CONTENT PANEL (right)
+   Centered column with the heading, body copy, resend, and CTA.
+══════════════════════════════════════════════════════════════════════════ */
+
+.check-email-form-panel {
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+}
+
+.check-email-form-panel__inner {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.check-email-form-panel__mobile-brand {
+  display: none;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  color: var(--color-text-primary);
+  margin: 0 0 28px;
+}
+
+/* ── Heading + body copy ─────────────────────────────────────────────── */
+
+.check-email__heading {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--color-text-primary);
+  margin: 0 0 12px;
+}
+
+.check-email__message {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  margin: 0 0 12px;
+}
+
+/* User's email echoed inside the message — emphasized without shouting.
+   word-break keeps long addresses from overflowing the 400px column. */
+.check-email__email {
+  color: var(--color-accent-text);
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.check-email__hint {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ── Resend section ──────────────────────────────────────────────────── */
+/* Margin above/below separates it from the main copy and the CTA below */
+
+.check-email__resend {
+  margin: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Ghost/secondary button — transparent bg, bordered, secondary text.
+   Visually subordinate to .check-email__cta so users don't mistake it
+   for the primary action. */
+.check-email__resend-button {
+  width: 100%;
+  height: 44px;
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.check-email__resend-button:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
+}
+
+.check-email__resend-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Single status line under the button. Copy carries the meaning — no
+   success-vs-error color coding to keep it calm. */
+.check-email__resend-message {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ── Primary CTA ─────────────────────────────────────────────────────── */
+/* Matches .signup-form__submit / .signin-form__submit — same height,
+   radius, weight, accent background. It's a react-router Link rather
+   than a button, so anchor defaults are reset and the content is
+   centered via flex. */
+
+.check-email__cta {
+  width: 100%;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-green);
+  color: var(--color-nav-text);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-sans);
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  box-sizing: border-box;
+}
+
+.check-email__cta:hover {
+  background: var(--color-green-dark);
+}
+
+/* ── Footer link ─────────────────────────────────────────────────────── */
+
+.check-email__footer {
+  margin: 24px 0 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.check-email__footer-link {
+  font-weight: 700;
+  color: var(--color-green);
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.check-email__footer-link:hover {
+  opacity: 0.75;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 860px) {
+  .check-email-page {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .check-email-panel {
+    display: none;
+  }
+
+  .check-email-form-panel {
+    padding: 56px 24px 72px;
+    align-items: flex-start;
+  }
+
+  .check-email-form-panel__mobile-brand {
+    display: block;
+  }
+
+  .check-email-form-panel__inner {
+    max-width: 420px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .check-email-form-panel {
+    padding: 40px 20px 56px;
+  }
+}

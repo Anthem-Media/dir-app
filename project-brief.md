@@ -1,8 +1,8 @@
 # DIR (Diamond in the Rough) — Project Brief
 
-**Working Name:** DIR (Diamond in the Rough)
+**Working Name:** DIR (Diamond in the Rough) — NOT YET LOCKED. May change before beta.
 **Tagline:** "Think inside the box."
-**Last Updated:** April 22, 2026
+**Last Updated:** April 23, 2026
 
 ---
 
@@ -119,7 +119,7 @@ Both yes  →  show box profile
 - **Pull rates:** Manufacturer-published odds from packaging and official sites (Topps, Panini, Upper Deck). Cross-reference Beckett, Cardboard Connection, Chasing Majors, and Checklist Insider. TCDB does not publish pull rates. Chasing Majors and Checklist Insider provide format-level odds (Hobby vs Jumbo vs Blaster etc.) — required for the format switcher feature.
 - **Box pricing:** eBay sold listings for sealed box market prices.
 - **Release dates / MSRP:** TCDB (tcdb.com) — each box set name links directly to its TCDB page. Use as fallback when release date or MSRP is not found on Cardboard Connection, Beckett, or Baseballcardpedia.
-- **Images:** Don't let images block data entry. Enter data first, leave image_url blank. Primary image source is distributor product feeds (Dave & Adam's, Blowout Cards, Steel City, etc.) — clean, standardized, high-res box art pulled automatically as a byproduct of price scraping, same method Waxstat uses for their 27k+ box library. eBay API (Phase 15) is the fallback for boxes no distributor carries. Manufacturer sites are a tertiary source. Placeholder images acceptable for beta. Images are never manually sourced.
+- **Images:** Don't let images block data entry. Enter data first, leave image_url blank. Primary image source is distributor product feeds (Dave & Adam's, Blowout Cards, Steel City, etc.) — clean, standardized, high-res box art pulled automatically as a byproduct of price scraping, same method Waxstat uses for their 27k+ box library. eBay API is the fallback for boxes no distributor carries. Manufacturer sites are a tertiary source. Placeholder images acceptable for beta. Images are never manually sourced.
 
 ### Data Entry Sources by Sport
 - **Baseball:** Cardboard Connection, Beckett, Baseballcardpedia, TCDB (release date / MSRP fallback)
@@ -170,7 +170,7 @@ Each `box_sets` row uses a slug as its linking key (e.g. `2024-topps-chrome-base
 Export each spreadsheet tab as a CSV file. Import into Supabase using the table editor's CSV import button — no raw SQL required. Import in dependency order: `box_sets` first, then `cards` and `pull_rates` (both reference `box_set_id` and require box_sets rows to exist first). One CSV per table, not one combined file.
 
 **Step 5 — eBay API fills pricing**
-After import, the eBay API proof of concept script (Phase 12) prices out individual cards by name. The full pipeline (Phase 15) automates this at scale with scheduled refresh. `current_value` on `cards` and `current_market_price` on `box_sets` populate automatically. EV and ROI calculate from those values. Do not begin full seeding until the end-to-end pipeline test with 2024 Topps Chrome Baseball passes completely.
+After import, the eBay API proof of concept script prices out individual cards by name. The full pipeline automates this at scale with scheduled refresh. `current_value` on `cards` and `current_market_price` on `box_sets` populate automatically. EV and ROI calculate from those values. Do not begin full seeding until the end-to-end pipeline test with 2024 Topps Chrome Baseball passes completely.
 
 ### Data Entry Maintenance
 - During beta: 5-10 hours/week (Zach only)
@@ -182,12 +182,12 @@ After import, the eBay API proof of concept script (Phase 12) prices out individ
 - **Pull rates — scraper first, hybrid fallback:** Primary approach is a Claude Code-written scraper targeting Cardboard Connection (and Chasing Majors for format-level odds). If the scraper hits walls or produces messy output, fall back to the hybrid method: paste raw published odds into Claude, Claude structures it to match the pull_rates schema, output to spreadsheet, bulk import. Do not manually organize pull rate tables.
 - **Test before full seed:** Before seeding all sports, run a complete end-to-end pipeline test with one box set (2024 Topps Chrome Baseball — already in schema as example data). Confirm EV, ROI, checklist, format switcher, and charts all work with real data. Only proceed to full seed once this passes.
 - **Data accuracy pre-beta:** Accurate numbers do not matter until the eBay API is live. Only Zach and Cam see the app during this phase. Focus on pipeline correctness, not data completeness.
-- **Admin panel:** Form-based interface (Phase 11) so data entry never requires raw SQL after initial seeding.
+- **Admin panel:** Form-based interface so data entry never requires raw SQL after initial seeding.
 - **Post-automation:** Data engineer hire on Upwork ($15-25/hr, ~10hrs/week) once revenue justifies it. Until then, the pipeline must be founder-operable.
 
 ---
 
-## Card Categories (Updated)
+## Card Categories
 
 The following categories are used in the database. "Case hit" is a boolean flag on individual cards, not a separate category.
 
@@ -218,11 +218,13 @@ Tier system:
 
 ## Tech Stack
 
-- **Frontend:** React, deployed on Vercel (shareable beta URL from day one)
+- **Frontend:** React, deployed on Vercel (live URL: dir-app-weld.vercel.app until custom domain is purchased)
 - **Backend:** Python or Node.js, deployed on Railway or Render (free tier to start)
-- **Database:** Supabase (managed PostgreSQL — scales from free tier to enterprise, see SCALING-REFERENCE.md)
-- **Auth:** Supabase Auth (handles sign up, sign in, sessions, password reset, email verification). Supabase Auth manages passwords in its own `auth.users` table. Our `users` table becomes a profile table (display_name, plan, email_opt_in) linked by Supabase user ID. No passwords are stored in our `users` table.
-- **Payments:** Stripe (web only — all subscription management and billing handled on DIRapp.com). No Stripe integration during beta.
+- **Database:** Supabase (managed PostgreSQL — scales from free tier to enterprise, see SCALING-REFERENCE.md). Free tier active now; upgrade to Supabase Pro ($25/mo, 8GB storage) planned for when full eBay API pipeline and data seeding begins.
+- **Auth:** Supabase Auth (handles sign up, sign in, sessions, password reset, email verification). Supabase Auth manages passwords in its own `auth.users` table. Our `users` table becomes a profile table (display_name, plan, email_opt_in) linked by Supabase user ID. No passwords are stored in our `users` table. **Current state:** Supabase client configured at `src/api/supabaseClient.js`. Sign Up, Sign In, and CheckEmailPage all wired and tested locally. Auth context, protected routes, sign out, and password reset are still in progress. Google OAuth on Sign Up and Sign In is placeholder only — deferred. Email verification is temporarily OFF during development (see below).
+- **Email delivery:** Supabase default SMTP is DEV-TIER ONLY (2 emails/hour, hit during testing). Custom SMTP via Resend is a hard beta requirement and is tracked in PRE-BETA-CHECKLIST.md. Requires owning a domain (blocked on name lock). Until custom SMTP is configured, email verification is turned OFF in Supabase so development and beta testing are not blocked.
+- **Auth emails:** Default Supabase template in use during development. Pre-launch: customize template with branded design in Supabase dashboard, then configure custom SMTP via Resend so auth emails come from a branded sender address on the final domain.
+- **Payments:** Stripe (web only — all subscription management and billing handled on the final domain). No Stripe integration during beta.
 - **AI Vision:** Claude API (photo → structured JSON → box match)
 - **AI Summaries:** Claude API (price data → plain English trend summary) — post-launch feature
 - **Data pipeline:** Cowork (source document generation + spreadsheet structuring), Claude Code (slug-bridge import script, pull rate scraper, eBay API integration)
@@ -231,7 +233,7 @@ Tier system:
 
 ## Business Context
 
-- **Working name:** DIR (Diamond in the Rough)
+- **Working name:** DIR (Diamond in the Rough) — NOT YET LOCKED. Name may change before beta. dirapp.com is in a $3,600 premium tier. Development continues name-agnostic.
 - **Founders:** Zach Seabolt (technical, 50%) and Cam Gibson (business, 50%)
 - **Partnership agreement:** Drafted and ready for signatures
 - **Strategy:** Leaning build-to-run (long-term operation). Not finalized but mindset has shifted from original build-to-sell framing.
@@ -240,9 +242,10 @@ Tier system:
 - **Beta access model — LOCKED:** Auth required from day one. All beta signups get `plan = 'beta'` with full premium access. No Stripe during beta. Paywall accepts `'beta'` OR `'paid'`. See Beta Access Model section above.
 - **Price range if subscription:** $4.99-$9.99/mo range
 - **Buy Now / affiliate system:** Price comparison with multiple distributors on box profile pages. Starts with 1-2 distributors, grows over time. Boxes without distributor listings fall back to "Find on eBay" affiliate link. Every box profile has a monetization path. System built but launches empty — populated when Cam has distributor partnerships (during beta). New database tables needed: `distributors` and `distributor_listings`.
-- **eBay Partner Network:** Free to join, 1-4% commission (collectibles 3-4%), 24-hour cookie. Sign up when real data is live (Phase 10-12). Don't apply with dummy data.
+- **eBay Partner Network:** Free to join, 1-4% commission (collectibles 3-4%), 24-hour cookie. Sign up when real data is live. Don't apply with dummy data.
 - **Distributor outreach:** No conversations until app is ready for launch or in beta. Cam handles all distributor relationships.
-- **Email list:** All user emails are owned and stored in the database. Sign-up form includes email opt-in checkbox (`email_opt_in` boolean on users table). A verified, opt-in email list of active sports card collectors is a valuable asset for marketing and for acquisition value. Captured from day one during beta.
+- **Email list:** All user emails are owned and stored in the database. Sign-up form includes email opt-in checkbox (`email_opt_in` boolean on users table). A verified, opt-in email list of active sports card collectors is a valuable asset for marketing and for acquisition value. Captured from day one during beta. (Note: email opt-in is UNCHECKED by default on the signup form — user must actively opt in.)
+- **Domain:** Not yet owned. Blocked on name lock. Once final name is chosen, buy immediately — domain squatting risk on promising product names.
 - **Legal structure:** LLC deferred until demand is validated
 - **Competitive advantage:** First and only box-level analytics tool for sports cards. Waxstat does box price comparison but NOT analytics/EV/ROI.
 - **Distribution:** Starts with local card stores. Cam has direct access to the target audience through hobby network. Scales from local to broader during/after beta.
@@ -251,9 +254,22 @@ Tier system:
 
 ---
 
+## Scaling Principles
+
+Scale is a first-class design concern, not an afterthought. Cam's distribution network has millions of engagement impressions — a successful launch could produce thousands of users in an hour. Every feature and every third-party service must hold up under that.
+
+**Process rules:**
+
+1. **Every new feature gets a scale-stress walkthrough** as part of its audit. Mandatory question: "What happens at 100 concurrent users? 10,000? 100,000? Where does this specific feature break, and at what scale?"
+2. **Every new third-party service gets a pre-integration scale-check.** Rate limits, pricing tiers, upgrade paths. Documented in SCALING-REFERENCE.md before the service is added to the stack, not after.
+3. **A full scale audit session happens after the auth phase closes.** Every feature, every third-party service, every database table evaluated at the 100/1k/10k/100k user ceilings. Findings flow into SCALING-REFERENCE.md as a living document and into PRE-BETA-CHECKLIST.md as blocking items.
+4. **Testing at scale before launch.** Burst tests simulating realistic flash crowds on signup, signin, box profile loads, and search. If it can't handle 100 concurrent users, it can't handle a real launch.
+
+---
+
 ## iOS App — Hard Architectural Requirements
 
-The DIR iOS app is authentication only. There is no free tier, no in-app signup flow, and no in-app purchase system. All user acquisition and payment happens exclusively on the web at DIRapp.com through Stripe.
+The iOS app is authentication only. There is no free tier, no in-app signup flow, and no in-app purchase system. All user acquisition and payment happens exclusively on the web at the final domain through Stripe.
 
 The app opens to a login screen with a single line directing users without credentials to the website. Once authenticated, users have full premium access. Without credentials the app has no usable functionality.
 
@@ -281,6 +297,21 @@ The database schema supports all sports from day one. The UI supports all sports
 
 ---
 
+## Pre-Launch Polish (before public launch)
+
+**All deferred loose ends are tracked in `PRE-BETA-CHECKLIST.md`.** Walk that file end-to-end before flipping the switch on beta. Key areas include:
+
+1. **Name & Domain** — lock the final name, buy the domain, update all references
+2. **Email infrastructure** — decide email verification policy, set up custom SMTP via Resend (required), customize branded email templates
+3. **Auth flow polish** — decide on Google OAuth, improve post-login redirect, build password reset flow
+4. **Database schema amendments** — apply all pending changes documented in the checklist
+5. **Data seeding** — end-to-end test with one box set, then full seed
+6. **eBay integration** — proof of concept, Partner Network signup, full pipeline
+7. **Infrastructure scaling** — Supabase Pro upgrade, scale audit session
+8. **Pro code audits** — three scheduled audits against $5k budget
+
+---
+
 ## Future Features (Post-MVP Roadmap)
 
 In rough priority order:
@@ -303,11 +334,11 @@ In rough priority order:
 ## Design Direction
 
 - **Aesthetic:** Clean and minimal, inspired by StockX
-- **Color scheme:** Dark mode — background #111214, accent #7c6fff (purple), positive financial indicators #16a34a (green). All colors are CSS variables in index.css. May evolve post-beta based on user feedback — CSS variables make this a one-file change.
-- **Logo:** TBD — will be designed
+- **Color scheme:** Dark mode — background #111214, accent #7c6fff (purple), positive financial indicators #16a34a (green), error states use `--color-red` / `--color-red-bg` / `--color-red-border` (red tint). All colors are CSS variables in index.css. May evolve post-beta based on user feedback — CSS variables make this a one-file change.
+- **Logo:** TBD — depends on final name lock
 - **UI approach:** Layered complexity — casual users see top-level info (top chases, ROI score), serious investors can drill into full data (checklist, price history, pull rate math)
 - **Browse experience:** Dedicated browse page at `/browse` with StockX-style layout — filter sidebar on the left (Sport → Manufacturer → Year → Format), results grid on the right. Filters use URL query parameters so every combination is shareable. Header nav links route to the browse page with filters pre-applied.
-- **Routing:** React Router. All routes: `/` (home), `/browse` (browse/filter), `/box/:slug` (box profile), `/about`, `/news`, `/contact`, `/help`, `/signin`, `/signup`.
+- **Routing:** React Router. All routes: `/` (home), `/browse` (browse/filter), `/box/:slug` (box profile), `/about`, `/news`, `/contact`, `/help`, `/signin`, `/signup`, `/check-email`.
 
 ---
 
@@ -325,14 +356,16 @@ In rough priority order:
 3. **Start every Claude session by loading project context** (handled by Project pinned files)
 4. **One job per file** — components render UI, hooks fetch data, utils calculate/format
 5. **Maintain this project-brief.md** — update it as decisions are made
-6. **Ask Claude to audit and refactor periodically** — every handful of features
-7. **Commit to GitHub frequently** with descriptive commit messages
-8. **Step by step guidance required** — Zach is not a developer, explain everything from first principles
-9. **No hacky workarounds** — if something needs a shortcut to work, flag it and find the right solution. A future developer shouldn't have to untangle clever hacks.
-10. **Comment non-obvious code** — if a piece of logic isn't self-explanatory, add a brief comment explaining what it does and why
-11. **Keep dependencies minimal** — don't install packages for things that can be done simply. Every dependency is something a future dev has to understand and maintain.
-12. **Use CSS variables for ALL colors** — no hardcoded hex values in any component or CSS file. All color values live in index.css only.
-13. **Never commit secrets** — API keys, database passwords, Supabase service keys, Stripe keys all go in `.env.local` (local dev) and Vercel environment variables (production). `.env.local` must be in `.gitignore`. No exceptions.
+6. **Maintain PRE-BETA-CHECKLIST.md** — add items the moment something is deferred, do not rely on memory
+7. **Ask Claude to audit and refactor periodically** — every handful of features
+8. **Commit to GitHub frequently** with descriptive commit messages
+9. **Step by step guidance required** — Zach is not a developer, explain everything from first principles
+10. **No hacky workarounds** — if something needs a shortcut to work, flag it and find the right solution. A future developer shouldn't have to untangle clever hacks.
+11. **Comment non-obvious code** — if a piece of logic isn't self-explanatory, add a brief comment explaining what it does and why
+12. **Keep dependencies minimal** — don't install packages for things that can be done simply. Every dependency is something a future dev has to understand and maintain.
+13. **Use CSS variables for ALL colors** — no hardcoded hex values in any component or CSS file. All color values live in index.css only.
+14. **Never commit secrets** — API keys, database passwords, Supabase service keys, Stripe keys all go in `.env.local` (local dev) and Vercel environment variables (production). `.env.local` must be in `.gitignore`. No exceptions.
+15. **Every new feature gets a scale-stress walkthrough** in its audit — what breaks at 100, 10k, 100k users? Document findings in SCALING-REFERENCE.md and add risk items to PRE-BETA-CHECKLIST.md.
 
 ---
 
@@ -352,6 +385,7 @@ Zach Seabolt is a mix engineer based in Tennessee with no formal coding or devel
 - **GitHub repo:** github.com/Anthem-Media/dir-app
 - **Frontend tooling:** Vite v8.0.3 + React
 - **Project location on disk:** ~/Desktop/dir-app
+- **Live Vercel URL:** dir-app-weld.vercel.app (temporary — will move to final domain once purchased)
 - **Claude tools:** Claude Pro subscription, Claude Code (Sonnet for UI/mechanical tasks, Opus for auth/database/backend), Cowork
 
 ### Project Folder Structure (established)
@@ -359,10 +393,10 @@ Zach Seabolt is a mix engineer based in Tennessee with no formal coding or devel
 dir-app/
 ├── src/
 │   ├── components/    # Reusable UI pieces (buttons, cards, charts, nav)
-│   ├── pages/         # Full page views (BoxProfilePage, SearchPage, etc.)
+│   ├── pages/         # Full page views (BoxProfilePage, SignInPage, SignUpPage, CheckEmailPage, etc.)
 │   ├── hooks/         # Data fetching logic
 │   ├── utils/         # Helper functions (calculations, formatting)
-│   ├── api/           # Backend communication (Supabase client)
+│   ├── api/           # Backend communication (Supabase client: supabaseClient.js)
 │   ├── App.jsx
 │   ├── App.css
 │   ├── main.jsx
@@ -382,10 +416,14 @@ Three commands to save and push changes:
 
 ### Current Status
 - UI polish pass complete across all pages
-- Auth phase starting (roadmap item #7)
+- Auth phase in progress (roadmap item #7):
+  - Supabase project, env vars, `supabaseClient.js`, and Supabase client library all set up
+  - Sign Up wired and tested; Sign In wired and tested locally; CheckEmailPage built with resend flow
+  - Email verification temporarily OFF in Supabase (blocked on custom SMTP / domain purchase)
+  - Next: commit pending changes, build auth context, protected routes, sign out
 - Dark mode color scheme implemented and deployed
-- All colors are CSS variables — no hardcoded hex in codebase
-- See CONTEXT.md for full task list and detailed progress tracking
+- All colors are CSS variables — no hardcoded hex in codebase (except Recharts chart constants, documented in-file)
+- See CONTEXT.md for full task list and PRE-BETA-CHECKLIST.md for every deferred item
 
 ---
 
@@ -395,11 +433,4 @@ See pinned file: `dir_database_schema.sql`
 
 The schema is complete with 13 tables, indexes, views, seed data, and example data. Do not rebuild from scratch — modify the existing schema.
 
-**Pending schema amendments (apply during database phase):**
-- Add `circulation_status VARCHAR(20) DEFAULT 'unknown'` to the `cards` table. Values: `unknown`, `in_circulation`, `pulled_sold`. Powers the Grails tab circulation status badge. Only meaningful for cards with `print_run` ≤ 10.
-- Add `parent_set_id INT REFERENCES box_sets(id) NULL` to the `box_sets` table. Groups all formats of the same set together (Hobby, Jumbo, Blaster, Mega, Retail). Powers the format switcher on the box profile page. NULL means no related formats exist.
-- Add `distributors` table for the Buy Now affiliate system.
-- Add `distributor_listings` table for the Buy Now affiliate system.
-- Add `email_opt_in BOOLEAN DEFAULT FALSE` to the `users` table. Captured from signup form checkbox.
-- Remove `password_hash` column from the `users` table. Supabase Auth manages passwords in its own `auth.users` table. Our `users` table becomes a profile table linked to Supabase auth users by ID.
-- Update `plan` column on `users` table to accept `'beta'` as a valid value alongside `'free'` and `'paid'`.
+**All pending schema amendments are tracked in `PRE-BETA-CHECKLIST.md` section #4.** Do not apply piecemeal — handle all together when the database phase begins.

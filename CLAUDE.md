@@ -4,22 +4,26 @@
 
 A sports card box analytics web app. Users look up any box set and see the full checklist, card values, pull rates, expected value, ROI, and market trends. Built around the box, not individual cards. No other tool does this.
 
+Working name is "DIR" — not yet final. Development is name-agnostic; name will lock before beta.
+
 ## Key Files
 
 - `project-brief.md` — Full project brief (read this for detailed context on features, data strategy, business context)
 - `CONTEXT.md` — Current status, what's done, what's next
+- `PRE-BETA-CHECKLIST.md` — Every deferred item that must be addressed before beta launch. Read when work gets deferred OR when preparing for beta.
 - `REFERENCES.md` — Design and competitor references
-- `SCALING-REFERENCE.md` — Infrastructure scaling roadmap
+- `SCALING-REFERENCE.md` — Infrastructure scaling roadmap (scheduled for expansion during the scale audit session)
 - `requirements.md` — Hard platform and architectural requirements (iOS app model, payment, access rules)
 - `dir_database_schema.sql` — PostgreSQL schema with 13 tables, views, seed data
 
 ## Tech Stack
 
-- Frontend: React + Vite, deployed on Vercel
+- Frontend: React + Vite, deployed on Vercel (live URL: dir-app-weld.vercel.app)
 - Backend: TBD (Python or Node.js), deployed on Railway or Render
-- Database: Supabase (managed PostgreSQL)
-- Auth: Supabase Auth (planned)
-- Payments: Stripe (web only — all billing handled on DIRapp.com, never in the iOS app)
+- Database: Supabase (managed PostgreSQL — free tier now, Pro planned when full seeding begins)
+- Auth: Supabase Auth (Sign Up, Sign In, and CheckEmailPage all wired; auth context, protected routes, sign out, password reset still in progress)
+- Email delivery: Supabase default SMTP for dev only (2 emails/hour limit). Custom SMTP via Resend is a hard requirement for beta — tracked in PRE-BETA-CHECKLIST.md.
+- Payments: Stripe (web only — all billing handled on final domain, never in the iOS app; not wired until post-beta)
 - AI: Claude API for photo scan (box identification) and trend summaries (post-launch)
 
 ## Folder Structure
@@ -27,10 +31,10 @@ A sports card box analytics web app. Users look up any box set and see the full 
 ```
 src/
 ├── components/    # Reusable UI pieces (buttons, cards, charts, nav)
-├── pages/         # Full page views (BoxProfilePage, SearchPage, etc.)
+├── pages/         # Full page views (BoxProfilePage, SignInPage, SignUpPage, CheckEmailPage, etc.)
 ├── hooks/         # Data fetching logic
 ├── utils/         # Helper functions (calculations, formatting)
-├── api/           # Backend communication
+├── api/           # Backend communication (supabaseClient.js lives here)
 ```
 
 ## Codebase Rules — Follow These Always
@@ -45,6 +49,8 @@ src/
 6. Comment non-obvious code — explain what it does and why
 7. Keep dependencies minimal — don't install packages for things that can be done simply
 8. Use CSS variables for ALL colors — no hardcoded hex values anywhere in components or CSS files
+9. Never commit secrets — API keys, passwords, Supabase service keys all go in `.env.local` (local) and Vercel env vars (production). `.env.local` is gitignored by the `*.local` rule.
+10. Every new feature and third-party integration gets a scale-stress walkthrough as part of its audit — ask what breaks at 100, 10k, 100k concurrent users before shipping.
 
 ## Color Scheme
 
@@ -60,6 +66,9 @@ Dark mode. All colors defined as CSS variables in index.css — never hardcode h
 - Accent background: `--color-accent-bg` (#2a2560)
 - Accent text: `--color-accent-text` (#a89fff)
 - Positive financial indicators: `--color-positive` (#16a34a) — intentionally green, do not change to accent purple
+- Error text: `--color-red`
+- Error background tint: `--color-red-bg`
+- Error border: `--color-red-border`
 
 ## About the Developer
 
@@ -78,6 +87,26 @@ git push
 Fully paid box profiles. Free browsing experience on web only (homepage, browse page, search, filtering, scrolling through box sets). Paywall triggers when user clicks into a box profile page. Auth system must enforce this gating. All payment via Stripe on the web.
 
 iOS app is auth-only — no in-app purchases, no signup flow, no free tier. See requirements.md.
+
+## Beta Access Model
+
+Auth is required from day one. All beta signups get `plan = 'beta'` with full premium access. No Stripe during beta. Paywall logic must accept `plan IN ('beta', 'paid')`. Post-beta, new signups default to `'free'` and must upgrade to `'paid'` via Stripe. See CONTEXT.md for full detail.
+
+Email verification is temporarily OFF during development (Supabase's default 2/hour rate limit blocks real testing). Turns back on when custom SMTP via Resend is wired. See PRE-BETA-CHECKLIST.md.
+
+## Auth Setup (current state)
+
+- Supabase project created. Keys live in `.env.local` locally and Vercel env vars for production.
+- Supabase client lives at `src/api/supabaseClient.js`. Import from there anywhere you need Supabase: `import { supabase } from '../api/supabaseClient'`.
+- Env var names: `VITE_SUPABASE_URL` (bare URL, no `/rest/v1/`), `VITE_SUPABASE_ANON_KEY` (the "Publishable key" in Supabase).
+- Supabase Site URL and Redirect URLs are configured for dir-app-weld.vercel.app + localhost:5173. Update when production URL changes.
+- Sign Up page is wired: email/password signup with validation, `display_name` + `email_opt_in` passed as user metadata, inline error messages styled with `--color-red` family variables, redirects to `/check-email` on success.
+- Sign In page is wired: email/password sign-in, validation, error display, redirects to `/` on success.
+- CheckEmailPage at `/check-email`: post-signup destination, displays user's email (via route state), resend confirmation button, graceful fallback when URL hit directly. Styled to match SignIn/SignUp split-panel layout.
+- `users` profile table does NOT exist yet. During Sign Up, user metadata (`display_name`, `email_opt_in`) is stored in `auth.users.raw_user_meta_data`. When the users profile table is created in the database phase, it links to Supabase's `auth.users` via the auth user ID — no passwords stored on our side.
+- Google OAuth buttons on Sign Up and Sign In are placeholder only. Deferred decision: wire it up or remove. See PRE-BETA-CHECKLIST.md #3.1.
+- Password reset flow: "Forgot password?" link is a dead link placeholder. Reset flow is deferred in the auth phase — blocked on custom SMTP for reliable reset emails.
+- Supabase auth emails use the default Supabase template. Pre-launch: customize template with DIR (or final name) branding in Supabase dashboard, configure custom SMTP via Resend so emails come from a branded sender. See PRE-BETA-CHECKLIST.md section #2.
 
 ## Data Coverage
 
@@ -122,7 +151,9 @@ React Router handles all navigation. Routes defined in App.jsx:
 - `/` — Homepage
 - `/browse` — Browse page (filter sidebar + results grid)
 - `/box/:slug` — Box profile page (slug from box_sets table)
-- `/about`, `/news`, `/contact`, `/help`, `/signin`, `/signup` — Landing pages
+- `/about`, `/news`, `/contact`, `/help` — Landing pages
+- `/signin`, `/signup` — Auth pages
+- `/check-email` — Post-signup confirmation destination (not in header nav — it's a flow state)
 
 Browse page filter system:
 - Dedicated page at `/browse` with StockX-style layout
@@ -135,26 +166,23 @@ Browse page filter system:
 
 ## Schema Notes
 
-Current schema has 13 tables and 2 views. Pending amendments to apply during database phase:
-
-1. **Add `circulation_status` to `cards` table** — `VARCHAR(20) DEFAULT 'unknown'`. Values: `unknown`, `in_circulation`, `pulled_sold`. Powers Grails tab circulation status badge. Only meaningful for cards with `print_run` ≤ 10.
-
-2. **Add `parent_set_id` to `box_sets` table** — `INT REFERENCES box_sets(id) NULL`. Groups all formats of the same set together. Used by the format switcher on the box profile page. NULL means no related formats exist.
-
-3. **Add `distributors` table** — distributor name, website, logo, affiliate URL pattern.
-
-4. **Add `distributor_listings` table** — which distributor has which box, at what price, with what affiliate link.
+Current schema has 13 tables and 2 views. All pending amendments are tracked in PRE-BETA-CHECKLIST.md section #4. Do not apply piecemeal — handle all together when the database phase begins.
 
 Buy Now system: price comparison with multiple distributors. Fallback to "Find on eBay" affiliate link when no distributor carries a box.
 
 ## Current Status
 
-- Box Profile features complete: format switcher, tier price trend chart, checklist expand/collapse, card search within tiers, Grails tab, tier sort order, soccer added to nav
-- Consolidation audit passed — all five features verified clean together, no conflicts, no rule violations
+- UI polish pass complete across all pages
+- Auth phase in progress (roadmap item #7):
+  - Supabase project, env vars, and client library all set up
+  - `src/api/supabaseClient.js` created
+  - Sign Up page fully wired and tested
+  - Sign In page fully wired and tested locally
+  - CheckEmailPage built with resend flow
+  - Next (after unblocking email testing): build auth context, header nav updates, protected routes, sign out
 - All colors are CSS variables — no hardcoded hex values in codebase (Recharts SVG exception documented in TierPriceTrendChart.jsx and PriceTrendChart.jsx)
-- Box Profile visual polish pass is next, then page-by-page: Header/Nav → Homepage → Browse → About → News → Help → Contact → Sign In → Sign Up
-- End every page session with a code audit before committing
-- See CONTEXT.md for full task list and detailed status
+- End every page/feature session with a code audit before committing
+- See CONTEXT.md for full task list, detailed status, and PRE-BETA-CHECKLIST.md for all deferred items
 
 ## Known Refactor Tasks (database phase)
 
@@ -162,3 +190,4 @@ Buy Now system: price comparison with multiple distributors. Fallback to "Find o
 - `DUMMY_FORMAT_DATA` drives `formatData` in `BoxProfilePage.jsx` — needs to come from `useBoxProfile` once `parent_set_id` is live on `box_sets`.
 - `useBoxProfile` hook has orphaned `MOCK_PULL_RATES` data — at database phase, pull rates must return from the hook keyed by format slug so the format switcher can request per-format odds.
 - Tier numbering in `dir_database_schema.sql` needs to be flipped so Tier 1 = Premium Hits and Tier 5 = Base/Rookies. Once done, update `sortTiersByValue` in `checklistUtils.js` to sort ascending instead of descending.
+- Sign Up and Sign In pages currently call `supabase.auth.signUp()` and `supabase.auth.signInWithPassword()` directly from page handlers. When the auth context is built, consider refactoring these into a dedicated auth hook for consistency with the codebase rule that data-fetching lives in hooks, not components.

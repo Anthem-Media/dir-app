@@ -15,6 +15,7 @@
  *   /faq             → FaqPage
  *   /signin          → SignInPage
  *   /signup          → SignUpPage
+ *   /check-email     → CheckEmailPage  (post-signup confirmation landing — not in nav)
  */
 
 import { Routes, Route } from 'react-router-dom';
@@ -33,6 +34,7 @@ import { HelpPage }       from './pages/HelpPage';
 import { FaqPage }        from './pages/FaqPage';
 import { SignInPage }     from './pages/SignInPage';
 import { SignUpPage }     from './pages/SignUpPage';
+import { CheckEmailPage } from './pages/CheckEmailPage';
 
 import { NAV_TABS } from './utils/navMockData';
 
@@ -51,8 +53,9 @@ function App() {
           <Route path="/contact"   element={<ContactPage />} />
           <Route path="/help"      element={<HelpPage />} />
           <Route path="/faq"       element={<FaqPage />} />
-          <Route path="/signin"    element={<SignInPage />} />
-          <Route path="/signup"    element={<SignUpPage />} />
+          <Route path="/signin"      element={<SignInPage />} />
+          <Route path="/signup"      element={<SignUpPage />} />
+          <Route path="/check-email" element={<CheckEmailPage />} />
         </Routes>
       </main>
       <SiteFooter />
