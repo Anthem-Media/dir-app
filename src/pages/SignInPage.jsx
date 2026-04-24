@@ -16,7 +16,7 @@
  */
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../api/supabaseClient';
 import './SignInPage.css';
 
@@ -32,6 +32,15 @@ export function SignInPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Reset-success banner is shown only when this page was reached from
+  // ResetPasswordPage, which navigates here with { state: { resetSuccess: true } }.
+  // Captured once on first mount via the lazy initializer — subsequent
+  // re-renders (e.g. as the user types) don't re-read route state, so the
+  // banner stays stable while visible. Navigating away and back later
+  // mounts the component fresh with no such state, so it doesn't persist.
+  const [showResetSuccess] = useState(() => Boolean(location.state?.resetSuccess));
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -126,6 +135,13 @@ export function SignInPage() {
 
           <form className="signin-form" onSubmit={handleSubmit} noValidate>
 
+            {/* Reset-success banner — one-time message after a password reset */}
+            {showResetSuccess && (
+              <p className="auth-success-banner" role="status">
+                Password updated. Sign in with your new password.
+              </p>
+            )}
+
             {/* Email */}
             <div className="signin-form__field">
               <label className="signin-form__label" htmlFor="signin-email">Email</label>
@@ -144,10 +160,9 @@ export function SignInPage() {
             <div className="signin-form__field">
               <div className="signin-form__label-row">
                 <label className="signin-form__label" htmlFor="signin-password">Password</label>
-                {/* TODO: Forgot password flow — wire up to supabase.auth.resetPasswordForEmail() when the password reset page exists (later auth phase step). */}
-                <a href="#" className="signin-form__forgot" onClick={(e) => e.preventDefault()}>
+                <Link to="/forgot-password" className="signin-form__forgot">
                   Forgot password?
-                </a>
+                </Link>
               </div>
               <div className="signin-form__password-wrap">
                 <input
