@@ -9,14 +9,14 @@
 ## 1. Name & Domain
 
 ### 1.1 Lock the product name
-- **Status:** Open — "DIR" is the working name, not locked
+- **Status:** ✅ CLOSED — Final name is "Ripper". Codebase rename to Ripper is scheduled right before Pro code audit #1 (not urgent).
 - **Why deferred:** Name change is a high-stakes decision and dirapp.com is in a $3,600 premium tier, which makes the current name costly to commit to
 - **Done when:** Final name chosen and committed to across all documentation, UI copy, and marketing plans
 - **Dependencies:** Nothing — this is a product decision
 - **Blocks:** Domain purchase, custom SMTP, branded email templates, logo design
 
 ### 1.2 Buy the domain
-- **Status:** Not owned
+- **Status:** ✅ CLOSED — hobbyripper.com purchased through Cloudflare. DNS control confirmed. Cloudflare account registered.
 - **Why deferred:** Waiting on final name decision
 - **Done when:** Domain purchased, DNS control confirmed, registered to an account both partners can access
 - **Dependencies:** Name lock (#1.1)
@@ -36,6 +36,7 @@
 - **Status:** Currently ON but untenable on Supabase's default email service (2/hour rate limit hit during testing)
 - **Why deferred:** Requires custom SMTP to scale past the default limits, and custom SMTP requires owning a domain
 - **Beta decision:** TEMPORARILY turning email verification OFF during development to unblock testing. Revisit when custom SMTP is live.
+- ⚠️ Known UX quirk during the off-state: SignUpPage still redirects to /check-email, which tells the user to click a verification link that doesn't exist. User is already signed in at that point. Cosmetic confusion for beta testers only. Resolves automatically when verification flips back on after SMTP is wired, OR decide during email infrastructure phase whether to remove CheckEmailPage entirely.
 - **Done when:** Final policy decided (on or off) and enforced in Supabase settings. If ON, custom SMTP must be wired and tested at scale.
 - **Dependencies:** Domain purchase (#1.2), Resend setup (#2.2)
 
@@ -86,6 +87,13 @@
 - **Why deferred:** Dedicated auth phase step — not skipped, just hasn't been reached yet in the roadmap
 - **Done when:** Full password reset flow built: request page, email with reset link, reset-password page, Supabase wiring, tested end-to-end
 - **Dependencies:** Resend setup (#2.2) for reliable email delivery
+
+### 3.4 Harden AuthContext against getSession() rejection
+- **Status:** Flagged during final auth audit — defensive improvement, not urgent
+- **Why deferred:** Supabase SDK surfaces errors through the { data, error } response rather than throwing, so the promise rejection path is rare. Worth fixing before beta but fine to batch with Pro audit #1.
+- **Details:** `supabase.auth.getSession().then()` in AuthContext.jsx has no `.catch()`. If the promise rejects (network failure, SDK exception), `loading` never flips to false and the app hangs silently — ProtectedRoute renders null forever, header auth slot stays blank.
+- **Fix:** Add `.catch(() => { setUser(null); setLoading(false); })` to the promise chain in AuthContext.jsx.
+- **Done when:** Fix applied and tested (disconnect network before load, confirm app renders signed-out state cleanly).
 
 ---
 
@@ -207,6 +215,25 @@ These amendments were decided on during UI development but deferred until the da
 - **Status:** Deferred until demand is validated
 - **Why deferred:** No revenue yet, no assets to protect, not worth the paperwork
 - **Trigger:** Revenue flowing or investors interested
+
+---
+
+## 10. Account Management Phase
+
+### 10.1 Account management feature set — DEFERRED to dedicated phase
+- **Status:** Not started — scoped but deliberately deferred
+- **Why deferred:** Most pieces are blocked on systems that don't exist yet (users profile table, Stripe, custom SMTP). Building a partial shell now would require returning multiple times to finish it, each return risking refactor of the last round. Cleaner to do it as one coherent phase after the database phase lands.
+- **Scope (what a normal app's account section includes):**
+  - Profile basics: view/edit display name, view email, change email, change password, delete account
+  - Notification preferences: email opt-in toggle, price alert settings (when alerts exist)
+  - Billing: current plan, payment method, update card, invoices, cancel subscription
+  - App data: saved boxes, collection, wishlist (separate post-launch features)
+- **Dependencies:**
+  - Editing display name / email_opt_in → requires users profile table (database phase)
+  - Change email + change password → requires custom SMTP (email infrastructure phase)
+  - All billing UI → requires Stripe (post-beta)
+- **Platform coverage:** Web, mobile web, and native iOS. iOS account page is minimal — view profile + sign out + link to web for billing changes (Apple allows this when not using IAP).
+- **Done when:** /account page exists on web with full profile editing, notification settings, and billing management (post-Stripe). iOS app has a minimal account view. Mobile UI polish pass runs concurrently with this phase since header/nav changes when account section is added.
 
 ---
 

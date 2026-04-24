@@ -1,7 +1,7 @@
 # Context
 
 ## Current State
-Auth phase in progress (roadmap item #7). Sign Up and Sign In flows wired to Supabase Auth and tested locally. Post-signup CheckEmailPage built with resend flow. Several blockers surfaced this session that are deferred to the PRE-BETA-CHECKLIST.md (email rate limits, name/domain, color variable naming cleanup). Auth context (Step 8) is next, but blocked on unblocking email testing first.
+Auth phase COMPLETE. AuthContext, ProtectedRoute, conditional header nav, and Sign Out all built and audited. Final auth audit returned clean with two items flagged to PRE-BETA-CHECKLIST.md (#3.4 getSession hardening, #2.1 CheckEmailPage UX quirk during verification-off period). Name + domain now locked — Ripper / hobbyripper.com. Moving into Email Infrastructure phase next.
 
 ## What's Been Decided and Locked
 - **Scope:** Baseball, Football, Basketball, Hockey, Soccer at launch. All sports need full database population for beta — not just baseball. No TCG categories.
@@ -10,7 +10,7 @@ Auth phase in progress (roadmap item #7). Sign Up and Sign In flows wired to Sup
 - **EV and ROI confirmed:** Stays in the product. This is the core differentiator vs. Waxstat and everyone else.
 - **Core value prop:** "When I buy a box, what cards can I get, how much are they worth, and what's the best box for my budget and goals?"
 - **Tagline:** "Think inside the box."
-- **Product name — NOT YET LOCKED:** Working name is DIR (Diamond in the Rough). Name may change before beta. dirapp.com is in a $3,600 premium tier. Name lock deferred — development continues name-agnostic. See PRE-BETA-CHECKLIST.md item #1.
+- **Product name — LOCKED:** Final name is Ripper. Domain hobbyripper.com purchased through Cloudflare. Working name 'DIR' still present throughout codebase/docs — dedicated rename pass scheduled right before Pro code audit #1, not sooner. Other spellings considered (Rippr, Ripr) and rejected — 'Ripper' is the hobby-native term for ripping packs/boxes, clean spelling, hobbyripper.com self-describes the product category.
 - **Revenue model — LOCKED:** Fully paid box profiles. Free browsing experience (homepage, browse page, search, filtering, scrolling through box sets) on web only. Paywall triggers when user clicks into a box profile page. Conversion funnel: visit site → scroll and look up boxes → click on box profile → hit paywall → pay for deeper analysis.
 - **Beta access model — LOCKED:** Auth is required from day one. All beta signups get `plan = 'beta'` with full premium access to every feature (box profiles, EV, ROI, pull rates, charts). No Stripe or payment processing during beta. Paywall logic on box profile pages accepts any user with `plan` of `'beta'` OR `'paid'`. When beta ends, new signups default to `'free'` (no box profile access) and must upgrade to `'paid'` via Stripe. Existing beta users will be migrated or grandfathered — decision deferred until end of beta. Email opt-in checkbox captures beta tester emails from day one. iOS app works during beta because it's auth-only by design — every beta signup becomes a valid iOS user.
 - **Email verification — TEMPORARILY OFF:** Supabase's default email service is rate-limited to 2 emails/hour (dev tier only). Custom SMTP via Resend requires owning a domain (blocked on name lock). Until custom SMTP is live, email verification is turned OFF in Supabase Auth settings so development and beta testing aren't blocked. Turn back on when custom SMTP is wired. See PRE-BETA-CHECKLIST.md items #2.1–#2.3.
@@ -28,8 +28,8 @@ Auth phase in progress (roadmap item #7). Sign Up and Sign In flows wired to Sup
 - **Filter URL structure:** Filters are passed as URL query parameters. Example: `/browse?sport=baseball&manufacturer=topps&year=2024&format=hobby`. Header nav links route to `/browse` with appropriate query params applied. Every filter combination produces a unique, shareable URL.
 - **Cascading filter logic:** Selecting a filter narrows the options in downstream filters. Example: selecting "Baseball" limits manufacturers to only those with baseball products. Prevents dead-end filter combinations with zero results.
 - **Landing pages:** About, News, Contact, Help, Sign In, Sign Up. Dummy content for now. These do NOT need to be locked down before database/backend work — they're independent static pages that can be updated any time.
-- **Auth — IN PROGRESS:** Supabase Auth. Sign Up page wired and tested locally — redirects to /check-email on success. Sign In page wired and tested locally — redirects to / on success. CheckEmailPage built and wired with email verification messaging + resend confirmation button. All three auth pages share consistent error-state styling. Supabase Auth manages passwords and sessions in its own `auth.users` table. Our `users` table (to be created during database phase) becomes a profile table (display_name, plan, email_opt_in) linked by Supabase user ID. Email opt-in on sign-up form is UNCHECKED by default — user must actively opt in. Display name and email_opt_in are captured as user metadata on signup and live in Supabase's auth.users.raw_user_meta_data until the profile table exists.
-- **Auth context, header nav updates, protected routes, sign out, password reset — STILL TO DO:** Remaining auth phase steps. Blocked on email testing being unblocked first.
+- **Auth — COMPLETE:** Supabase Auth wired. AuthContext provider + useAuth hook in src/context/AuthContext.jsx. ProtectedRoute component in src/components/ProtectedRoute.jsx gates /box/:slug. Conditional header nav in AppNav.jsx and HamburgerMenu.jsx shows Sign In/Sign Up when signed out, display name + Sign Out when signed in. SignUp, SignIn, CheckEmailPage all wired. Final audit clean. Two defensive items flagged to PRE-BETA-CHECKLIST.md.
+- **Password reset flow — DEFERRED to Email Infrastructure phase:** Blocked on custom SMTP, which was blocked on domain purchase. Domain now owned — password reset will be built during the Email Infrastructure phase.
 - **Google OAuth — DEFERRED:** Placeholder buttons on Sign Up and Sign In. Decision and wiring (or removal) tracked in PRE-BETA-CHECKLIST.md #3.1.
 - **Buy Now / affiliate system — LOCKED:** Price comparison with multiple distributors on box profile pages. Starts with 1-2 distributors, grows over time. Boxes without distributor listings fall back to "Find on eBay" affiliate link. System gets designed and built but launches empty — populated when Cam has distributor partnerships (during beta). No distributor outreach until app is ready. New database tables needed: `distributors` and `distributor_listings`. Buy Now button is built as a UI placeholder on the box profile page — wired to distributor_listings table during database phase.
 - **eBay Partner Network:** Free to join, 1-4% commission (collectibles on the higher end at 3-4%), 24-hour cookie window. Sign up when real data is live on the site (Phase 10-12 timeframe) — signing up with dummy data risks rejection.
@@ -126,6 +126,12 @@ Auth phase in progress (roadmap item #7). Sign Up and Sign In flows wired to Sup
 32. ✅ SignUpPage redirected to /check-email on success (was redirecting to homepage)
 33. ✅ CheckEmailPage route added to App.jsx
 34. ✅ PRE-BETA-CHECKLIST.md created — single compiled document of every deferred item to address before beta launch
+35. ✅ Auth context built (src/context/AuthContext.jsx with AuthProvider + useAuth hook)
+36. ✅ Header nav conditional display (AppNav + HamburgerMenu show display name + Sign Out when signed in, Sign In + Sign Up when signed out)
+37. ✅ Sign Out flow wired (calls signOut from context, navigates to /, header re-renders automatically)
+38. ✅ ProtectedRoute component built (src/components/ProtectedRoute.jsx), wrapping /box/:slug — signed-out users redirect to /signin
+39. ✅ Final auth system audit — clean, two defensive items flagged to PRE-BETA-CHECKLIST.md
+40. ✅ Name + domain locked (Ripper, hobbyripper.com via Cloudflare)
 
 ## Full Roadmap
 1. ~~Codebase audit~~ ✅
@@ -134,7 +140,7 @@ Auth phase in progress (roadmap item #7). Sign Up and Sign In flows wired to Sup
 4. ~~Deploy to Vercel~~ ✅
 5. ~~Dark mode color scheme~~ ✅
 6. ~~UI polish pass~~ ✅
-7. Auth system (Supabase) ← CURRENT
+7. Auth system (Supabase) ✅
    - ~~Create Supabase project (free tier)~~ ✅
    - ~~Install Supabase client library in React app~~ ✅
    - ~~Set up environment variables (.env.local + Vercel env vars)~~ ✅
@@ -142,35 +148,46 @@ Auth phase in progress (roadmap item #7). Sign Up and Sign In flows wired to Sup
    - ~~Wire Sign Up page to Supabase Auth~~ ✅
    - ~~Wire Sign In page to Supabase Auth~~ ✅
    - ~~Build CheckEmailPage with resend flow~~ ✅
-   - Turn off email verification in Supabase Auth settings (temporary — unblocks testing) ← NEXT
-   - Commit uncommitted changes + delete broken test accounts
-   - Build auth context (React context provider for logged-in state)
-   - Update header nav (conditional Sign In / Sign Out / user display)
-   - Protect box profile page (redirect to sign in if not authenticated)
-   - Sign out flow
-   - Password reset flow (deferred — depends on custom SMTP for reliable reset emails, see PRE-BETA-CHECKLIST.md)
-   - Code audit before committing
-8. Scale audit session — full walk of every feature, third-party service, rate limit, and bottleneck at 100/1k/10k/100k concurrent user ceilings. Findings documented in SCALING-REFERENCE.md and high-risk items added to PRE-BETA-CHECKLIST.md.
-9. Pro audit #1 (senior React dev — is the frontend and auth foundation solid? ~3-5 hours at $50-150/hr = $150-750)
-10. Database setup and backend API (apply all pending schema amendments from PRE-BETA-CHECKLIST.md #4)
-11. Connect frontend to real data
-12. Admin panel for data entry
-13. eBay API proof of concept — small targeted test after admin panel is live
-14. Pull rate scraper test — target Cardboard Connection for 2024 Topps Chrome Baseball
-15. Seed one test box set end to end (2024 Topps Chrome Baseball)
-16. eBay API full integration (card pricing + box pricing + images from distributor feeds + eBay fallback)
-17. Seed database with all sports (Baseball, Football, Basketball, Hockey, Soccer)
-18. Claude API integration for photo scan feature
-19. Buy Now / affiliate link system (UI built, populated when Cam has distributor partnerships)
-20. Price alerts and notifications
-21. User features (saved boxes, collection tracker, wishlist)
-22. Search functionality
-23. Pro audit #2 (full-stack dev — is the complete app ready for real users? ~8-15 hours at $50-150/hr = $400-2,250)
-24. Pre-launch polish: walk PRE-BETA-CHECKLIST.md end-to-end. Includes name lock, domain purchase, Resend SMTP setup, custom email templates, Google OAuth decision, password reset flow, all remaining schema amendments.
-25. Beta launch (all signups default to plan='beta' with full access — no Stripe yet)
-26. Pro audit #3 (specialist based on what breaks — performance, security, or both. ~5-10 hours at $75-200/hr = $375-2,000)
-27. Post-beta: Stripe integration, migrate beta users (grandfather or prompt to upgrade), flip paywall to require plan='paid' for new signups
-28. Post-launch: Coming Soon / release calendar, AI trend summaries, portfolio tracking, light/dark mode toggle in settings, Legacy Boxes marketplace tab (if validated)
+   - ~~Turn off email verification in Supabase Auth settings (temporary — unblocks testing)~~ ✅
+   - ~~Commit uncommitted changes + delete broken test accounts~~ ✅
+   - ~~Build auth context (React context provider for logged-in state)~~ ✅
+   - ~~Update header nav (conditional Sign In / Sign Out / user display)~~ ✅
+   - ~~Protect box profile page (redirect to sign in if not authenticated)~~ ✅
+   - ~~Sign out flow~~ ✅
+   - ~~Password reset flow~~ — moved to Email Infrastructure phase (#8), blocked on custom SMTP
+   - ~~Code audit before committing~~ ✅
+8. Email Infrastructure phase ← CURRENT
+   - Create Resend account
+   - Verify hobbyripper.com DNS in Cloudflare (SPF, DKIM)
+   - Wire Resend SMTP into Supabase Auth
+   - Burst-test email delivery (20 signups in 60 seconds)
+   - Customize 6 Supabase auth email templates with Ripper branding
+   - Build password reset flow (request → email → reset page)
+   - Flip email verification back ON in Supabase
+   - Decide fate of CheckEmailPage
+9. Scale audit session — full walk of every feature, third-party service, rate limit, and bottleneck at 100/1k/10k/100k concurrent user ceilings. Findings documented in SCALING-REFERENCE.md and high-risk items added to PRE-BETA-CHECKLIST.md.
+10. Mobile UI polish + Account Management phase — see PRE-BETA-CHECKLIST.md #10
+11. Rename pass: DIR → Ripper across codebase, docs, UI copy, Vercel/Supabase project names
+12. Pro audit #1 (senior React dev — is the frontend and auth foundation solid? ~3-5 hours at $50-150/hr = $150-750)
+13. Database setup and backend API (apply all pending schema amendments from PRE-BETA-CHECKLIST.md #4)
+14. Connect frontend to real data
+15. Admin panel for data entry
+16. eBay API proof of concept — small targeted test after admin panel is live
+17. Pull rate scraper test — target Cardboard Connection for 2024 Topps Chrome Baseball
+18. Seed one test box set end to end (2024 Topps Chrome Baseball)
+19. eBay API full integration (card pricing + box pricing + images from distributor feeds + eBay fallback)
+20. Seed database with all sports (Baseball, Football, Basketball, Hockey, Soccer)
+21. Claude API integration for photo scan feature
+22. Buy Now / affiliate link system (UI built, populated when Cam has distributor partnerships)
+23. Price alerts and notifications
+24. User features (saved boxes, collection tracker, wishlist)
+25. Search functionality
+26. Pro audit #2 (full-stack dev — is the complete app ready for real users? ~8-15 hours at $50-150/hr = $400-2,250)
+27. Pre-launch polish: walk PRE-BETA-CHECKLIST.md end-to-end. Includes Resend SMTP setup, custom email templates, Google OAuth decision, password reset flow, all remaining schema amendments.
+28. Beta launch (all signups default to plan='beta' with full access — no Stripe yet)
+29. Pro audit #3 (specialist based on what breaks — performance, security, or both. ~5-10 hours at $75-200/hr = $375-2,000)
+30. Post-beta: Stripe integration, migrate beta users (grandfather or prompt to upgrade), flip paywall to require plan='paid' for new signups
+31. Post-launch: Coming Soon / release calendar, AI trend summaries, portfolio tracking, light/dark mode toggle in settings, Legacy Boxes marketplace tab (if validated)
 
 ## Reminders & Flags
 - ⚠️ Switch Claude Code to Opus for auth system, database connection layer, and backend API work. Sonnet for UI, color, and mechanical tasks.

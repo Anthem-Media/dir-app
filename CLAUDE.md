@@ -4,7 +4,7 @@
 
 A sports card box analytics web app. Users look up any box set and see the full checklist, card values, pull rates, expected value, ROI, and market trends. Built around the box, not individual cards. No other tool does this.
 
-Working name is "DIR" — not yet final. Development is name-agnostic; name will lock before beta.
+Final name: Ripper. Domain: hobbyripper.com. Working name 'DIR' is still present throughout the codebase and docs — a dedicated rename pass is scheduled before Pro code audit #1, not sooner. Do NOT do find-and-replace of DIR → Ripper while building features. Keep development name-agnostic until the rename pass.
 
 ## Key Files
 
@@ -172,17 +172,12 @@ Buy Now system: price comparison with multiple distributors. Fallback to "Find o
 
 ## Current Status
 
-- UI polish pass complete across all pages
-- Auth phase in progress (roadmap item #7):
-  - Supabase project, env vars, and client library all set up
-  - `src/api/supabaseClient.js` created
-  - Sign Up page fully wired and tested
-  - Sign In page fully wired and tested locally
-  - CheckEmailPage built with resend flow
-  - Next (after unblocking email testing): build auth context, header nav updates, protected routes, sign out
+- Auth phase COMPLETE. AuthContext, ProtectedRoute, conditional header nav (AppNav + HamburgerMenu), Sign Out all built and audited.
+- Name + domain locked: Ripper / hobbyripper.com (via Cloudflare).
+- Currently in Email Infrastructure phase: Resend SMTP, branded email templates, password reset flow, flip email verification back ON.
 - All colors are CSS variables — no hardcoded hex values in codebase (Recharts SVG exception documented in TierPriceTrendChart.jsx and PriceTrendChart.jsx)
 - End every page/feature session with a code audit before committing
-- See CONTEXT.md for full task list, detailed status, and PRE-BETA-CHECKLIST.md for all deferred items
+- See CONTEXT.md for full task list and PRE-BETA-CHECKLIST.md for all deferred items, including the new Account Management phase (section #10)
 
 ## Known Refactor Tasks (database phase)
 
@@ -191,3 +186,12 @@ Buy Now system: price comparison with multiple distributors. Fallback to "Find o
 - `useBoxProfile` hook has orphaned `MOCK_PULL_RATES` data — at database phase, pull rates must return from the hook keyed by format slug so the format switcher can request per-format odds.
 - Tier numbering in `dir_database_schema.sql` needs to be flipped so Tier 1 = Premium Hits and Tier 5 = Base/Rookies. Once done, update `sortTiersByValue` in `checklistUtils.js` to sort ascending instead of descending.
 - Sign Up and Sign In pages currently call `supabase.auth.signUp()` and `supabase.auth.signInWithPassword()` directly from page handlers. When the auth context is built, consider refactoring these into a dedicated auth hook for consistency with the codebase rule that data-fetching lives in hooks, not components.
+
+## Documentation Update Workflow
+
+When updates are needed across multiple MD files (project-brief.md, CLAUDE.md, CONTEXT.md, PRE-BETA-CHECKLIST.md, SCALING-REFERENCE.md, REFERENCES.md, requirements.md) at the end of a planning session:
+
+- DO NOT have the planning chat rewrite full file contents for manual copy-paste. That burns the planning chat's output tokens on content that's mostly duplicating existing file content.
+- DO have the planning chat produce a single Claude Code prompt listing targeted str_replace edits by file and section. Claude Code reads the files from its own context and applies surgical edits.
+- This keeps planning-chat token usage low, minimizes risk of accidentally dropping content during rewrites, and keeps files in sync with the repo without manual download/replace cycles.
+- The planning chat's job is to decide WHAT needs to change. Claude Code's job is to MAKE the changes.

@@ -1,8 +1,8 @@
 # DIR (Diamond in the Rough) — Project Brief
 
-**Working Name:** DIR (Diamond in the Rough) — NOT YET LOCKED. May change before beta.
+**Working Name:** DIR (Diamond in the Rough) — used throughout codebase and docs until rename pass. **Final Name:** Ripper. **Domain:** hobbyripper.com (purchased via Cloudflare). Rename pass scheduled before Pro code audit #1.
 **Tagline:** "Think inside the box."
-**Last Updated:** April 23, 2026
+**Last Updated:** April 24, 2026
 
 ---
 
@@ -233,7 +233,7 @@ Tier system:
 
 ## Business Context
 
-- **Working name:** DIR (Diamond in the Rough) — NOT YET LOCKED. Name may change before beta. dirapp.com is in a $3,600 premium tier. Development continues name-agnostic.
+- **Final name — LOCKED:** Ripper. Domain hobbyripper.com purchased through Cloudflare. 'DIR' still present in codebase/docs — rename pass scheduled right before Pro audit #1. Other spellings (Rippr, Ripr) rejected; 'Ripper' is hobby-native, cleanly spelled, and hobbyripper.com self-describes the product.
 - **Founders:** Zach Seabolt (technical, 50%) and Cam Gibson (business, 50%)
 - **Partnership agreement:** Drafted and ready for signatures
 - **Strategy:** Leaning build-to-run (long-term operation). Not finalized but mindset has shifted from original build-to-sell framing.
@@ -415,15 +415,12 @@ Three commands to save and push changes:
 3. `git push` — upload to GitHub
 
 ### Current Status
-- UI polish pass complete across all pages
-- Auth phase in progress (roadmap item #7):
-  - Supabase project, env vars, `supabaseClient.js`, and Supabase client library all set up
-  - Sign Up wired and tested; Sign In wired and tested locally; CheckEmailPage built with resend flow
-  - Email verification temporarily OFF in Supabase (blocked on custom SMTP / domain purchase)
-  - Next: commit pending changes, build auth context, protected routes, sign out
+- Auth phase COMPLETE — AuthContext, ProtectedRoute, conditional header nav (AppNav + HamburgerMenu), Sign Out all built and audited
+- Email Infrastructure phase in progress — Resend SMTP, branded auth email templates, password reset flow, flip email verification back ON
+- Account Management phase scoped — deferred until after database phase (see PRE-BETA-CHECKLIST.md #10)
+- All colors are CSS variables — no hardcoded hex in codebase (Recharts SVG exception documented in-file)
 - Dark mode color scheme implemented and deployed
-- All colors are CSS variables — no hardcoded hex in codebase (except Recharts chart constants, documented in-file)
-- See CONTEXT.md for full task list and PRE-BETA-CHECKLIST.md for every deferred item
+- See CONTEXT.md for full task list, PRE-BETA-CHECKLIST.md for deferred items
 
 ---
 
