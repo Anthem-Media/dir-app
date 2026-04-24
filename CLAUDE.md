@@ -21,8 +21,8 @@ Final name: Ripper. Domain: hobbyripper.com. Working name 'DIR' is still present
 - Frontend: React + Vite, deployed on Vercel (live URL: dir-app-weld.vercel.app)
 - Backend: TBD (Python or Node.js), deployed on Railway or Render
 - Database: Supabase (managed PostgreSQL — free tier now, Pro planned when full seeding begins)
-- Auth: Supabase Auth (Sign Up, Sign In, and CheckEmailPage all wired; auth context, protected routes, sign out, password reset still in progress)
-- Email delivery: Supabase default SMTP for dev only (2 emails/hour limit). Custom SMTP via Resend is a hard requirement for beta — tracked in PRE-BETA-CHECKLIST.md.
+- Auth: Supabase Auth COMPLETE — Sign Up, Sign In, CheckEmailPage, AuthContext, ProtectedRoute, Sign Out, and password reset flow (ForgotPasswordPage + ResetPasswordPage) all wired, branded, and tested. Email verification permanently ON. Custom SMTP via Resend live.
+- Email delivery: Custom SMTP via Resend is LIVE. Sender is noreply@hobbyripper.com. All 6 Supabase auth email templates branded with RIPPER. wordmark. Tested under burst load.
 - Payments: Stripe (web only — all billing handled on final domain, never in the iOS app; not wired until post-beta)
 - AI: Claude API for photo scan (box identification) and trend summaries (post-launch)
 
@@ -92,7 +92,7 @@ iOS app is auth-only — no in-app purchases, no signup flow, no free tier. See 
 
 Auth is required from day one. All beta signups get `plan = 'beta'` with full premium access. No Stripe during beta. Paywall logic must accept `plan IN ('beta', 'paid')`. Post-beta, new signups default to `'free'` and must upgrade to `'paid'` via Stripe. See CONTEXT.md for full detail.
 
-Email verification is temporarily OFF during development (Supabase's default 2/hour rate limit blocks real testing). Turns back on when custom SMTP via Resend is wired. See PRE-BETA-CHECKLIST.md.
+Email verification is permanently ON. Custom SMTP via Resend is live, so the 2/hour Supabase default limit no longer applies.
 
 ## Auth Setup (current state)
 
@@ -105,8 +105,8 @@ Email verification is temporarily OFF during development (Supabase's default 2/h
 - CheckEmailPage at `/check-email`: post-signup destination, displays user's email (via route state), resend confirmation button, graceful fallback when URL hit directly. Styled to match SignIn/SignUp split-panel layout.
 - `users` profile table does NOT exist yet. During Sign Up, user metadata (`display_name`, `email_opt_in`) is stored in `auth.users.raw_user_meta_data`. When the users profile table is created in the database phase, it links to Supabase's `auth.users` via the auth user ID — no passwords stored on our side.
 - Google OAuth buttons on Sign Up and Sign In are placeholder only. Deferred decision: wire it up or remove. See PRE-BETA-CHECKLIST.md #3.1.
-- Password reset flow: "Forgot password?" link is a dead link placeholder. Reset flow is deferred in the auth phase — blocked on custom SMTP for reliable reset emails.
-- Supabase auth emails use the default Supabase template. Pre-launch: customize template with DIR (or final name) branding in Supabase dashboard, configure custom SMTP via Resend so emails come from a branded sender. See PRE-BETA-CHECKLIST.md section #2.
+- Password reset flow: COMPLETE. Forgot password link on SignInPage routes to /forgot-password. Full flow: /forgot-password (email input) → branded reset email → /reset-password (new password) → /signin with success banner. ResetPasswordPage handles invalid/expired session state with CTA back to /forgot-password.
+- Supabase auth emails route through Resend SMTP. All 6 templates branded with RIPPER. wordmark in the Supabase dashboard. Light-mode only (color-scheme meta tags applied) — renders correctly on iOS Mail without auto-invert. Templates authored in Supabase dashboard only, not in codebase.
 
 ## Data Coverage
 
@@ -174,7 +174,7 @@ Buy Now system: price comparison with multiple distributors. Fallback to "Find o
 
 - Auth phase COMPLETE. AuthContext, ProtectedRoute, conditional header nav (AppNav + HamburgerMenu), Sign Out all built and audited.
 - Name + domain locked: Ripper / hobbyripper.com (via Cloudflare).
-- Currently in Email Infrastructure phase: Resend SMTP, branded email templates, password reset flow, flip email verification back ON.
+- Email Infrastructure phase COMPLETE. Custom SMTP via Resend live, all 6 email templates branded, password reset built/tested, email verification permanently ON, vercel.json added for SPA routing. POC phase is now current.
 - All colors are CSS variables — no hardcoded hex values in codebase (Recharts SVG exception documented in TierPriceTrendChart.jsx and PriceTrendChart.jsx)
 - End every page/feature session with a code audit before committing
 - See CONTEXT.md for full task list and PRE-BETA-CHECKLIST.md for all deferred items, including the new Account Management phase (section #10)

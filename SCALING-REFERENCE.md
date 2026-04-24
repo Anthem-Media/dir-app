@@ -80,7 +80,7 @@
 
 ---
 
-### Resend (Planned — Custom SMTP Provider)
+### Resend (Custom SMTP Provider — LIVE)
 
 **Free tier:**
 - 3,000 emails/month
@@ -103,12 +103,12 @@
 
 **What happens when monthly limit hit:** Sending stops until the next month or upgrade. Alerts arrive well in advance.
 
-**Action items (all pre-beta):**
-- [ ] Create Resend account once domain is owned
-- [ ] Verify domain with DNS records (SPF, DKIM)
-- [ ] Wire into Supabase Auth SMTP config
-- [ ] Burst-test: simulate 20 signups in 60 seconds, confirm all land
-- [ ] Start on free tier; monitor monthly send volume; upgrade to Pro when realistic traffic exceeds 2k/month
+**Action items:**
+- [x] Resend account created
+- [x] hobbyripper.com DNS verified (SPF, DKIM records active in Cloudflare)
+- [x] Supabase Auth SMTP config live with Resend credentials
+- [x] Burst test passed: 17/17 signups delivered under burst conditions
+- [ ] Monitor monthly send volume; upgrade to Pro ($20/mo) when realistic traffic exceeds 2k/month
 
 **Scale readiness for realistic launch:** Free tier handles ~100 signups/day comfortably. Pro tier ($20/mo) handles ~1,500/day. Scale tier handles ~3,300/day. Cam's network can produce a spike beyond this on a single promo day — budget for the Scale tier during launch windows.
 
@@ -337,11 +337,10 @@ Supabase Free (dev/test — current)
 ```
 
 ```
-Supabase default SMTP (dev/test — current, BLOCKING for beta)
-  → Resend free tier (beta launch)
-    → Resend Pro ($20/mo — early post-launch)
-      → Resend Scale ($90/mo — growth phase)
-        → Dedicated transactional provider with negotiated rates (scale phase)
+Resend free tier (CURRENT — live, tested)
+  → Resend Pro ($20/mo — early post-launch, when volume exceeds 2k/month)
+    → Resend Scale ($90/mo — growth phase)
+      → Dedicated transactional provider with negotiated rates (scale phase)
 ```
 
 ```

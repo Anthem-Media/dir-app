@@ -221,9 +221,9 @@ Tier system:
 - **Frontend:** React, deployed on Vercel (live URL: dir-app-weld.vercel.app until custom domain is purchased)
 - **Backend:** Python or Node.js, deployed on Railway or Render (free tier to start)
 - **Database:** Supabase (managed PostgreSQL — scales from free tier to enterprise, see SCALING-REFERENCE.md). Free tier active now; upgrade to Supabase Pro ($25/mo, 8GB storage) planned for when full eBay API pipeline and data seeding begins.
-- **Auth:** Supabase Auth (handles sign up, sign in, sessions, password reset, email verification). Supabase Auth manages passwords in its own `auth.users` table. Our `users` table becomes a profile table (display_name, plan, email_opt_in) linked by Supabase user ID. No passwords are stored in our `users` table. **Current state:** Supabase client configured at `src/api/supabaseClient.js`. Sign Up, Sign In, and CheckEmailPage all wired and tested locally. Auth context, protected routes, sign out, and password reset are still in progress. Google OAuth on Sign Up and Sign In is placeholder only — deferred. Email verification is temporarily OFF during development (see below).
-- **Email delivery:** Supabase default SMTP is DEV-TIER ONLY (2 emails/hour, hit during testing). Custom SMTP via Resend is a hard beta requirement and is tracked in PRE-BETA-CHECKLIST.md. Requires owning a domain (blocked on name lock). Until custom SMTP is configured, email verification is turned OFF in Supabase so development and beta testing are not blocked.
-- **Auth emails:** Default Supabase template in use during development. Pre-launch: customize template with branded design in Supabase dashboard, then configure custom SMTP via Resend so auth emails come from a branded sender address on the final domain.
+- **Auth:** Supabase Auth (handles sign up, sign in, sessions, password reset, email verification). Supabase Auth manages passwords in its own `auth.users` table. Our `users` table becomes a profile table (display_name, plan, email_opt_in) linked by Supabase user ID. No passwords are stored in our `users` table. **Current state:** Supabase client configured at `src/api/supabaseClient.js`. Sign Up, Sign In, CheckEmailPage, AuthContext, ProtectedRoute, Sign Out, and password reset flow (ForgotPasswordPage + ResetPasswordPage) all wired, branded, and tested end-to-end. Email verification permanently ON via custom Resend SMTP. Google OAuth on Sign Up and Sign In is placeholder only — deferred to pre-beta (see PRE-BETA-CHECKLIST.md #3.1).
+- **Email delivery:** Custom SMTP via Resend is LIVE. Sender is noreply@hobbyripper.com. Burst-tested. All 6 Supabase auth email templates branded with RIPPER. wordmark. Email verification permanently ON.
+- **Auth emails:** All 6 branded templates live in Supabase dashboard. Light-mode design (iOS dark-mode auto-invert disabled via color-scheme meta tags). Authored in Supabase dashboard, not in codebase — edits happen in Supabase → Authentication → Emails.
 - **Payments:** Stripe (web only — all subscription management and billing handled on the final domain). No Stripe integration during beta.
 - **AI Vision:** Claude API (photo → structured JSON → box match)
 - **AI Summaries:** Claude API (price data → plain English trend summary) — post-launch feature
@@ -416,7 +416,7 @@ Three commands to save and push changes:
 
 ### Current Status
 - Auth phase COMPLETE — AuthContext, ProtectedRoute, conditional header nav (AppNav + HamburgerMenu), Sign Out all built and audited
-- Email Infrastructure phase in progress — Resend SMTP setup, branded auth email templates, password reset flow, flip email verification back ON
+- Email Infrastructure phase COMPLETE — Resend SMTP live, all 6 email templates branded, password reset flow built/branded/tested end-to-end, vercel.json added for SPA routing
 - Proof of Concept phase is next — hook up hobbyripper.com in Vercel, soft database connection with real data, 2024 Topps Chrome Baseball pipeline end-to-end, homepage images
 - Rename pass (DIR → Ripper) scheduled after POC is live and confirmed working on hobbyripper.com, right before Pro audit #1
 - eBay Partner Network enrollment queued for once real data is live on hobbyripper.com (do not apply with dummy data)

@@ -1,7 +1,7 @@
 # Context
 
 ## Current State
-Auth phase COMPLETE. Email Infrastructure phase is current — Resend SMTP setup, branded auth email templates, password reset flow, and turning email verification back on. Proof of Concept phase follows: hook up hobbyripper.com in Vercel, connect Supabase with minimal real data, run the 2024 Topps Chrome Baseball pipeline end-to-end, and populate homepage images. Rename pass (DIR → Ripper across codebase and docs) is scheduled after POC is complete and working on hobbyripper.com, right before Pro audit #1. eBay Partner Network enrollment is queued for as soon as real data is live on the domain.
+Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Resend live and tested under burst load, all 6 auth email templates branded, password reset flow built/branded/tested end-to-end, email verification permanently ON. POC (Proof of Concept) phase is current: hook up hobbyripper.com in Vercel, connect Supabase with minimal real data, run the 2024 Topps Chrome Baseball pipeline end-to-end, and populate homepage images. Rename pass (DIR → Ripper across codebase and docs) is scheduled after POC is complete and working on hobbyripper.com, right before Pro audit #1. eBay Partner Network enrollment is queued for as soon as real data is live on the domain.
 
 ## What's Been Decided and Locked
 - **Scope:** Baseball, Football, Basketball, Hockey, Soccer at launch. All sports need full database population for beta — not just baseball. No TCG categories.
@@ -13,7 +13,7 @@ Auth phase COMPLETE. Email Infrastructure phase is current — Resend SMTP setup
 - **Product name — LOCKED:** Final name is Ripper. Domain hobbyripper.com purchased through Cloudflare. Working name 'DIR' still present throughout codebase/docs — dedicated rename pass scheduled right before Pro code audit #1, not sooner. Other spellings considered (Rippr, Ripr) and rejected — 'Ripper' is the hobby-native term for ripping packs/boxes, clean spelling, hobbyripper.com self-describes the product category.
 - **Revenue model — LOCKED:** Fully paid box profiles. Free browsing experience (homepage, browse page, search, filtering, scrolling through box sets) on web only. Paywall triggers when user clicks into a box profile page. Conversion funnel: visit site → scroll and look up boxes → click on box profile → hit paywall → pay for deeper analysis.
 - **Beta access model — LOCKED:** Auth is required from day one. All beta signups get `plan = 'beta'` with full premium access to every feature (box profiles, EV, ROI, pull rates, charts). No Stripe or payment processing during beta. Paywall logic on box profile pages accepts any user with `plan` of `'beta'` OR `'paid'`. When beta ends, new signups default to `'free'` (no box profile access) and must upgrade to `'paid'` via Stripe. Existing beta users will be migrated or grandfathered — decision deferred until end of beta. Email opt-in checkbox captures beta tester emails from day one. iOS app works during beta because it's auth-only by design — every beta signup becomes a valid iOS user.
-- **Email verification — TEMPORARILY OFF:** Supabase's default email service is rate-limited to 2 emails/hour (dev tier only). Custom SMTP via Resend requires owning a domain (blocked on name lock). Until custom SMTP is live, email verification is turned OFF in Supabase Auth settings so development and beta testing aren't blocked. Turn back on when custom SMTP is wired. See PRE-BETA-CHECKLIST.md items #2.1–#2.3.
+- **Email verification — ON (permanent):** Custom SMTP via Resend is live. Branded auth emails send reliably from noreply@hobbyripper.com. Email verification is permanently ON in Supabase Auth settings.
 - **Data sources:** Manufacturer pull rates + eBay sold listings only.
 - **Tech stack:** React + Vite frontend on Vercel, PostgreSQL on Supabase, Python or Node.js backend, Claude API for photo scan and trend summary features.
 - **Database schema:** 13 tables, 2 views. Complete and finalized — do not rebuild. All pending amendments tracked in PRE-BETA-CHECKLIST.md section #4.
@@ -29,7 +29,7 @@ Auth phase COMPLETE. Email Infrastructure phase is current — Resend SMTP setup
 - **Cascading filter logic:** Selecting a filter narrows the options in downstream filters. Example: selecting "Baseball" limits manufacturers to only those with baseball products. Prevents dead-end filter combinations with zero results.
 - **Landing pages:** About, News, Contact, Help, Sign In, Sign Up. Dummy content for now. These do NOT need to be locked down before database/backend work — they're independent static pages that can be updated any time.
 - **Auth — COMPLETE:** Supabase Auth wired. AuthContext provider + useAuth hook in src/context/AuthContext.jsx. ProtectedRoute component in src/components/ProtectedRoute.jsx gates /box/:slug. Conditional header nav in AppNav.jsx and HamburgerMenu.jsx shows Sign In/Sign Up when signed out, display name + Sign Out when signed in. SignUp, SignIn, CheckEmailPage all wired. Final audit clean. Two defensive items flagged to PRE-BETA-CHECKLIST.md.
-- **Password reset flow — DEFERRED to Email Infrastructure phase:** Blocked on custom SMTP, which was blocked on domain purchase. Domain now owned — password reset will be built during the Email Infrastructure phase.
+- **Password reset flow — COMPLETE:** Built during Email Infrastructure phase. ForgotPasswordPage and ResetPasswordPage wired, branded email template, end-to-end tested. vercel.json rewrite rule added so client-side routes resolve correctly on direct URL loads.
 - **Google OAuth — DEFERRED:** Placeholder buttons on Sign Up and Sign In. Decision and wiring (or removal) tracked in PRE-BETA-CHECKLIST.md #3.1.
 - **Buy Now / affiliate system — LOCKED:** Price comparison with multiple distributors on box profile pages. Starts with 1-2 distributors, grows over time. Boxes without distributor listings fall back to "Find on eBay" affiliate link. System gets designed and built but launches empty — populated when Cam has distributor partnerships (during beta). No distributor outreach until app is ready. New database tables needed: `distributors` and `distributor_listings`. Buy Now button is built as a UI placeholder on the box profile page — wired to distributor_listings table during database phase.
 - **eBay Partner Network:** Free to join, 1-4% commission (collectibles on the higher end at 3-4%), 24-hour cookie window. Sign up when real data is live on the site (Phase 10-12 timeframe) — signing up with dummy data risks rejection.
@@ -132,6 +132,17 @@ Auth phase COMPLETE. Email Infrastructure phase is current — Resend SMTP setup
 38. ✅ ProtectedRoute component built (src/components/ProtectedRoute.jsx), wrapping /box/:slug — signed-out users redirect to /signin
 39. ✅ Final auth system audit — clean, two defensive items flagged to PRE-BETA-CHECKLIST.md
 40. ✅ Name + domain locked (Ripper, hobbyripper.com via Cloudflare)
+41. ✅ Resend account created, hobbyripper.com DNS verified (SPF, DKIM)
+42. ✅ Custom SMTP via Resend wired into Supabase Auth, tested, working
+43. ✅ Burst test passed — 17 of 17 signups delivered through Resend under burst conditions (proved SMTP scales past Supabase default's 2/hour cap)
+44. ✅ Branded confirm signup email template (RIPPER. wordmark, purple accent, iOS dark-mode fix applied via color-scheme meta tags)
+45. ✅ ForgotPasswordPage built at /forgot-password (split-panel layout, email validation, success state)
+46. ✅ ResetPasswordPage built at /reset-password (split-panel layout, password validation, invalid/expired session handling, redirects to /signin with success banner)
+47. ✅ Supabase redirect URLs configured for /reset-password on both production and localhost
+48. ✅ vercel.json added at project root — rewrite rule so client-side React Router routes resolve on direct URL loads (fixes 404 on /reset-password from email, applies to all protected routes)
+49. ✅ Password reset email template branded
+50. ✅ Magic link, email change, reauth, and invite user email templates all branded (not actively wired to features but ready)
+51. ✅ End-to-end password reset flow tested and working
 
 ## Full Roadmap
 1. ~~Codebase audit~~ ✅
@@ -156,7 +167,7 @@ Auth phase COMPLETE. Email Infrastructure phase is current — Resend SMTP setup
    - ~~Sign out flow~~ ✅
    - ~~Password reset flow~~ — moved to Email Infrastructure phase (#8), blocked on custom SMTP
    - ~~Code audit before committing~~ ✅
-8. Email Infrastructure phase ← CURRENT
+8. Email Infrastructure phase ✅ COMPLETE
    - Create Resend account
    - Verify hobbyripper.com DNS in Cloudflare (SPF, DKIM)
    - Wire Resend SMTP into Supabase Auth
@@ -165,7 +176,7 @@ Auth phase COMPLETE. Email Infrastructure phase is current — Resend SMTP setup
    - Build password reset flow (request → email → reset page)
    - Flip email verification back ON in Supabase
    - Decide fate of CheckEmailPage
-9. Proof of Concept phase
+9. Proof of Concept phase ← CURRENT
    - Hook up hobbyripper.com domain in Vercel (point DNS, confirm live)
    - Soft database connection — Supabase hooked up with minimal real data (just enough to prove the stack works end-to-end on the real domain)
    - End-to-end pipeline test with 2024 Topps Chrome Baseball (checklist, pull rates, eBay-priced cards, EV, ROI, format switcher, price charts — all working with real data)
@@ -198,14 +209,10 @@ Auth phase COMPLETE. Email Infrastructure phase is current — Resend SMTP setup
 ## Reminders & Flags
 - ⚠️ Switch Claude Code to Opus for auth system, database connection layer, and backend API work. Sonnet for UI, color, and mechanical tasks.
 - ⚠️ Beta access model is LOCKED: auth required from day one, all signups get plan='beta', no Stripe until after beta. Paywall check must accept plan IN ('beta', 'paid'). Do not build any free-tier box profile access during beta.
-- ⚠️ Email verification temporarily OFF in Supabase Auth settings. Turn back ON after custom SMTP via Resend is configured (requires owning a domain). Do not forget — see PRE-BETA-CHECKLIST.md #2.1.
-- ⚠️ Supabase's default email service is 2 emails/hour — development tier only. Never ship to beta on default SMTP. Custom SMTP via Resend is a hard requirement for beta launch. See PRE-BETA-CHECKLIST.md #2.2.
 - ⚠️ Scale audit is now a scheduled roadmap item (#8). Every new feature and third-party integration gets a scale-stress walkthrough during its audit checklist from here forward. Ask "what breaks at 100 concurrent users? 10,000? 100,000?" before shipping.
 - ⚠️ Every new third-party service gets a pre-integration scale-check: rate limits, pricing tiers, upgrade paths. Documented in SCALING-REFERENCE.md before the service is added to the stack.
 - ⚠️ Error state CSS variables are `--color-red`, `--color-red-bg`, `--color-red-border` (already in index.css) — not `--color-error`. Previous docs referenced a variable name that doesn't exist. Use the real names.
-- ⚠️ Product name "DIR" is a working name, not locked. dirapp.com is $3,600 (premium tier). Name lock is deferred until a final decision is made. Development continues name-agnostic.
 - ⚠️ Google OAuth is placeholder only on Sign Up and Sign In. Decision + wiring (or removal) tracked in PRE-BETA-CHECKLIST.md #3.1.
-- ⚠️ Password reset flow is deferred within the auth phase. Depends on reliable email delivery (custom SMTP). Will be built alongside SMTP setup during pre-launch polish.
 - ⚠️ All database schema amendments deferred to the database phase. Full list in PRE-BETA-CHECKLIST.md section #4. Do not apply piecemeal — handle all together when database phase begins.
 - ⚠️ Supabase free tier is 500MB of database storage. Current usage is tiny. Plan to upgrade to Supabase Pro ($25/mo, 8GB) when the full eBay API pipeline goes live and full seeding begins. See PRE-BETA-CHECKLIST.md #7.1.
 - ⚠️ DUMMY_TIER_TREND_DATA bypasses the hook and is consumed inline in BoxProfilePage.jsx — at database phase this needs to move into useBoxProfile, not just be replaced with real data. This is a refactor task, not just a data swap.
@@ -229,7 +236,10 @@ Auth phase COMPLETE. Email Infrastructure phase is current — Resend SMTP setup
 - ⚠️ Vercel env vars: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set for Production and Preview only (Development checkbox was locked — uses .env.local locally instead). Correct setup.
 - ⚠️ Supabase "Secret key" is the service role key — NEVER use it in the React app or commit it anywhere. It has full admin access to the database. The "Publishable key" (a.k.a. anon key) is the one used by VITE_SUPABASE_ANON_KEY.
 - ⚠️ VITE_SUPABASE_URL is the bare project URL (https://[project-id].supabase.co) — do NOT include /rest/v1/ at the end. The Supabase client appends the path internally.
-- ⚠️ Supabase Site URL and Redirect URLs are configured for the live Vercel URL (dir-app-weld.vercel.app) + localhost. Update whenever the production URL changes (domain purchase, Vercel project rename, etc.).
+- ⚠️ Supabase Site URL and Redirect URLs are configured for dir-app-weld.vercel.app + localhost (both signup and /reset-password paths). When hobbyripper.com goes live in the POC phase, add https://hobbyripper.com and https://hobbyripper.com/reset-password to the Supabase redirect URL allow-list.
+- ⚠️ vercel.json at project root is required — rewrite rule that serves index.html for all routes so React Router client-side routing works on direct URL loads. Do NOT delete this file. Every direct-URL load of a route like /reset-password, /box/:slug, /browse depends on it.
+- ⚠️ Email templates (6 total) are branded and live in Supabase Auth dashboard. The HTML is authored in the Supabase dashboard only — not stored in the codebase. If templates need edits, edit directly in Supabase dashboard → Authentication → Emails. Subject lines: 'Confirm your Ripper email' (confirm signup), 'Reset your Ripper password' (password reset), 'Your Ripper sign-in link' (magic link), 'Confirm your new email for Ripper' (email change), 'Confirm it's you on Ripper' (reauth), 'You've been invited to Ripper' (invite user).
+- ⚠️ Post-password-reset UX flagged for revisit: after successful reset, users currently redirect to /signin with a success banner and must re-enter credentials. Options to reconsider later: auto-sign-in and redirect to homepage (smoother), or keep current flow (more explicit). Real user feedback will decide. See PRE-BETA-CHECKLIST.md.
 
 ## Development Guidelines
 - Use this Project chat for planning, strategy, and decisions

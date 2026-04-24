@@ -33,7 +33,7 @@
 ## 2. Email Infrastructure
 
 ### 2.1 Decide on email verification policy
-- **Status:** Currently ON but untenable on Supabase's default email service (2/hour rate limit hit during testing)
+- **Status:** ✅ CLOSED — Verification is permanently ON. Custom SMTP via Resend is live, 2/hour rate limit no longer applies. CheckEmailPage is legitimate and staying as-is.
 - **Why deferred:** Requires custom SMTP to scale past the default limits, and custom SMTP requires owning a domain
 - **Beta decision:** TEMPORARILY turning email verification OFF during development to unblock testing. Revisit when custom SMTP is live.
 - ⚠️ Known UX quirk during the off-state: SignUpPage still redirects to /check-email, which tells the user to click a verification link that doesn't exist. User is already signed in at that point. Cosmetic confusion for beta testers only. Resolves automatically when verification flips back on after SMTP is wired, OR decide during email infrastructure phase whether to remove CheckEmailPage entirely.
@@ -41,7 +41,7 @@
 - **Dependencies:** Domain purchase (#1.2), Resend setup (#2.2)
 
 ### 2.2 Set up custom SMTP via Resend
-- **Status:** Not configured — Supabase is using its built-in email service (limited to 2 emails/hour on free tier, a dev-only service)
+- **Status:** ✅ CLOSED — Resend live. hobbyripper.com DNS verified (SPF, DKIM). SMTP wired into Supabase. Sender is noreply@hobbyripper.com. Burst test passed (17/17 delivered through Resend under burst conditions).
 - **Why deferred:** Requires owning a domain and was originally scheduled for pre-launch polish
 - **Critical context:** This is NOT optional polish. Supabase's default SMTP is 2 emails/hour. A flash crowd during Cam's network launch (10k+ impressions/hour potential) would hit this wall immediately and block signups. Every beta tester after the first two in any given hour would fail to receive their verification/reset email. This is a scaling ceiling, not a cosmetic issue.
 - **Done when:**
@@ -54,7 +54,7 @@
 - **Scale note:** Resend's free tier is 3,000 emails/month with per-second rate limits in the thousands. Paid tier scales to 100,000+/month. Covers all realistic beta and early launch traffic.
 
 ### 2.3 Customize Supabase auth email templates
-- **Status:** Using Supabase's default generic template (plain styling, `noreply@supabase.co` sender)
+- **Status:** ✅ CLOSED — All 6 templates branded with RIPPER. wordmark, purple accent, split-panel light-mode design. Subject lines branded. iOS dark-mode auto-invert fixed via color-scheme meta tags. Templates authored in Supabase dashboard only.
 - **Why deferred:** Branding doesn't matter for internal testing and requires final name/domain
 - **Done when:** All six auth email templates customized in Supabase dashboard with final branding, logo, copy in the product voice:
   - Confirm signup
@@ -83,10 +83,17 @@
 - **Dependencies:** Protected routes must be built first
 
 ### 3.3 Password reset flow
-- **Status:** "Forgot password?" link on Sign In page is a dead link; no reset page exists
+- **Status:** ✅ CLOSED — ForgotPasswordPage and ResetPasswordPage built, wired, branded, tested end-to-end. Supabase redirect URLs configured. vercel.json added to handle client-side route resolution on direct URL loads.
 - **Why deferred:** Dedicated auth phase step — not skipped, just hasn't been reached yet in the roadmap
 - **Done when:** Full password reset flow built: request page, email with reset link, reset-password page, Supabase wiring, tested end-to-end
 - **Dependencies:** Resend setup (#2.2) for reliable email delivery
+
+### 3.5 Post-password-reset UX decision
+- **Status:** Flagged during Email Infrastructure phase close
+- **Current behavior:** After successful password reset, user is redirected to /signin with a success banner, must sign in with new password manually.
+- **Alternative:** Auto-sign-in and redirect to homepage (smoother, less friction). Many modern apps do this (Gmail, GitHub, Linear). Current behavior matches banks/healthcare portals.
+- **Decision timing:** Leave current behavior. Revisit after beta users provide feedback. Real user reactions will inform whether to change.
+- **Done when:** Either behavior is confirmed as correct by real-world feedback, or code is updated to auto-sign-in on reset.
 
 ### 3.4 Harden AuthContext against getSession() rejection
 - **Status:** Flagged during final auth audit — defensive improvement, not urgent
@@ -94,6 +101,11 @@
 - **Details:** `supabase.auth.getSession().then()` in AuthContext.jsx has no `.catch()`. If the promise rejects (network failure, SDK exception), `loading` never flips to false and the app hangs silently — ProtectedRoute renders null forever, header auth slot stays blank.
 - **Fix:** Add `.catch(() => { setUser(null); setLoading(false); })` to the promise chain in AuthContext.jsx.
 - **Done when:** Fix applied and tested (disconnect network before load, confirm app renders signed-out state cleanly).
+
+### 3.6 Stale comment cleanup in SignInPage.jsx
+- **Status:** Flagged during password reset audit
+- **Details:** SignInPage.jsx lines 11-13 still has a comment: "The 'Forgot password?' link is a placeholder pending the password reset flow (built in a later auth phase step)." This is now false — reset flow is built and wired. Minor cleanup.
+- **Done when:** Comment removed or updated. Batch with Pro audit #1.
 
 ---
 
@@ -174,6 +186,11 @@ These amendments were decided on during UI development but deferred until the da
 ---
 
 ## 7. Infrastructure Scaling
+
+### 7.0 Update Supabase redirect URLs when hobbyripper.com goes live
+- **Status:** Pending POC phase
+- **Details:** Current Supabase redirect URLs are for dir-app-weld.vercel.app + localhost. When hobbyripper.com is wired to Vercel during POC phase, add https://hobbyripper.com and https://hobbyripper.com/reset-password to Supabase dashboard → Authentication → URL Configuration → Redirect URLs.
+- **Done when:** Both hobbyripper.com URLs added and saved in Supabase redirect URL allow-list. Confirmed by testing signup + password reset flow on the final domain.
 
 ### 7.1 Supabase Pro upgrade
 - **Status:** On free tier (500MB storage)
