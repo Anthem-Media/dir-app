@@ -133,6 +133,10 @@ These amendments were decided on during UI development but deferred until the da
 - **Status:** Schema currently accepts `'free'` and `'paid'`; needs `'beta'` added
 - **Details:** Required by the locked beta access model. Paywall check is `plan IN ('beta', 'paid')`.
 
+### 4.9 Add `is_featured` to `box_sets` table
+- **Status:** Not applied
+- **Details:** `BOOLEAN DEFAULT FALSE`. Powers homepage featured box curation — set to `TRUE` for boxes displayed in featured homepage sections. Manually managed in the Supabase table editor during beta. No admin UI needed for this field until a proper admin panel is built.
+
 ---
 
 ## 5. Data Seeding
@@ -234,6 +238,22 @@ These amendments were decided on during UI development but deferred until the da
   - All billing UI → requires Stripe (post-beta)
 - **Platform coverage:** Web, mobile web, and native iOS. iOS account page is minimal — view profile + sign out + link to web for billing changes (Apple allows this when not using IAP).
 - **Done when:** /account page exists on web with full profile editing, notification settings, and billing management (post-Stripe). iOS app has a minimal account view. Mobile UI polish pass runs concurrently with this phase since header/nav changes when account section is added.
+
+---
+
+## 11. Image Pipeline
+
+### 11.1 Build semi-automated image review tool
+- **Status:** Not started
+- **Details:** Local Node.js script + lightweight browser UI. For each box set with a blank `image_url`, the tool queries Google Custom Search API or scrapes distributor product pages (Dave & Adam's, Blowout Cards, Steel City) for candidate box images. A browser UI displays candidates one at a time — reviewer clicks to accept, skip, or flag. Accepted images upload directly to Supabase Storage and the URL is written to the `image_url` column on `box_sets`.
+- **Done when:** Script runs locally, surfaces image candidates per box set, reviewer can accept and upload in a single click, `image_url` populates in Supabase.
+- **When to build:** After the POC phase. Full database seeding depends on this tool for image coverage at scale.
+
+### 11.2 Populate manual images for POC phase
+- **Status:** Not started — POC-phase-only one-time effort
+- **Details:** ~84 homepage box images (featured sections on the homepage) and the 2024 Topps Chrome Baseball box image for the POC profile page. This is a manual pass for the POC only. After POC, the semi-automated tool (#11.1) handles all future image sourcing — no manual image work at scale.
+- **Done when:** Homepage displays real box images. 2024 Topps Chrome Baseball box profile page displays a real box image.
+- **Dependencies:** None for the manual pass. #11.1 must exist before moving to full seeding.
 
 ---
 

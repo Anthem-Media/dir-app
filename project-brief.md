@@ -416,11 +416,15 @@ Three commands to save and push changes:
 
 ### Current Status
 - Auth phase COMPLETE — AuthContext, ProtectedRoute, conditional header nav (AppNav + HamburgerMenu), Sign Out all built and audited
-- Email Infrastructure phase in progress — Resend SMTP, branded auth email templates, password reset flow, flip email verification back ON
-- Account Management phase scoped — deferred until after database phase (see PRE-BETA-CHECKLIST.md #10)
+- Email Infrastructure phase in progress — Resend SMTP setup, branded auth email templates, password reset flow, flip email verification back ON
+- Proof of Concept phase is next — hook up hobbyripper.com in Vercel, soft database connection with real data, 2024 Topps Chrome Baseball pipeline end-to-end, homepage images
+- Rename pass (DIR → Ripper) scheduled after POC is live and confirmed working on hobbyripper.com, right before Pro audit #1
+- eBay Partner Network enrollment queued for once real data is live on hobbyripper.com (do not apply with dummy data)
+- `is_featured BOOLEAN DEFAULT FALSE` added to schema amendment list (PRE-BETA-CHECKLIST.md #4.9) — powers homepage featured box curation
+- Image Pipeline added to PRE-BETA-CHECKLIST.md (#11) — semi-automated tool for scale, manual pass for POC phase (~84 homepage images + Topps Chrome profile)
+- Account Management phase scoped and deferred until after database phase (see PRE-BETA-CHECKLIST.md #10)
 - All colors are CSS variables — no hardcoded hex in codebase (Recharts SVG exception documented in-file)
-- Dark mode color scheme implemented and deployed
-- See CONTEXT.md for full task list, PRE-BETA-CHECKLIST.md for deferred items
+- See CONTEXT.md for full task list and roadmap, PRE-BETA-CHECKLIST.md for all deferred items
 
 ---
 

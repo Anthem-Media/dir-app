@@ -1,7 +1,7 @@
 # Context
 
 ## Current State
-Auth phase COMPLETE. AuthContext, ProtectedRoute, conditional header nav, and Sign Out all built and audited. Final auth audit returned clean with two items flagged to PRE-BETA-CHECKLIST.md (#3.4 getSession hardening, #2.1 CheckEmailPage UX quirk during verification-off period). Name + domain now locked — Ripper / hobbyripper.com. Moving into Email Infrastructure phase next.
+Auth phase COMPLETE. Email Infrastructure phase is current — Resend SMTP setup, branded auth email templates, password reset flow, and turning email verification back on. Proof of Concept phase follows: hook up hobbyripper.com in Vercel, connect Supabase with minimal real data, run the 2024 Topps Chrome Baseball pipeline end-to-end, and populate homepage images. Rename pass (DIR → Ripper across codebase and docs) is scheduled after POC is complete and working on hobbyripper.com, right before Pro audit #1. eBay Partner Network enrollment is queued for as soon as real data is live on the domain.
 
 ## What's Been Decided and Locked
 - **Scope:** Baseball, Football, Basketball, Hockey, Soccer at launch. All sports need full database population for beta — not just baseball. No TCG categories.
@@ -165,29 +165,35 @@ Auth phase COMPLETE. AuthContext, ProtectedRoute, conditional header nav, and Si
    - Build password reset flow (request → email → reset page)
    - Flip email verification back ON in Supabase
    - Decide fate of CheckEmailPage
-9. Scale audit session — full walk of every feature, third-party service, rate limit, and bottleneck at 100/1k/10k/100k concurrent user ceilings. Findings documented in SCALING-REFERENCE.md and high-risk items added to PRE-BETA-CHECKLIST.md.
-10. Mobile UI polish + Account Management phase — see PRE-BETA-CHECKLIST.md #10
-11. Rename pass: DIR → Ripper across codebase, docs, UI copy, Vercel/Supabase project names
-12. Pro audit #1 (senior React dev — is the frontend and auth foundation solid? ~3-5 hours at $50-150/hr = $150-750)
-13. Database setup and backend API (apply all pending schema amendments from PRE-BETA-CHECKLIST.md #4)
-14. Connect frontend to real data
-15. Admin panel for data entry
-16. eBay API proof of concept — small targeted test after admin panel is live
-17. Pull rate scraper test — target Cardboard Connection for 2024 Topps Chrome Baseball
-18. Seed one test box set end to end (2024 Topps Chrome Baseball)
-19. eBay API full integration (card pricing + box pricing + images from distributor feeds + eBay fallback)
-20. Seed database with all sports (Baseball, Football, Basketball, Hockey, Soccer)
-21. Claude API integration for photo scan feature
-22. Buy Now / affiliate link system (UI built, populated when Cam has distributor partnerships)
-23. Price alerts and notifications
-24. User features (saved boxes, collection tracker, wishlist)
-25. Search functionality
-26. Pro audit #2 (full-stack dev — is the complete app ready for real users? ~8-15 hours at $50-150/hr = $400-2,250)
-27. Pre-launch polish: walk PRE-BETA-CHECKLIST.md end-to-end. Includes Resend SMTP setup, custom email templates, Google OAuth decision, password reset flow, all remaining schema amendments.
-28. Beta launch (all signups default to plan='beta' with full access — no Stripe yet)
-29. Pro audit #3 (specialist based on what breaks — performance, security, or both. ~5-10 hours at $75-200/hr = $375-2,000)
-30. Post-beta: Stripe integration, migrate beta users (grandfather or prompt to upgrade), flip paywall to require plan='paid' for new signups
-31. Post-launch: Coming Soon / release calendar, AI trend summaries, portfolio tracking, light/dark mode toggle in settings, Legacy Boxes marketplace tab (if validated)
+9. Proof of Concept phase
+   - Hook up hobbyripper.com domain in Vercel (point DNS, confirm live)
+   - Soft database connection — Supabase hooked up with minimal real data (just enough to prove the stack works end-to-end on the real domain)
+   - End-to-end pipeline test with 2024 Topps Chrome Baseball (checklist, pull rates, eBay-priced cards, EV, ROI, format switcher, price charts — all working with real data)
+   - Populate homepage with real images for featured box sets (see PRE-BETA-CHECKLIST.md #11.2)
+10. Rename pass: DIR → Ripper across codebase, docs, UI copy, Vercel/Supabase project names
+11. Pro audit #1 (senior React dev — is the frontend and auth foundation solid? ~3-5 hours at $50-150/hr = $150-750)
+12. eBay Partner Network enrollment — apply once real data is live on hobbyripper.com. Do not apply with dummy data — risks rejection.
+13. eBay API proof of concept — small targeted script: card name → eBay sold listings → last 10 sales with average price. Validates API before full pipeline.
+14. Scale audit session — full walk of every feature, third-party service, rate limit, and bottleneck at 100/1k/10k/100k concurrent user ceilings. Findings documented in SCALING-REFERENCE.md and high-risk items added to PRE-BETA-CHECKLIST.md.
+15. Mobile UI polish + Account Management phase — see PRE-BETA-CHECKLIST.md #10
+16. Database setup and backend API (apply all pending schema amendments from PRE-BETA-CHECKLIST.md #4)
+17. Connect frontend to real data
+18. Admin panel for data entry
+19. Pull rate scraper test — target Cardboard Connection for 2024 Topps Chrome Baseball
+20. Seed one test box set end to end (2024 Topps Chrome Baseball)
+21. eBay API full integration (card pricing + box pricing + images from distributor feeds + eBay fallback)
+22. Seed database with all sports (Baseball, Football, Basketball, Hockey, Soccer)
+23. Claude API integration for photo scan feature
+24. Buy Now / affiliate link system (UI built, populated when Cam has distributor partnerships)
+25. Price alerts and notifications
+26. User features (saved boxes, collection tracker, wishlist)
+27. Search functionality
+28. Pro audit #2 (full-stack dev — is the complete app ready for real users? ~8-15 hours at $50-150/hr = $400-2,250)
+29. Pre-launch polish: walk PRE-BETA-CHECKLIST.md end-to-end. Includes custom email templates, Google OAuth decision, all remaining schema amendments.
+30. Beta launch (all signups default to plan='beta' with full access — no Stripe yet)
+31. Pro audit #3 (specialist based on what breaks — performance, security, or both. ~5-10 hours at $75-200/hr = $375-2,000)
+32. Post-beta: Stripe integration, migrate beta users (grandfather or prompt to upgrade), flip paywall to require plan='paid' for new signups
+33. Post-launch: Coming Soon / release calendar, AI trend summaries, portfolio tracking, light/dark mode toggle in settings, Legacy Boxes marketplace tab (if validated)
 
 ## Reminders & Flags
 - ⚠️ Switch Claude Code to Opus for auth system, database connection layer, and backend API work. Sonnet for UI, color, and mechanical tasks.
