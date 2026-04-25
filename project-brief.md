@@ -326,11 +326,12 @@ In rough priority order:
 6. Plain English AI trend summaries
 7. Light/dark mode toggle in user settings
 8. Portfolio value tracking over time (graph your collection's total value)
-9. "Cards I need" auto-generated from checklist minus owned cards
-10. Community / social features
-11. Legacy Boxes marketplace tab (filtered list of pre-2018 boxes for sale through affiliate partners — only if validated and distributor partnerships exist)
-12. Marketplace exploration (StockX-style for cards — year two at earliest)
-13. AI price predictions (only if historical data is deep enough to be credible)
+9. **Grading ROI calculator.** Show raw, PSA 9, and PSA 10 average prices for every card, alongside a calculation of grading upside — price delta minus grading service fees. Answers a question every collector has when they pull a high-value card from a box: "Is this worth grading?" No competing tool surfaces all three price points and the grading economics in one place. Schema is designed to support this from day one — eBay sales are stored with grade tier on every row, so adding the feature later is a UI build, not a data rebuild.
+10. "Cards I need" auto-generated from checklist minus owned cards
+11. Community / social features
+12. Legacy Boxes marketplace tab (filtered list of pre-2018 boxes for sale through affiliate partners — only if validated and distributor partnerships exist)
+13. Marketplace exploration (StockX-style for cards — year two at earliest)
+14. AI price predictions (only if historical data is deep enough to be credible)
 
 ---
 
