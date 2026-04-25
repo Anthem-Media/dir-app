@@ -185,6 +185,9 @@ After import, the eBay API proof of concept script prices out individual cards b
 - **Admin panel:** Form-based interface so data entry never requires raw SQL after initial seeding.
 - **Post-automation:** Data engineer hire on Upwork ($15-25/hr, ~10hrs/week) once revenue justifies it. Until then, the pipeline must be founder-operable.
 
+### New Release Handling
+New boxes (release_date within 30 days) will have thin EV coverage as the market develops. This is handled transparently — the box profile page shows a "New Release" badge and an EV coverage meter ("Based on X of Y cards priced — updating as market develops"). Coverage climbs automatically as the eBay API refresh runs. This framing turns sparse early data into a live-updating feature rather than a gap, and creates a return-visit habit loop for users tracking a new release.
+
 ---
 
 ## Card Categories

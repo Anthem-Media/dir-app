@@ -149,6 +149,12 @@ These amendments were decided on during UI development but deferred until the da
 - **Status:** Not applied
 - **Details:** `BOOLEAN DEFAULT FALSE`. Powers homepage featured box curation — set to `TRUE` for boxes displayed in featured homepage sections. Manually managed in the Supabase table editor during beta. No admin UI needed for this field until a proper admin panel is built.
 
+### 4.10 Add `ev_cards_priced` and `ev_cards_total` to `box_sets` table
+- **Status:** Not applied
+- **Details:** `ev_cards_priced SMALLINT` and `ev_cards_total SMALLINT`. Written at the same time EV is calculated and cached. Powers the EV coverage display ("X of Y cards priced") on the box profile page. Grails (print_run ≤ 10) are excluded from both counts — same exclusion rule as EV itself.
+- **⚠️ Must be applied before full database seeding begins.** These columns get written during EV calculation. If seeding runs before they exist, all EV writes will fail or require retrofitting.
+- **Timing:** Database phase, after POC, before full seed. Apply alongside all other schema amendments in section 4.
+
 ---
 
 ## 5. Data Seeding
