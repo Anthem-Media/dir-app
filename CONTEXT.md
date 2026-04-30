@@ -67,8 +67,6 @@ Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Res
 - **Coming soon / upcoming releases — POST-LAUNCH:** A "Coming Soon" section on the homepage showing upcoming box releases with countdown timers. No new schema needed — uses existing `release_date` and `is_active` columns on `box_sets`. Unreleased boxes entered with `is_active = FALSE` and a future `release_date`. On release day `is_active` flips to `TRUE` automatically. Zach will build a personal notification tool to alert him when new boxes are announced. Post-launch only — not in beta scope.
 - **EV coverage display — LOCKED:** EV on the box profile page shows "Based on X of Y cards priced" using `ev_cards_priced` and `ev_cards_total` columns on `box_sets`. Both written when EV is calculated. Grails excluded from both counts. Transparent coverage builds trust — no other tool shows this.
 - **New Release badge — LOCKED:** Boxes where `release_date >= NOW() - INTERVAL '30 days'` display a "New Release" badge. No new column needed — derived from existing `release_date`. Badge sets user expectations on thin EV coverage for recent releases.
-- **Mavin.io — flagged for evaluation:** Aggregates eBay sold data with an API. Evaluate as a complement or fallback to direct eBay API calls before the eBay integration phase begins. Not committed — needs a pre-integration scale-check per SCALING-REFERENCE.md process before adding to the stack.
-
 ## Hard No List (v1)
 - Marketplace
 - Community features
@@ -197,7 +195,7 @@ Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Res
 19. Pull rate scraper test — target Cardboard Connection for 2024 Topps Chrome Baseball
 20. Seed one test box set end to end (2024 Topps Chrome Baseball)
 21. eBay API full integration (card pricing + box pricing + images from distributor feeds + eBay fallback)
-22. Seed database with all sports (Baseball, Football, Basketball, Hockey, Soccer)
+22. Seed database with all four launch sports (Baseball, Football, Basketball, Hockey). Soccer seeding deferred to post-beta.
 23. Claude API integration for photo scan feature
 24. Buy Now / affiliate link system (UI built, populated when Cam has distributor partnerships)
 25. Price alerts and notifications

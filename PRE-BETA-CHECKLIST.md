@@ -164,9 +164,9 @@ These amendments were decided on during UI development but deferred until the da
 - **Details:** Run all five steps (source doc, spreadsheet populate, slug-bridge, CSV import, eBay API pricing) against one box set. Confirm EV, ROI, checklist, format switcher, and price charts all work with real data.
 - **Done when:** The 2024 Topps Chrome Baseball box set is fully populated in Supabase with real pull rates, real eBay prices, real images — and the box profile page renders correctly.
 
-### 5.2 Full seed — all five sports
+### 5.2 Full seed — all four launch sports
 - **Status:** Blocked on #5.1 passing
-- **Details:** Baseball, Football, Basketball, Hockey, Soccer. 2018-present full profiles. 1995-2017 legacy profiles. No EV/ROI for legacy. Use the five-step seeding pipeline.
+- **Details:** Baseball, Football, Basketball, Hockey. 2018-present full profiles. 1995-2017 legacy profiles. No EV/ROI for legacy. Use the five-step seeding pipeline. Soccer seeding handled separately post-beta — see Section 12.
 
 ### 5.3 Image sourcing automated
 - **Status:** All `image_url` fields currently blank
