@@ -8,7 +8,7 @@
 - Add to OBSERVED whenever real data teaches us something new
 - Never delete reasoning — supersede it. Keep the history of why decisions changed.
 
-**Last updated:** April 25, 2026
+**Last updated:** April 29, 2026
 
 ---
 
@@ -58,13 +58,25 @@ Items here have been explicitly locked in through partner discussion or project 
 - **Source:** requirements.md.
 - **Schema implication:** `box_sets.expected_value` must allow `NULL`. UI must gracefully hide or message missing EV.
 
+### Mavin.io is not a viable data source
+- **What:** Mavin shut down operations. Site posted a public shutdown notice; accounts being wiped. Pricing pipeline is fully owned by Ripper — no third-party aggregator dependency.
+- **Why:** Beyond the shutdown itself, Reddit research surfaced that Mavin failed because users lost trust in their pricing accuracy (manipulated outliers, shipping-cost inflation, suspected money-laundering pollution). This is a direct lesson for Ripper's pipeline design.
+- **Source:** Web research April 2026.
+- **Schema implication:** No need to design `price_history` for multi-vendor data ingestion at launch. `source` column kept for future flexibility (other aggregators may emerge), but eBay is the only source for now.
+
+### Beta launches with 4 sports, not 5
+- **What:** Soccer dropped from beta scope. Beta launches with Baseball, Football, Basketball, Hockey. Soccer becomes a "Coming Soon" link in the navigation.
+- **Why:** Reduces seeding scope without abandoning the future expansion. Soccer was always a smaller market than the four core sports for the U.S. card collector audience.
+- **Source:** Planning session April 29, 2026.
+- **Schema implication:** None — schema already supports all sports. UI implication: nav tab for Soccer routes to a "Coming Soon" page rather than a filtered browse view.
+
 ---
 
 ## OBSERVED
 
 Real-world observations that should inform schema and pricing decisions. These aren't decisions yet — they're inputs to upcoming decisions.
 
-### eBay sold listings — initial 10-minute observation (April 2026)
+### April 2026 — eBay sold listings, initial 10-minute observation
 
 **Volume:** Tons of sold listings available for modern cards. Volume isn't the problem.
 
@@ -85,10 +97,65 @@ Real-world observations that should inform schema and pricing decisions. These a
 - A meaningful price threshold likely exists below which "treat as raw" is roughly safe.
 - **Implication:** Tier-level rules might apply. Base cards almost always raw. Autos and high-end parallels much more likely to be graded — needs more careful filtering.
 
-### Grading-as-a-feature opportunity
-- Identified during eBay observation: if graded listings are easy to identify by keyword, we can store per-grade prices separately and surface them as a future feature.
-- Future product opportunity: show raw, PSA 9, PSA 10 prices side-by-side with grading ROI calculation. No competing tool does this in one place.
-- **Implication:** Schema should support per-grade pricing now, even if only raw is displayed in POC. Captured in project-brief.md as Post-MVP Roadmap item.
+### April 2026 — eBay graded filter discovery
+
+eBay's web UI exposes a "Graded: Yes / No / Not Specified" filter. The API likely has the same parameter. **This dramatically simplifies raw-vs-graded handling.** Instead of relying on title keyword matching as the primary mechanism, we can ask eBay directly. Keyword detection becomes a backup verification layer.
+
+**Important caveat:** This needs to be confirmed with actual eBay API testing before we design around it. See OPEN QUESTIONS — eBay API verification.
+
+### April 2026 — Targeted query observations on 2023 Topps Chrome
+
+Searches run with negative keyword filters in eBay's web UI:
+
+- **Star base cards (Ohtani, Soto):** High volume (500–3300 sales over 90 days). Reliable price clusters.
+- **Rookie base cards:** Variable. Carroll had 336 sales over 90 days; some current-year rookies showed near-zero results, possibly due to query matching issues rather than real volume gaps.
+- **Numbered refractors:** Moderate volume (~215 sales over 90 days). Reliable for averaging.
+- **Base autos:** Moderate (~235 sales over 90 days).
+- **Numbered autos (/99, /50):** Lower volume but still usable, with significant pollution from non-Topps-Chrome products.
+- **Old vs. new comparison:** 2018 Soto had 781 sales, 2024 Soto had 817 sales. Volume holds up over years for star players. **This is good news for legacy era (2018–2023) viability.**
+
+**Pollution sources identified (Topps Chrome specifically):**
+- Topps Chrome Update
+- Topps Chrome Platinum
+- Topps Chrome Black
+- Topps Chrome Sapphire
+- Topps Chrome Cosmic
+- Topps Chrome Heritage
+- Topps Chrome Logofractors
+- Bowman Chrome (different product entirely)
+- "Lot" listings
+- "You pick" / "your choice" listings
+- Different parallels appearing in base searches
+
+**Key insight:** The pollution is *named* and finite. Each product line has an identifiable list of polluting siblings. Once mapped, exclusion rules can be encoded per product line in a query template that runs forever.
+
+**Web search has fuzzy matching:** Negative keyword filters work imperfectly in the eBay web UI. The eBay API likely uses exact filtering, so pipeline results should be cleaner than manual web searches suggest.
+
+### April 2026 — Mavin failure-mode analysis (Reddit research)
+
+Mavin shut down with a public notice, but the underlying cause was loss of user trust over pricing accuracy. Reddit threads identified the failure modes:
+
+- **Outlier manipulation:** Users reported a $99,999 Pokemon Pikachu sale showing up as a "real" comp on Mavin. Suspected sock-puppet behavior — one account selling to another at an absurd price to inflate perceived value. Mavin had no detection for this.
+- **Shipping cost inflation:** Mavin included shipping in sale prices, inflating low-value cards (where shipping is a meaningful percentage of the total).
+- **Money laundering theory:** Community theorized some absurd-price sales were deliberate movement of money via card transactions. Whether or not this is literally true, the pattern (impossible single sales) needs to be designed against.
+- **User exodus:** Users moved to raw eBay sold listings or TCGFish (mentioned multiple times as a cleaner alternative).
+
+**Implications for Ripper's pricing pipeline:**
+
+1. **Outlier detection at the individual-sale level.** Single sales 30%+ outside the recent cluster get flagged and excluded from `current_value`. The $99,999 sale never makes it into our headline price.
+2. **Shipping cost handling.** Either subtract shipping from sale total before averaging, or store both `total_sale_price` and `card_only_price` separately so we always know which version is in play.
+3. **Pattern detection for sock-puppet activity.** Multiple sales between the same buyer/seller, sudden volume spikes on previously-quiet cards — these are flag candidates.
+4. **Transparent confidence display.** Sales count, recency, cluster tightness — if any are weak, surface that to the user. Don't hide bad data behind a confident-looking number.
+
+**TCGFish flagged for evaluation:** Mentioned multiple times as a cleaner Mavin alternative. Out of TCG scope but worth examining as a reference for how clean eBay aggregation can be done well. Not a data source dependency — a benchmark.
+
+### April 2026 — Grading-as-a-feature opportunity
+
+Identified during eBay observation: if graded listings are easy to identify, we can store per-grade prices separately and surface them as a future feature.
+
+**Future product opportunity:** Show raw, PSA 9, PSA 10 prices side-by-side with grading ROI calculation. No competing tool does this in one place.
+
+**Implication:** Schema should support per-grade pricing now, even if only raw is displayed in POC. Captured in project-brief.md as Post-MVP Roadmap item.
 
 ### Box format coverage varies by set
 - Not every set has Hobby + Jumbo + Blaster + Mega + Retail.
@@ -106,11 +173,25 @@ Real-world observations that should inform schema and pricing decisions. These a
 
 Decisions that haven't been made yet. Each question includes the framing and what answering it depends on. Items here become DECIDED entries when conversations close.
 
-### The Pricing Data Model (highest priority)
+### eBay API verification (must be answered before pricing data model decisions)
+
+**0. What does the eBay API actually expose?**
+We've been assuming several things about eBay API capabilities based on web UI behavior. Before locking pricing pipeline decisions, we need a hands-on verification session to confirm:
+- Confirmed access tier and daily quota
+- Whether Marketplace Insights API (sold listings) access is approved
+- Whether the graded filter exists at the API level
+- Whether shipping cost is returned as a separate field
+- Whether item specifics (structured product data) include card number when the title doesn't
+- Search syntax for queries with card numbers + exclusion keywords
+- Rate limit behavior under realistic refresh patterns
+
+**This is a hands-on session, not a thinking session.** Confirm before designing around assumptions.
+
+### The Pricing Data Model
 
 **1. What does `current_value` on a card mean, statistically?**
 - Average of last N sales? Median? Most recent? Weighted by recency?
-- Each option produces different numbers. Median is more resistant to outliers. Recent-weighted reflects current market better but reacts to noise.
+- Median is more resistant to outliers (Mavin's $99,999 lesson). Recent-weighted reflects current market better but reacts to noise.
 - Depends on: nothing — this is a definitional choice.
 - Affects: every EV/ROI calculation, every checklist price, every chart.
 
@@ -121,9 +202,9 @@ Decisions that haven't been made yet. Each question includes the framing and wha
 - Affects: EV accuracy, coverage display, what appears on the checklist.
 
 **3. How do we handle raw vs. graded?**
-- For POC: filter to raw-only sales using keyword exclusion (no "PSA," "BGS," etc.)? Or take all sales and trust the average?
+- For POC: filter to raw-only sales using API graded filter (if confirmed) plus keyword exclusion as backup?
 - For future: store per-grade tiers separately so the Grading ROI feature works.
-- Depends on: how confident we are in keyword filtering accuracy after running real data.
+- Depends on: eBay API verification confirming graded filter exists.
 - Affects: schema (single price column vs. multiple), accuracy, future feature enablement.
 
 **4. What counts as "priced" for the `ev_cards_priced` count?**
@@ -133,61 +214,55 @@ Decisions that haven't been made yet. Each question includes the framing and wha
 - Affects: the headline coverage number on every box profile page.
 
 **5. How do we measure pricing confidence?**
-- Confidence factors: sales count, recency of most recent sale, standard deviation of recent sales, condition mix in sales.
+- Confidence factors: sales count, recency of most recent sale, standard deviation of recent sales, condition mix in sales, presence of suspected manipulated sales.
 - Could be a single confidence score (high/medium/low) or multiple stored signals.
 - Depends on: how the review dashboard wants to surface flags.
 - Affects: schema (confidence columns on `cards`), review workflow, what gets flagged.
 
 **6. What does the data review dashboard flag?**
-- Likely candidates: large week-over-week price changes (>30%?), low sales count (<3?), high standard deviation, suspected mismatched cards, suspected condition pollution.
+- Likely candidates: large week-over-week price changes (>30%?), low sales count (<3?), high standard deviation, suspected mismatched cards, suspected condition pollution, suspected sock-puppet sales (Mavin lesson).
 - Threshold values are guesses until real data is reviewed.
 - Depends on: real eBay data flowing in to set sensible thresholds.
 - Affects: ongoing data quality maintenance, weekly review time investment.
 
-**7. Where does Mavin.io fit?**
-- Aggregates eBay sold data with an API. Possibly cleaner data than direct eBay calls, possibly handles raw/graded separation already.
-- Could be: complement to direct eBay (different data source), fallback (when direct calls fail), or replacement.
-- Depends on: actually evaluating their API and data quality.
-- Affects: pricing pipeline architecture, schema flexibility for multiple data sources.
-
 ### Structural schema decisions
 
-**8. Users table identity strategy: UUID matching `auth.users` or keep `SERIAL`?**
+**7. Users table identity strategy: UUID matching `auth.users` or keep `SERIAL`?**
 - Supabase Auth uses UUIDs in its `auth.users` table. Our `users` table currently uses `SERIAL` integer IDs.
 - Hard to change later — every foreign key referencing `user_id` would need migration.
 - Depends on: nothing — pure architecture choice.
 - Affects: every user-related table (saved_boxes, price_alerts, user_collection, user_wishlist).
 
-**9. `parent_set_id` design for sets with one format**
+**8. `parent_set_id` design for sets with one format**
 - Does a single-format set get a `parent_set_id`? Options: NULL (no parent concept), self-reference (set is its own parent), or only populate when 2+ formats exist.
 - Depends on: how the format switcher UI handles "no other formats available."
 - Affects: format switcher logic, query patterns, seeding spreadsheet structure.
 
-**10. `parent_set_id` parent identity rule**
+**9. `parent_set_id` parent identity rule**
 - When a set has multiple formats, which row is "the parent"? Always Hobby? Falls back to Jumbo if no Hobby? First format alphabetically?
 - Depends on: nothing definitive — convention choice.
 - Affects: seeding logic, slug generation, default-format display.
 
-**11. Card categories review**
-- Schema has 15 categories tied to baseball-style sets. Soccer and hockey have slightly different card structures.
+**10. Card categories review**
+- Schema has 15 categories tied to baseball-style sets. Football, basketball, and hockey have slightly different card structures.
 - Depends on: real data inspection across all four sports during seeding.
 - Affects: `card_categories` table, tier flip (#4.7), checklist rendering.
 
 ### Data retention and refresh
 
-**12. `price_history` retention policy**
+**11. `price_history` retention policy**
 - Keep all sales forever? Prune older than 2 years? Roll up older data into monthly averages?
 - Depends on: chart needs (6+ months minimum) and storage budget.
 - Affects: storage growth rate, chart query performance.
 
-**13. eBay API refresh cadence per card**
+**12. eBay API refresh cadence per card**
 - Daily? Weekly? Tiered by card value (high-value cards refreshed more often)?
 - Depends on: eBay API rate limits, price volatility tolerance, scaling reference.
 - Affects: data freshness, API quota usage, infrastructure cost.
 
 ### Source-of-truth data format
 
-**14. How do we structure raw collected data so it survives a schema rebuild?**
+**13. How do we structure raw collected data so it survives a schema rebuild?**
 - Spreadsheets currently mirror schema tables. If schema changes, spreadsheets become stale.
 - Options: keep raw "facts" spreadsheets separate from schema-shaped import spreadsheets, with a transformation step between.
 - Depends on: deciding what the "atomic facts" about a card and box actually are.
@@ -211,6 +286,16 @@ Specific moments where reality changed our thinking. Each entry includes what we
 - **Expected:** Card numbers and grade status would be reliably present in listing titles.
 - **Saw:** Card numbers in ~50% of titles, raw status almost never explicit, graded status in ~80% of graded listings.
 - **Changed:** Matching strategy needs multi-pass logic with confidence scoring. Keyword-based grade detection is viable for POC but isn't perfect. Future feature opportunity (Grading ROI calculator) identified.
+
+### April 2026 — eBay graded filter discovery
+- **Expected:** Raw vs. graded would have to be inferred from listing titles entirely.
+- **Saw:** eBay's web UI exposes a structured graded filter, suggesting the API likely does too.
+- **Changed:** Raw-vs-graded strategy becomes "use API filter primarily, keyword detection as backup." Pending API verification.
+
+### April 2026 — Mavin shutdown and failure-mode analysis
+- **Expected:** Mavin was a possible third-party data source we'd evaluate.
+- **Saw:** Mavin shut down. Reddit research revealed they died because users lost trust in their pricing accuracy (outlier manipulation, shipping inflation, sock-puppet sales).
+- **Changed:** No third-party dependency for data — pipeline is fully Ripper's. Mavin's failure modes become Ripper's design requirements: outlier detection, shipping handling, pattern detection for manipulation.
 
 ---
 

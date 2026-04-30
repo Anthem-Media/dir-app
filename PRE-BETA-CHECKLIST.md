@@ -176,6 +176,21 @@ These amendments were decided on during UI development but deferred until the da
 
 ## 6. eBay Integration
 
+### 6.0 eBay API capability verification
+- **Status:** Not started — must be done before pricing pipeline design is locked
+- **Why:** We've been making assumptions about eBay API capabilities based on the web UI. Designing pricing logic around unverified assumptions risks rework. Verification session is hands-on, not theoretical.
+- **What needs to be confirmed:**
+  - Approved access tier and daily call quota
+  - Marketplace Insights API access (for sold listings)
+  - Whether the graded filter exists at the API level
+  - Whether shipping cost is returned as a separate field per sale
+  - Whether item specifics (structured product data) include card number when the title doesn't
+  - Search syntax for queries combining card numbers and exclusion keywords
+  - Rate limit behavior under realistic refresh patterns
+- **Done when:** A verification session has been completed, real test calls have been made for at least three specific cards, raw API responses have been examined, and findings have been logged in SCHEMA-AND-DATA.md under OBSERVED.
+- **Dependencies:** eBay Developer account approval (already in progress)
+- **Blocks:** All decisions in SCHEMA-AND-DATA.md OPEN QUESTIONS pricing data model section.
+
 ### 6.1 eBay API proof of concept script
 - **Status:** Not started
 - **Details:** Small targeted test — script takes a card name, hits eBay sold listings endpoint, returns last 10 sales with average price. Validates the API works before building the full pipeline.
@@ -277,6 +292,16 @@ These amendments were decided on during UI development but deferred until the da
 - **Details:** ~84 homepage box images (featured sections on the homepage) and the 2024 Topps Chrome Baseball box image for the POC profile page. This is a manual pass for the POC only. After POC, the semi-automated tool (#11.1) handles all future image sourcing — no manual image work at scale.
 - **Done when:** Homepage displays real box images. 2024 Topps Chrome Baseball box profile page displays a real box image.
 - **Dependencies:** None for the manual pass. #11.1 must exist before moving to full seeding.
+
+---
+
+## 12. Soccer "Coming Soon" treatment
+
+### 12.1 Soccer nav tab routes to Coming Soon page
+- **Status:** Not started
+- **Details:** Soccer was removed from the beta launch scope. The navigation needs a Soccer tab that does NOT route to a filtered Browse page (that would show zero results and look broken). Instead, it routes to a simple "Coming Soon" page or modal explaining that Soccer ships post-beta.
+- **Done when:** Soccer is visible in the nav, clicking it surfaces a Coming Soon experience (page or modal — designer's call), and post-beta soccer rollout is added to the post-launch roadmap.
+- **Dependencies:** None.
 
 ---
 

@@ -60,6 +60,19 @@
 ### Topps Official Odds Page (topps.com/pages/odds)
 - **Useful for:** Official manufacturer-published pack odds for all Topps sets. Primary source for pull rates.
 
+### Mavin.io (defunct)
+- **What they were:** Aggregated eBay sold-card data with a price guide front-end. Shut down in 2025/2026.
+- **Why they died:** Reddit research surfaced loss of user trust over pricing accuracy. Specific failure modes:
+  - Outlier sales pollution (users reported a $99,999 Pokemon Pikachu sale shown as a real comp, suspected sock-puppet manipulation between two accounts)
+  - Shipping costs included in displayed prices, inflating low-value card values
+  - Suspected money-laundering activity producing impossibly-high single sales that polluted the data
+- **Implication for Ripper:** Mavin's failure modes are Ripper's design requirements. Our pipeline must include outlier detection at the individual-sale level, shipping cost handling, pattern detection for sock-puppet activity, and transparent confidence display. Captured in detail in SCHEMA-AND-DATA.md.
+- **Takeaway:** A pricing aggregator that fails on data quality loses users to "I'll just check eBay myself." Pricing accuracy isn't a feature — it's a survival requirement.
+
+### TCGFish
+- **What they do:** Mentioned in Reddit threads as a cleaner alternative to Mavin for eBay sold-card data aggregation. Primarily TCG-focused (Magic, Pokemon).
+- **Relevance:** Out of Ripper's sport-card scope, but worth examining as a reference for how clean eBay aggregation can be done well. Future research, not a data dependency.
+
 ### eBay Sold Listings
 - **Useful for:** Primary source for card pricing and sealed box pricing. What cards actually sold for, not asking prices. eBay API available for programmatic access (Phase 13). Also provides box images as a byproduct of price data scraping.
 

@@ -4,7 +4,7 @@
 Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Resend live and tested under burst load, all 6 auth email templates branded, password reset flow built/branded/tested end-to-end, email verification permanently ON. POC (Proof of Concept) phase is current: hook up hobbyripper.com in Vercel, connect Supabase with minimal real data, run the 2024 Topps Chrome Baseball pipeline end-to-end, and populate homepage images. Rename pass (DIR → Ripper across codebase and docs) is scheduled after POC is complete and working on hobbyripper.com, right before Pro audit #1. eBay Partner Network enrollment is queued for as soon as real data is live on the domain.
 
 ## What's Been Decided and Locked
-- **Scope:** Baseball, Football, Basketball, Hockey, Soccer at launch. All sports need full database population for beta — not just baseball. No TCG categories.
+- **Scope:** Baseball, Football, Basketball, Hockey at beta launch. Soccer dropped from beta scope — becomes a "Coming Soon" link in the navigation. Soccer remains on the post-beta roadmap. All four launch sports need full database population for beta. No TCG categories.
 - **Data coverage:** Full profiles (checklist, pull rates, EV, ROI, card pricing) for boxes 2018-present. Legacy boxes (1995-2017) get box profiles without EV/ROI but keep checklist, card pricing, top chases, and pull rates where available.
 - **Card-level pricing required:** Every card in a checklist needs a current market value. This is what makes EV and ROI calculations work. Not just top chases — the full checklist priced out.
 - **EV and ROI confirmed:** Stays in the product. This is the core differentiator vs. Waxstat and everyone else.
@@ -83,6 +83,7 @@ Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Res
 - CLAUDE.md — Claude Code context file (lives in repo root)
 - CONTEXT.md — this file, current status and decisions
 - PRE-BETA-CHECKLIST.md — single compiled list of every deferred item that must be addressed before beta launch
+- SCHEMA-AND-DATA.md — single source of truth for every schema and data decision (DECIDED, OBSERVED, OPEN QUESTIONS sections; updated continuously through database phase)
 - REFERENCES.md — design and competitor references
 - SCALING-REFERENCE.md — infrastructure scaling roadmap (scheduled for expansion during scale audit session)
 - requirements.md — hard platform and architectural requirements
@@ -243,6 +244,8 @@ Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Res
 - ⚠️ vercel.json at project root is required — rewrite rule that serves index.html for all routes so React Router client-side routing works on direct URL loads. Do NOT delete this file. Every direct-URL load of a route like /reset-password, /box/:slug, /browse depends on it.
 - ⚠️ Email templates (6 total) are branded and live in Supabase Auth dashboard. The HTML is authored in the Supabase dashboard only — not stored in the codebase. If templates need edits, edit directly in Supabase dashboard → Authentication → Emails. Subject lines: 'Confirm your Ripper email' (confirm signup), 'Reset your Ripper password' (password reset), 'Your Ripper sign-in link' (magic link), 'Confirm your new email for Ripper' (email change), 'Confirm it's you on Ripper' (reauth), 'You've been invited to Ripper' (invite user).
 - ⚠️ Post-password-reset UX flagged for revisit: after successful reset, users currently redirect to /signin with a success banner and must re-enter credentials. Options to reconsider later: auto-sign-in and redirect to homepage (smoother), or keep current flow (more explicit). Real user feedback will decide. See PRE-BETA-CHECKLIST.md.
+- ⚠️ Mavin.io is shut down and is NOT a viable data source. Pricing pipeline is fully owned by Ripper, no third-party aggregator dependency. Mavin's failure modes (outlier manipulation, shipping cost inflation, sock-puppet sales) are documented in SCHEMA-AND-DATA.md as design requirements for our pipeline. TCGFish flagged as future benchmark, not a data source.
+- ⚠️ eBay API capabilities need hands-on verification before pricing pipeline design is locked. We've been assuming things about graded filters, shipping cost fields, item specifics, and search syntax based on the eBay web UI. Verification session must confirm what the API actually exposes before pricing decisions are committed. See SCHEMA-AND-DATA.md OPEN QUESTIONS #0.
 
 ## Development Guidelines
 - Use this Project chat for planning, strategy, and decisions

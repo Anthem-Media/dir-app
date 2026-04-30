@@ -142,7 +142,7 @@ Both yes  →  show box profile
 - Long-term: Real-time or near-real-time (engineering hire needed)
 
 ### Scale
-- Beta launch: All five sports (Baseball, Football, Basketball, Hockey, Soccer) populated with full profiles for 2018-present, legacy profiles for 1995-2017
+- Beta launch: Baseball, Football, Basketball, Hockey populated with full profiles for 2018-present, legacy profiles for 1995-2017. Soccer ships as "Coming Soon" — post-beta priority for population.
 - Estimated box count for full profiles (2018-present): ~1,200-2,000 boxes across all sports
 - 40-60 new box set products per year per sport from major manufacturers
 - Each set has multiple formats (Hobby, Jumbo, Blaster, Mega, Retail) — each is a separate database entry linked by `parent_set_id`
@@ -292,7 +292,8 @@ During beta, the iOS app works the same way: beta users sign up on the web, then
 
 ## Sport Expansion Roadmap
 
-Beta & Launch: Baseball, Football, Basketball, Hockey, Soccer (all populated with data)
+Beta & Launch: Baseball, Football, Basketball, Hockey (all populated with data)
+Coming Soon (post-beta priority): Soccer — placeholder nav link until populated
 Phase 2: UFC, F1
 Phase 3 (if ever): Entertainment/TCG (Disney, Marvel, Pokemon, Magic, Yu-Gi-Oh, etc.)
 
