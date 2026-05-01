@@ -2,6 +2,8 @@
 
 **Purpose:** A single, living checklist of every loose end that's been deferred during development and MUST be addressed before public beta launch. Every time something gets deferred, it lands here. Before flipping the switch on beta, this list gets walked end-to-end. Nothing ships with open items on this list.
 
+**Companion document:** EBAY-STRATEGY.md is the canonical source for all eBay-related strategy, License Agreement analysis, application package contents, and roadmap sequencing. Section 6 of this checklist (eBay Integration) is the operational checklist version of decisions captured there. Read EBAY-STRATEGY.md first before working through Section 6.
+
 **How to use this:** Check items off as they're completed. Add new items the moment they're deferred — do not rely on memory. Each item includes what it is, why it was deferred, and what "done" looks like.
 
 ---
@@ -176,35 +178,92 @@ These amendments were decided on during UI development but deferred until the da
 
 ## 6. eBay Integration
 
-> **🟦 Read EBAY-STRATEGY.md first.** This section's items will be reorganized in a future docs sync to align with the eBay access path documented in EBAY-STRATEGY.md (EPN → Buy API → Application Growth Check → contract). Until that sync happens, the items below remain valid but are incomplete — EBAY-STRATEGY.md is the canonical source of truth for eBay sequencing, license constraints, and roadmap impacts.
+⚠️ **Read EBAY-STRATEGY.md first.** That document is the canonical source for all eBay-related strategy, License Agreement constraints, application package contents, and roadmap sequencing. Items in this section are the operational checklist version of decisions captured there.
 
 ### 6.0 eBay API capability verification
 - **Status:** Not started — must be done before pricing pipeline design is locked
 - **Why:** We've been making assumptions about eBay API capabilities based on the web UI. Designing pricing logic around unverified assumptions risks rework. Verification session is hands-on, not theoretical.
 - **What needs to be confirmed:**
   - Approved access tier and daily call quota
-  - Marketplace Insights API access (for sold listings)
-  - Whether the graded filter exists at the API level
+  - Browse API search syntax for queries combining card numbers and exclusion keywords
+  - Whether the graded filter exists at the API level (web UI confirmed, API status unconfirmed)
   - Whether shipping cost is returned as a separate field per sale
   - Whether item specifics (structured product data) include card number when the title doesn't
-  - Search syntax for queries combining card numbers and exclusion keywords
   - Rate limit behavior under realistic refresh patterns
-- **Done when:** A verification session has been completed, real test calls have been made for at least three specific cards, raw API responses have been examined, and findings have been logged in SCHEMA-AND-DATA.md under OBSERVED.
-- **Dependencies:** eBay Developer account approval (already in progress)
-- **Blocks:** All decisions in SCHEMA-AND-DATA.md OPEN QUESTIONS pricing data model section.
+- **Done when:** A verification session has been completed, real test calls have been made for at least three specific cards, raw API responses have been examined, and findings have been logged in EBAY-STRATEGY.md OBSERVED and SCHEMA-AND-DATA.md OBSERVED.
+- **Dependencies:** eBay Developer account approval (already in place)
+- **Blocks:** All decisions in SCHEMA-AND-DATA.md OPEN QUESTIONS pricing data model section, Path E+ mitigation tactics validation, Buy API Application submission.
 
-### 6.1 eBay API proof of concept script
-- **Status:** Not started
-- **Details:** Small targeted test — script takes a card name, hits eBay sold listings endpoint, returns last 10 sales with average price. Validates the API works before building the full pipeline.
+### 6.1 EPN (eBay Partner Network) enrollment
+- **Status:** Not started — sequenced for after POC phase complete on hobbyripper.com
+- **Why:** EPN approval is fast and low-bar but does not auto-grant access to restricted Buy APIs. EPN must be approved BEFORE Buy API Application can be submitted. Don't apply with dummy data — risks rejection.
+- **Done when:** Accepted into EPN, affiliate link pattern configured for the eBay fallback in distributor_listings, EPN Campaign ID generated.
+- **Dependencies:** Real data live on hobbyripper.com (POC phase #5.1 complete)
+- **Blocks:** Buy API Application submission (#6.3)
 
-### 6.2 eBay Partner Network signup
-- **Status:** Not applied — waiting on real data to be live
-- **Details:** Free to join, 1-4% commission (collectibles 3-4%), 24-hour cookie, $550 USD cap per qualifying purchase. Do not apply with dummy data — risks rejection.
-- **Done when:** Accepted into EPN, affiliate link pattern configured in the `distributors` table as the eBay fallback.
+### 6.2 Card Hedge + PriceCharting outreach (Path B research)
+- **Status:** Not started — HIGH PRIORITY, runs in parallel with EPN application
+- **Why:** Path E+ design wants paid sold-data for top chases and grails regardless of whether Marketplace Insights is approved. Quotes and terms from both providers are needed to finalize the design.
+- **Cam-led emails. Four questions to each provider:**
+  1. Pricing for paid-data calls scoped to top chases and grails only (~50-200 cards per box × 1,200-2,000 boxes, refresh frequency TBD)
+  2. eBay data sourcing method (direct API access, scraping, or aggregation)
+  3. SLA and stability commitments
+  4. Terms-of-service compatibility with combining their data with eBay Browse API active-listing data in the same product
+- **Critical context:** SportsCardsPro/PriceCharting public ToS allows "referencing" price data with attribution but does NOT explicitly authorize using their data as the silent backend of a paid analytics product. Commercial use requires written confirmation from them, not interpretation of public ToS. Do not pay for a subscription before getting explicit commercial-use confirmation in writing.
+- **Done when:** Both providers have responded with pricing, sourcing methods, SLAs, and commercial-use terms in writing. Findings documented in EBAY-STRATEGY.md OBSERVED.
+- **Dependencies:** None — this can happen now
+- **Blocks:** Final Path B/Path E+ economic decision
 
-### 6.3 Full eBay API pipeline
-- **Status:** Not started, blocked on #6.1
-- **Details:** Automated card pricing, box pricing, image scraping, and scheduled refresh. Powers the entire data layer.
+### 6.3 Buy API Application submission (single combined ask)
+- **Status:** Not started — sequenced after EPN approval
+- **What:** Submit Buy API Application questionnaire as ONE cohesive partnership package. Four APIs requested together: Browse API rate limit increase, Marketplace Insights API scoped to top chases/grails, Feed API for bulk listing efficiency, Notification API for price alert features.
+- **Why combined, not separate:** Application Growth Check is a single review process for both rate limit increases and restricted API access. Submitting fragmented applications doesn't preserve negotiating leverage and weakens the partnership story.
+- **Done when:** Application submitted with mocks, data flows, per-API call volume estimates, and cover letter framing the partnership as driving traffic to eBay through analytics. EPN approval confirmed before submission.
+- **Dependencies:** EPN approval (#6.1)
+- **Blocks:** Application Growth Check review (#6.5)
+
+### 6.4 LLC formation pre-Marketplace-Insights-contract
+- **Status:** Not started — TIMING CHANGED from previous "deferred until revenue"
+- **Why:** The eBay API License Agreement includes an indemnification clause (Section 15) that should not be signed by individual partners. Forming the LLC before contract signing protects Zach and Cam personally.
+- **Done when:** LLC formed in chosen state (Tennessee for Zach's residence is the obvious default unless tax/legal counsel suggests otherwise), operating agreement drafted reflecting the 50/50 split from the existing partnership agreement, EIN obtained.
+- **Dependencies:** None — can happen any time, but must be complete before #6.6
+- **Blocks:** Marketplace Insights contract signing (#6.6)
+
+### 6.5 Application Growth Check review
+- **Status:** Not started — sequenced after #6.3 submission
+- **What:** eBay reviews the Buy API Application. 5-7 business days to outcome. Approve or deny.
+- **Done when:** eBay returns a decision in writing.
+- **Outcomes:**
+  - **Approved:** Move to #6.6 (contract signing) and #6.7 (production access)
+  - **Denied:** Path A is dead. Pivot to Path E+ with Path B as primary sold-data source. Document outcome in EBAY-STRATEGY.md OBSERVED.
+
+### 6.6 Marketplace Insights contract signing
+- **Status:** Conditional — only if #6.5 approved
+- **What:** eBay sends contract terms via Developer Support ticket. Contract is governed by the API License Agreement (dated September 3, 2025) plus any deal-specific terms.
+- **Critical pre-signing review:**
+  - LLC must be formed and signing as the contracting entity (#6.4)
+  - License Agreement constraints must be acknowledged in the build plan: 6-hour refresh on listing data, 24-hour on other content, delete-when-unavailable cleanup pipeline, visual separation of eBay vs. non-eBay data, AI ingestion blocked by default
+  - Eternal license clause (Section 8.5.3.1) — eBay gets a perpetual license to Ripper if built with Marketplace Insights data. Affects acquisition strategy. Future buyers (Fanatics/Topps/Panini) inherit this license.
+- **Done when:** Contract reviewed by counsel (~$500 budget allocated from $5k audit cap), signed by LLC, returned to eBay.
+
+### 6.7 Production access for Marketplace Insights
+- **Status:** Conditional — only after #6.6 signed
+- **What:** eBay grants production credentials. Pipeline can now flip from Browse-only to full Path E+ with Marketplace Insights powering top chases/grails precision.
+- **Done when:** Production credentials configured in environment variables, scoped pull tested for one box (2024 Topps Chrome Baseball), data flows verified, EV/ROI calculations match expected outputs.
+
+### 6.8 License Agreement compliance build items (if Path A succeeds)
+- **6-hour refresh cadence on listing data:** Build refresh logic that polls eBay no more frequently than every 6 hours for any given listing. Cache layer must enforce this even if user demand would justify more frequent refresh.
+- **Delete-when-unavailable cleanup pipeline:** When eBay reports a listing is no longer available, our cached copy must be deleted within the License Agreement's required window (Section 8.1.2.b.1). Cron job or webhook-driven cleanup.
+- **Visual separation:** Box profile pages must visually separate eBay-sourced data from non-eBay distributor data. Affects Buy Now section UI design — distributor listings and eBay fallback must be visually distinguished, not blended.
+- **10-day data destruction on termination:** If the contract is ever terminated, all eBay-sourced data must be deleted within 10 days. Build admin tooling for this from the start so it's not a panic operation later.
+- **AI ingestion blocked by default:** No LLM features can be built on top of Marketplace Insights data without explicit additional consent from eBay. Affects post-MVP "AI trend summaries" feature — see #6.9.
+- **Status:** Build items, not active until contract signed. Capture as design constraints now to avoid retrofit costs later.
+
+### 6.9 Post-MVP "AI trend summaries" feature blocked status
+- **Status:** Blocked under standard Marketplace Insights License Agreement
+- **Why:** Section 8.5.2.a of the License Agreement explicitly blocks AI ingestion of Marketplace Insights data by default. Requires separate written consent from eBay to enable.
+- **Implication for roadmap:** The post-launch "AI trend summaries" feature in project-brief.md cannot be built freely on top of MI-sourced data. Three options to revisit when the feature comes up: (a) request explicit AI-use consent from eBay during contract negotiation, (b) build the feature using non-MI data sources only (Browse API, paid aggregator, our own data), (c) drop the feature.
+- **Done when:** Feature is built using a license-compliant data source, OR explicit eBay consent for AI use of MI data is in writing, OR feature is dropped from roadmap.
 
 ---
 
@@ -256,9 +315,11 @@ These amendments were decided on during UI development but deferred until the da
 - **Done when:** Both signatures, both dates, stored in a shared location
 
 ### 9.2 LLC formation
-- **Status:** Deferred until demand is validated
-- **Why deferred:** No revenue yet, no assets to protect, not worth the paperwork
-- **Trigger:** Revenue flowing or investors interested
+- **Status:** Not started — TIMING CHANGED
+- **Previous trigger:** Deferred until demand validated, revenue flowing, or investors interested
+- **Updated trigger:** Required BEFORE Marketplace Insights contract signing (#6.6) because the License Agreement includes an indemnification clause that should not be signed by individual partners
+- **Done when:** LLC formed in Tennessee (default unless tax/legal counsel advises otherwise), operating agreement drafted reflecting the 50/50 split from the existing partnership agreement, EIN obtained, banking set up under the LLC.
+- **Cross-reference:** Same item is tracked as #6.4 in the eBay Integration section because LLC formation is operationally a pre-MI-contract dependency. Whichever section is referenced first, both are the same task.
 
 ---
 
