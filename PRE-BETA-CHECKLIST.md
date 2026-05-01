@@ -176,6 +176,8 @@ These amendments were decided on during UI development but deferred until the da
 
 ## 6. eBay Integration
 
+> **🟦 Read EBAY-STRATEGY.md first.** This section's items will be reorganized in a future docs sync to align with the eBay access path documented in EBAY-STRATEGY.md (EPN → Buy API → Application Growth Check → contract). Until that sync happens, the items below remain valid but are incomplete — EBAY-STRATEGY.md is the canonical source of truth for eBay sequencing, license constraints, and roadmap impacts.
+
 ### 6.0 eBay API capability verification
 - **Status:** Not started — must be done before pricing pipeline design is locked
 - **Why:** We've been making assumptions about eBay API capabilities based on the web UI. Designing pricing logic around unverified assumptions risks rework. Verification session is hands-on, not theoretical.

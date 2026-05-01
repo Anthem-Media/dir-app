@@ -15,6 +15,11 @@ Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Res
 - **Beta access model — LOCKED:** Auth is required from day one. All beta signups get `plan = 'beta'` with full premium access to every feature (box profiles, EV, ROI, pull rates, charts). No Stripe or payment processing during beta. Paywall logic on box profile pages accepts any user with `plan` of `'beta'` OR `'paid'`. When beta ends, new signups default to `'free'` (no box profile access) and must upgrade to `'paid'` via Stripe. Existing beta users will be migrated or grandfathered — decision deferred until end of beta. Email opt-in checkbox captures beta tester emails from day one. iOS app works during beta because it's auth-only by design — every beta signup becomes a valid iOS user.
 - **Email verification — ON (permanent):** Custom SMTP via Resend is live. Branded auth emails send reliably from noreply@hobbyripper.com. Email verification is permanently ON in Supabase Auth settings.
 - **Data sources:** Manufacturer pull rates + eBay sold listings only.
+- **eBay strategy — LOCKED design posture (May 1, 2026):** Path E+ hybrid is now the design assumption for both Path A approved and Path A denied scenarios. Browse API covers the bulk of any checklist. Paid sold-data source (Path B) covers Top Chases and Grails specifically. Path A (Marketplace Insights direct) is pursued in parallel and reduces cost if approved — but is no longer make-or-break. Full detail in EBAY-STRATEGY.md.
+- **Five Paths to eBay sold-listing data — LOCKED:** Path A = Marketplace Insights API (direct from eBay, gated, free to attempt). Path B = license from paid aggregator (Card Hedge AI, PriceCharting/SportsCardsPro). Path C = bespoke eBay partnership (future, executive-level). Path D = scraping (off the table — TOS violation). Path E+ = Browse API for bulk + paid aggregator for Top Chases and Grails (current design assumption). Sequencing: Path A goes first (dominant if approved). Path B research happens in parallel during Path A review period. Full detail in EBAY-STRATEGY.md.
+- **Concentrate accuracy where users care most — LOCKED:** Bulk checklist (base, common parallels, common autos of star players) priced via Browse API with mitigation tactics. Top Chases and Grails (~50-200 cards per box) priced via paid sold-data source (Path B). EV calculated on combined data with transparent coverage labeling. Concentrates accuracy spend on the cards that drive purchase decisions — confirmed viable by May 1, 2026 active-vs-sold research across 5 card tiers.
+- **License Agreement constraints — LOCKED (applies if Marketplace Insights is approved):** 6-hour mandatory refresh on active listing data, 24-hour on other eBay content. Delete-when-unavailable cleanup pipeline required. eBay and non-eBay content must be visually separated in displays (affects Buy Now UI). AI ingestion of Marketplace Insights data blocked by default — AI trend summaries require explicit additional written consent from eBay (AI photo scan is fine). Eternal irrevocable license to eBay over Ripper itself if built using Marketplace Insights data. 10-day data destruction on termination. Full detail in EBAY-STRATEGY.md.
+- **LLC formation — TIMING CHANGE:** No longer deferred until revenue. Must form before signing the Marketplace Insights production access agreement. License Agreement Section 15 (Indemnification) exposes individual signatories personally to legal claims — LLC formation contains that exposure. Capital cost ~$50-300. Cam owns this.
 - **Tech stack:** React + Vite frontend on Vercel, PostgreSQL on Supabase, Python or Node.js backend, Claude API for photo scan and trend summary features.
 - **Database schema:** 13 tables, 2 views. Complete and finalized — do not rebuild. All pending amendments tracked in PRE-BETA-CHECKLIST.md section #4.
 - **Business structure:** 50/50 split with Cam Gibson. Zach handles all technical work. Cam handles business development, distribution, and capital.
@@ -32,7 +37,7 @@ Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Res
 - **Password reset flow — COMPLETE:** Built during Email Infrastructure phase. ForgotPasswordPage and ResetPasswordPage wired, branded email template, end-to-end tested. vercel.json rewrite rule added so client-side routes resolve correctly on direct URL loads.
 - **Google OAuth — DEFERRED:** Placeholder buttons on Sign Up and Sign In. Decision and wiring (or removal) tracked in PRE-BETA-CHECKLIST.md #3.1.
 - **Buy Now / affiliate system — LOCKED:** Price comparison with multiple distributors on box profile pages. Starts with 1-2 distributors, grows over time. Boxes without distributor listings fall back to "Find on eBay" affiliate link. System gets designed and built but launches empty — populated when Cam has distributor partnerships (during beta). No distributor outreach until app is ready. New database tables needed: `distributors` and `distributor_listings`. Buy Now button is built as a UI placeholder on the box profile page — wired to distributor_listings table during database phase.
-- **eBay Partner Network:** Free to join, 1-4% commission (collectibles on the higher end at 3-4%), 24-hour cookie window. Sign up when real data is live on the site (Phase 10-12 timeframe) — signing up with dummy data risks rejection.
+- **eBay Partner Network:** EPN membership is Step 1 of the Buy API access process — must be approved before Marketplace Insights can be applied for. Submit as soon as Phase 1 foundation is complete (rename pass done, hobbyripper.com live with real pages and real images). EPN approval is fast (hours to days) and the bar is low — use the wait time for Browse API integration and sandbox setup. Commission structure: 1-4% (collectibles at 3-4%), 24-hour cookie window. Do not apply with dummy data — risks rejection. Full sequencing detail in EBAY-STRATEGY.md.
 - **Data entry — LOCKED:** Zach handles all data entry during beta (5-10 hrs/week). No data engineer hire until revenue or investors. Pipeline is AI-assisted and runs in five steps — see Data Seeding Pipeline section below and full detail in project-brief.md.
 - **Data entry sources by sport:**
   - Baseball: Cardboard Connection, Beckett, Baseballcardpedia, TCDB (release date / MSRP fallback)
@@ -145,6 +150,12 @@ Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Res
 49. ✅ Password reset email template branded
 50. ✅ Magic link, email change, reauth, and invite user email templates all branded (not actively wired to features but ready)
 51. ✅ End-to-end password reset flow tested and working
+52. ✅ EBAY-STRATEGY.md created — single source of truth for all eBay API strategy, License Agreement constraints, and application roadmap
+53. ✅ Five eBay documents researched and summarized (License Agreement, Buy API Requirements, Application Growth Check, Get Started guide, Buy API Support by Marketplace page)
+54. ✅ Reddit r/Flipping evidence sourced — developer testimony confirming Marketplace Insights new approvals are rare in 2025-2026 despite strong applications
+55. ✅ Multi-aggregator landscape research complete — Card Ladder, Market Movers, Card Hedge AI, PriceCharting/SportsCardsPro, 130 Point all documented in EBAY-STRATEGY.md OBSERVED
+56. ✅ Active-vs-sold research session completed — hands-on research across 5 card tiers from 2024 Topps Chrome Baseball confirming asking-vs-sold gap is small at high volume and large at low volume
+57. ✅ Five Paths framework defined and sequenced — Path E+ hybrid (Browse API for bulk + paid aggregator for Top Chases/Grails) confirmed as design assumption for both Path A approved and Path A denied scenarios
 
 ## Full Roadmap
 1. ~~Codebase audit~~ ✅
@@ -185,30 +196,36 @@ Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Res
    - Populate homepage with real images for featured box sets (see PRE-BETA-CHECKLIST.md #11.2)
 10. Rename pass: DIR → Ripper across codebase, docs, UI copy, Vercel/Supabase project names
 11. Pro audit #1 (senior React dev — is the frontend and auth foundation solid? ~3-5 hours at $50-150/hr = $150-750)
-12. eBay Partner Network enrollment — apply once real data is live on hobbyripper.com. Do not apply with dummy data — risks rejection.
-13. eBay API proof of concept — small targeted script: card name → eBay sold listings → last 10 sales with average price. Validates API before full pipeline.
-14. Scale audit session — full walk of every feature, third-party service, rate limit, and bottleneck at 100/1k/10k/100k concurrent user ceilings. Findings documented in SCALING-REFERENCE.md and high-risk items added to PRE-BETA-CHECKLIST.md.
-15. Mobile UI polish + Account Management phase — see PRE-BETA-CHECKLIST.md #10
-16. Database setup and backend API (apply all pending schema amendments from PRE-BETA-CHECKLIST.md #4)
-17. Connect frontend to real data
-18. Admin panel for data entry
-19. Pull rate scraper test — target Cardboard Connection for 2024 Topps Chrome Baseball
-20. Seed one test box set end to end (2024 Topps Chrome Baseball)
-21. eBay API full integration (card pricing + box pricing + images from distributor feeds + eBay fallback)
-22. Seed database with all four launch sports (Baseball, Football, Basketball, Hockey). Soccer seeding deferred to post-beta.
-23. Claude API integration for photo scan feature
-24. Buy Now / affiliate link system (UI built, populated when Cam has distributor partnerships)
-25. Price alerts and notifications
-26. User features (saved boxes, collection tracker, wishlist)
-27. Search functionality
-28. Pro audit #2 (full-stack dev — is the complete app ready for real users? ~8-15 hours at $50-150/hr = $400-2,250)
-29. Pre-launch polish: walk PRE-BETA-CHECKLIST.md end-to-end. Includes custom email templates, Google OAuth decision, all remaining schema amendments.
-30. Beta launch (all signups default to plan='beta' with full access — no Stripe yet)
-31. Pro audit #3 (specialist based on what breaks — performance, security, or both. ~5-10 hours at $75-200/hr = $375-2,000)
-32. Post-beta: Stripe integration, migrate beta users (grandfather or prompt to upgrade), flip paywall to require plan='paid' for new signups
-33. Post-launch: Coming Soon / release calendar, AI trend summaries, portfolio tracking, light/dark mode toggle in settings, Legacy Boxes marketplace tab (if validated)
+12. eBay Partner Network enrollment — apply once Phase 1 foundation is complete (rename pass done, hobbyripper.com live with real pages and real images). EPN approval is fast (hours to days). Do not apply with dummy data — risks rejection. EPN approval is required before Marketplace Insights can be applied for.
+13. Card Hedge AI + PriceCharting outreach — Cam-led, parallel to EPN application. Email both with scoped call-volume estimates for Top Chases and Grails (~50-200 cards per box). Four questions to Card Hedge: pricing, sourcing method, SLA, TOS compatibility with Browse API data. Document findings in EBAY-STRATEGY.md.
+14. eBay API capability verification session — hands-on session to confirm what Browse API and Marketplace Insights actually expose (graded filters, shipping cost fields, item specifics, search syntax). See SCHEMA-AND-DATA.md OPEN QUESTIONS #0.
+15. eBay API proof of concept — Browse API integration: card name → active listings → trimmed median asking price with mitigation tactics applied. Validates the bulk-pricing pipeline before full seeding begins.
+16. Buy API Application submission — single combined ask: Browse rate limit increase + Marketplace Insights (scoped to top chases/grails) + Feed API + Notification API. Requires sandbox integration built and demoable, EPN approved, LLC formed, mock package complete.
+17. LLC formation — Cam-led. Required before signing the Marketplace Insights production access agreement. License Agreement Section 15 (Indemnification) — personal exposure without LLC formation. Capital cost ~$50-300.
+18. Application Growth Check review — eBay reviews the combined application (5-7 business days). Respond to questions, provide additional mocks if requested.
+19. Scale audit session — full walk of every feature, third-party service, rate limit, and bottleneck at 100/1k/10k/100k concurrent user ceilings. Findings documented in SCALING-REFERENCE.md and high-risk items added to PRE-BETA-CHECKLIST.md.
+20. Mobile UI polish + Account Management phase — see PRE-BETA-CHECKLIST.md #10
+21. Database setup and backend API (apply all pending schema amendments from PRE-BETA-CHECKLIST.md #4)
+22. Connect frontend to real data
+23. Admin panel for data entry
+24. Pull rate scraper test — target Cardboard Connection for 2024 Topps Chrome Baseball
+25. Seed one test box set end to end (2024 Topps Chrome Baseball)
+26. eBay API full integration (card pricing + box pricing + images from distributor feeds + eBay fallback)
+27. Seed database with all four launch sports (Baseball, Football, Basketball, Hockey). Soccer seeding deferred to post-beta.
+28. Claude API integration for photo scan feature
+29. Buy Now / affiliate link system (UI built, populated when Cam has distributor partnerships)
+30. Price alerts and notifications
+31. User features (saved boxes, collection tracker, wishlist)
+32. Search functionality
+33. Pro audit #2 (full-stack dev — is the complete app ready for real users? ~8-15 hours at $50-150/hr = $400-2,250)
+34. Pre-launch polish: walk PRE-BETA-CHECKLIST.md end-to-end. Includes custom email templates, Google OAuth decision, all remaining schema amendments.
+35. Beta launch (all signups default to plan='beta' with full access — no Stripe yet)
+36. Pro audit #3 (specialist based on what breaks — performance, security, or both. ~5-10 hours at $75-200/hr = $375-2,000)
+37. Post-beta: Stripe integration, migrate beta users (grandfather or prompt to upgrade), flip paywall to require plan='paid' for new signups
+38. Post-launch: Coming Soon / release calendar, AI trend summaries, portfolio tracking, light/dark mode toggle in settings, Legacy Boxes marketplace tab (if validated)
 
 ## Reminders & Flags
+- ⚠️ **eBay strategy lives in EBAY-STRATEGY.md.** Read that file before any decision related to eBay API access, EPN, Marketplace Insights, or License Agreement compliance. The eBay path has multiple stages and several License Agreement clauses that materially affect schema, refresh cadence, AI feature roadmap, and acquisition strategy. Do not make eBay-related decisions without reading EBAY-STRATEGY.md first.
 - ⚠️ Switch Claude Code to Opus for auth system, database connection layer, and backend API work. Sonnet for UI, color, and mechanical tasks.
 - ⚠️ Beta access model is LOCKED: auth required from day one, all signups get plan='beta', no Stripe until after beta. Paywall check must accept plan IN ('beta', 'paid'). Do not build any free-tier box profile access during beta.
 - ⚠️ Scale audit is now a scheduled roadmap item (#8). Every new feature and third-party integration gets a scale-stress walkthrough during its audit checklist from here forward. Ask "what breaks at 100 concurrent users? 10,000? 100,000?" before shipping.
@@ -243,7 +260,16 @@ Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Res
 - ⚠️ Email templates (6 total) are branded and live in Supabase Auth dashboard. The HTML is authored in the Supabase dashboard only — not stored in the codebase. If templates need edits, edit directly in Supabase dashboard → Authentication → Emails. Subject lines: 'Confirm your Ripper email' (confirm signup), 'Reset your Ripper password' (password reset), 'Your Ripper sign-in link' (magic link), 'Confirm your new email for Ripper' (email change), 'Confirm it's you on Ripper' (reauth), 'You've been invited to Ripper' (invite user).
 - ⚠️ Post-password-reset UX flagged for revisit: after successful reset, users currently redirect to /signin with a success banner and must re-enter credentials. Options to reconsider later: auto-sign-in and redirect to homepage (smoother), or keep current flow (more explicit). Real user feedback will decide. See PRE-BETA-CHECKLIST.md.
 - ⚠️ Mavin.io is shut down and is NOT a viable data source. Pricing pipeline is fully owned by Ripper, no third-party aggregator dependency. Mavin's failure modes (outlier manipulation, shipping cost inflation, sock-puppet sales) are documented in SCHEMA-AND-DATA.md as design requirements for our pipeline. TCGFish flagged as future benchmark, not a data source.
-- ⚠️ eBay API capabilities need hands-on verification before pricing pipeline design is locked. We've been assuming things about graded filters, shipping cost fields, item specifics, and search syntax based on the eBay web UI. Verification session must confirm what the API actually exposes before pricing decisions are committed. See SCHEMA-AND-DATA.md OPEN QUESTIONS #0.
+- ⚠️ **eBay strategy is Five Paths — read EBAY-STRATEGY.md before any eBay-related decision.** Path A = Marketplace Insights direct, Path B = paid aggregator license, Path C = bespoke partnership (future), Path D = scraping (off the table), Path E+ = Browse API + paid aggregator hybrid (current design assumption). EBAY-STRATEGY.md is the single source of truth for sequencing, License Agreement constraints, application package requirements, and Plan B research status.
+- ⚠️ **eBay API capability verification session still required.** Hands-on session to confirm what Browse API and Marketplace Insights actually expose (graded filters, shipping cost fields, item specifics, search syntax). Must complete before full pricing pipeline is locked. See SCHEMA-AND-DATA.md OPEN QUESTIONS #0.
+- ⚠️ **Single combined application for all four API asks.** When the Application Growth Check submission goes in, it requests Browse API rate limit increase + Marketplace Insights (scoped to top chases/grails) + Feed API + Notification API as one cohesive partnership package. Do not fragment into separate applications.
+- ⚠️ **Marketplace Insights ask is scoped to Top Chases and Grails only.** Not full-checklist sold-data dependency. ~50-200 cards per box. Makes the application pitch stronger (precision on the cards that drive purchase decisions) and the call-volume estimate more defensible.
+- ⚠️ **License Agreement constraints are hard architectural requirements, not guidelines.** Refresh cadence (6-hour on active listings, 24-hour on other content), delete-when-unavailable pipeline, visual separation of eBay and non-eBay content in displays, AI ingestion restrictions — all must be designed in from the start. Full detail in EBAY-STRATEGY.md.
+- ⚠️ **Card Hedge AI + PriceCharting outreach is HIGH PRIORITY — Cam-led, this week.** Path B (paid aggregator) research must run in parallel with Path A (Marketplace Insights application), not in reserve. Quotes and terms inform Path E+ design regardless of Path A outcome. Four questions to Card Hedge: (1) pricing scoped to top chases/grails call volumes, (2) eBay data sourcing method, (3) SLA/stability, (4) TOS compatibility with Browse API data combination.
+- ⚠️ **SportsCardsPro/PriceCharting ToS needs clarification.** Are their aggregated prices built on eBay data? If so, using them as a paid source may carry eBay TOS compliance risk that flows through to Ripper. Ask during outreach.
+- ⚠️ **LLC formation must complete before signing the Marketplace Insights agreement.** Previously deferred until revenue — superseded for the eBay timeline. License Agreement Section 15 (Indemnification) exposes individual signatories personally. Capital cost ~$50-300. Cam owns this.
+- ⚠️ **Path D (scraping) is a hard no for production.** Apify, Oxylabs, and similar tools may be used for one-off research only — not as the production pipeline. Using a scraper while applying for Marketplace Insights would likely surface during review and result in instant denial.
+- ⚠️ **AI trend summaries are blocked by default.** License Agreement Section 8.5.2.a prohibits ingesting Marketplace Insights data into any AI model without eBay's explicit written consent. AI photo scan (image → box identification) is fine — it doesn't ingest eBay data. AI trend summaries require explicit additional consent. See PRE-BETA-CHECKLIST.md.
 
 ## Development Guidelines
 - Use this Project chat for planning, strategy, and decisions
