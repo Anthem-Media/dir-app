@@ -157,6 +157,17 @@ These amendments were decided on during UI development but deferred until the da
 - **⚠️ Must be applied before full database seeding begins.** These columns get written during EV calculation. If seeding runs before they exist, all EV writes will fail or require retrofitting.
 - **Timing:** Database phase, after POC, before full seed. Apply alongside all other schema amendments in section 4.
 
+### 4.11 Add `value_source` column to `cards` table
+- **Status:** Not applied — locked in Stage 0a planning session, May 2026
+- **Details:** `value_source VARCHAR(40)` with a CHECK constraint listing the realistic universe of source values, and an index on the column. Tracks which pricing pipeline wrote each `current_value`.
+- **CHECK constraint values:** `'ebay_browse_mitigation'`, `'ebay_marketplace_insights'`, `'card_hedge'`, `'price_charting'`, `'manual'`, `'placeholder'` (or NULL).
+- **Index:** `CREATE INDEX idx_cards_value_source ON cards(value_source);` — needed because License Agreement Section 16.3 cleanup queries filter by source and must run fast.
+- **Why:** Path E+ design has multiple pricing pipelines feeding the same `cards.current_value` column. The app needs to know source for: (a) refresh cadence enforcement (6h for eBay-sourced per License Agreement, paid-source per their terms), (b) License Agreement Section 16.3 compliance bulk-delete tooling, (c) tier-aware confidence display, (d) audit/debugging.
+- **Eβay-first framing:** Best case is a full eBay pipeline (Browse + Marketplace Insights) as sole source. Other source values exist for Plan B fallback resilience (Card Hedge, PriceCharting) but aren't expected to populate in the happy path. This is future-proofing, not a commitment to multi-source pricing as a goal. If the pricing strategy pivots significantly (e.g., pushed away from eBay entirely), the CHECK constraint will need to be updated — small migration, no schema rebuild. That expectation is accepted.
+- **Pipeline behavior:** Every pipeline that writes `current_value` MUST also write `value_source` and update `value_last_updated`. Wrap this in a function (e.g., `update_card_value(card_id, new_value, source)`) so individual pipelines can't forget.
+- **⚠️ Must be applied before any pricing pipeline writes real data.** Apply alongside all other schema amendments in section 4.
+- **Timing:** Database phase, after POC, before full seed. Apply alongside all other schema amendments in section 4.
+
 ---
 
 ## 5. Data Seeding
@@ -283,7 +294,7 @@ These amendments were decided on during UI development but deferred until the da
 ## 7. Infrastructure Scaling
 
 ### 7.0 Update Supabase redirect URLs when hobbyripper.com goes live
-- **Status:** Pending POC phase
+- **Status:** ✅ CLOSED — hobbyripper.com live on Vercel, Supabase redirect URLs updated, signup + password reset tested end-to-end on the final domain.
 - **Details:** Current Supabase redirect URLs are for dir-app-weld.vercel.app + localhost. When hobbyripper.com is wired to Vercel during POC phase, add https://hobbyripper.com and https://hobbyripper.com/reset-password to Supabase dashboard → Authentication → URL Configuration → Redirect URLs.
 - **Done when:** Both hobbyripper.com URLs added and saved in Supabase redirect URL allow-list. Confirmed by testing signup + password reset flow on the final domain.
 
@@ -378,6 +389,18 @@ These amendments were decided on during UI development but deferred until the da
 - **Details:** Soccer was removed from the beta launch scope. The navigation needs a Soccer tab that does NOT route to a filtered Browse page (that would show zero results and look broken). Instead, it routes to a simple "Coming Soon" page or modal explaining that Soccer ships post-beta.
 - **Done when:** Soccer is visible in the nav, clicking it surfaces a Coming Soon experience (page or modal — designer's call), and post-beta soccer rollout is added to the post-launch roadmap.
 - **Dependencies:** None.
+
+---
+
+## 13. Post-Beta: Retail Format Support
+
+### 13.1 Add Retail as a sixth box format
+- **Status:** Deferred to post-beta — locked in Stage 0a planning session, May 2026
+- **Why deferred:** Beta scope is the five formats Breaker, Jumbo, Hobby, Mega, Blaster (display order). Retail-only legacy boxes (1995–2017) won't appear in beta. Cleanest beta scope, fully modern-relevant, no premature cost on Retail-specific data entry templates or pull-rate sourcing for boxes that may not even ship in beta.
+- **What's already compatible:** Schema is already Retail-ready. `box_format` on `box_sets` is a VARCHAR — adding "Retail" later is just inserting rows with `box_format = 'Retail'`. No migration, no FK changes, no data backfill, no risk to existing rows.
+- **What changes when Retail is added back:** (a) Cowork data entry pipeline updated to recognize Retail as a valid format. (b) Pull-rate sourcing confirmed for Retail across Cardboard Connection, Beckett, manufacturer sites, and any 20-year-old products being seeded. (c) Format switcher UI updated to include the Retail tab. Display order to be decided when added (likely rightmost, but to be confirmed). (d) `parent_set_id` priority chain to be reconsidered — does Retail ever become a parent format? Probably never, but locked at the time.
+- **Done when:** Retail is wired into the data entry pipeline, format switcher UI, and pull-rate sources. Legacy Retail-only boxes from Cam's network priority list have been seeded successfully and render correctly on box profile pages.
+- **Dependencies:** Beta launch + decision to expand legacy box coverage post-beta.
 
 ---
 
