@@ -81,6 +81,44 @@ Items here have been explicitly locked in through partner discussion or project 
 
 ---
 
+### Users table uses UUID matching `auth.users(id)` (locked May 2026)
+- **What:** The `users` table primary key is `UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE`, replacing the previous `SERIAL` integer ID. Every foreign key referencing `user_id` (saved_boxes, price_alerts, user_collection, user_wishlist) becomes UUID accordingly.
+- **Why:** Supabase Row Level Security policies use `auth.uid()`, which always returns a UUID. With UUID matching, RLS policies are direct: `WHERE user_id = auth.uid()`. With SERIAL, every policy would require a subquery: `WHERE user_id = (SELECT id FROM users WHERE auth_id = auth.uid())`. RLS gets used heavily for paywall logic and per-user data access — clean policies pay back forever. The standard Supabase pattern is also UUID matching, which makes the codebase recognizable to future devs (Pro audit reviewers, potential acquirer engineers).
+- **Why now and not later:** Migration cost is roughly the same as any other Stage 1 schema amendment if done now (essentially no real users, just test accounts). The migration would be 10× harder after seeding or beta.
+- **Implementation:** A trigger on `auth.users` insert auto-creates a matching row in our `users` profile table (standard Supabase boilerplate). All `user_id` foreign keys throughout the schema migrate to UUID in the same batch.
+- **Tradeoff accepted:** UUIDs are 16 bytes vs. 4 bytes for INT. Irrelevant at our scale.
+- **Source:** Stage 0a planning session, May 2026. Tracked as PRE-BETA-CHECKLIST.md #4 schema amendment.
+
+### `parent_set_id` is NULL for single-format sets (locked May 2026)
+- **What:** When a `box_sets` row has only one format (e.g., a Mega-only release, a Breaker-only product), its `parent_set_id` is NULL. When a set has multiple formats, all sibling rows share a non-NULL `parent_set_id` pointing to the parent row's `id`.
+- **Why:** NULL is the honest representation of "no parent concept exists." Self-referencing would force the database to fabricate a relationship that isn't real, and would complicate format-switcher logic (would need a special case to detect "self-only" sets). NULL also makes the format-switcher query natural: `SELECT * FROM box_sets WHERE parent_set_id = $current_parent_id` returns 0 rows when parent is NULL, which is exactly the right signal to hide the switcher UI entirely.
+- **Format switcher rule:** When 0 or 1 sibling formats exist for a set, the format switcher hides itself entirely. No "single tab" UI that exists only to be useless.
+- **Tradeoff accepted:** Cowork data entry must remember to leave `parent_set_id` blank for single-format sets. One documented rule.
+- **Source:** Stage 0a planning session, May 2026.
+
+### `parent_set_id` parent identity rule: Hobby > Jumbo > Mega > Breaker > Blaster (locked May 2026)
+- **What:** When a set has multiple formats, the parent row is determined by walking the priority chain Hobby > Jumbo > Mega > Breaker > Blaster and selecting the first format that exists for that set. The parent row gets seeded first; its `id` becomes the shared `parent_set_id` value that all sibling format rows point to.
+- **Why Hobby first:** Hobby is the canonical product type in the hobby. When a collector says "2024 Topps Chrome Baseball" without specifying format, they almost always mean Hobby. URL slugs match user expectation. Pull-rate documentation also leads with Hobby — manufacturer odds, Cardboard Connection, Beckett — meaning the most-complete row anchors each set when Hobby is parent.
+- **Why this fallback order:** Jumbo is essentially "Hobby with bigger packs" — same depth of pull-rate documentation, premium positioning. Mega is typically a Target/retail-channel product with reasonable documentation. Breaker is a niche distributor format, less canonical. Blaster is the most retail-end and least likely to be the "primary" representation of a set.
+- **Display order is separate:** Display order in the format switcher tabs is Breaker, Jumbo, Hobby, Mega, Blaster (left to right) — this is independent of parent priority. Two ordering rules exist; they should not be conflated.
+- **EV/ROI defaulting:** When a user lands on a box profile with no format query param, the parent format renders by default. Hobby being the canonical default makes this useful for the typical collector evaluation case.
+- **Tradeoff accepted:** Some sets without Hobby will have a non-Hobby parent, creating slight inconsistency. The alternative — making one fixed format parent across the board — would create more inconsistency because most users associate sets with Hobby.
+- **Source:** Stage 0a planning session, May 2026.
+
+### `value_source` column on `cards` tracks pricing pipeline (locked May 2026)
+- **What:** A single `value_source VARCHAR(40)` column on `cards`, with a CHECK constraint listing valid source values, and an index on the column. Tracks which pricing pipeline wrote each `current_value`.
+- **CHECK values:** `'ebay_browse_mitigation'`, `'ebay_marketplace_insights'`, `'card_hedge'`, `'price_charting'`, `'manual'`, `'placeholder'` (or NULL for unpriced cards).
+- **Index rationale:** License Agreement Section 16.3 cleanup queries filter by source and must run fast under deletion deadline pressure.
+- **Why a single column instead of paired source+timestamp columns:** The schema already has `value_last_updated TIMESTAMP` on `cards`. Adding a redundant timestamp column would duplicate existing state. One source column + the existing timestamp = full story.
+- **Why VARCHAR + CHECK instead of Postgres ENUM:** CHECK constraints are easier to extend later (just update the constraint). ENUMs require a migration to add new values. Given that we may need to add Plan B sources or pivot away from eBay entirely, the more flexible option wins.
+- **eBay-first framing:** Best case is a full eBay pipeline (Browse API for bulk + Marketplace Insights for top chases/grails) as the sole source. The other source values exist for Plan B fallback resilience (Card Hedge, PriceCharting) but are not expected to populate in the happy path. This is future-proofing the schema, not committing to multi-source pricing as a goal.
+- **Schema-pivot expectation:** If the pricing strategy pivots significantly — e.g., pushed away from eBay entirely toward different aggregators — the CHECK constraint will need to be updated to add new source values. That's a small migration, not a schema rebuild. This expectation is accepted, not surprising.
+- **Pipeline contract:** Every pipeline that writes `current_value` MUST also write `value_source` and update `value_last_updated`. Wrap in a function (e.g., `update_card_value(card_id, new_value, source)`) so individual pipelines can't forget.
+- **Companion table symmetry:** The `price_history` table already tracks `source` for individual sale rows. Adding `value_source` to `cards` makes the design symmetric — same concept in both related tables.
+- **Source:** Stage 0a planning session, May 2026. Tracked as PRE-BETA-CHECKLIST.md #4.11 schema amendment.
+
+---
+
 ## OBSERVED
 
 Real-world observations that should inform schema and pricing decisions. These aren't decisions yet — they're inputs to upcoming decisions.
@@ -249,22 +287,6 @@ We've been assuming several things about eBay API capabilities based on web UI b
 
 ### Structural schema decisions
 
-**7. Users table identity strategy: UUID matching `auth.users` or keep `SERIAL`?**
-- Supabase Auth uses UUIDs in its `auth.users` table. Our `users` table currently uses `SERIAL` integer IDs.
-- Hard to change later — every foreign key referencing `user_id` would need migration.
-- Depends on: nothing — pure architecture choice.
-- Affects: every user-related table (saved_boxes, price_alerts, user_collection, user_wishlist).
-
-**8. `parent_set_id` design for sets with one format**
-- Does a single-format set get a `parent_set_id`? Options: NULL (no parent concept), self-reference (set is its own parent), or only populate when 2+ formats exist.
-- Depends on: how the format switcher UI handles "no other formats available."
-- Affects: format switcher logic, query patterns, seeding spreadsheet structure.
-
-**9. `parent_set_id` parent identity rule**
-- When a set has multiple formats, which row is "the parent"? Always Hobby? Falls back to Jumbo if no Hobby? First format alphabetically?
-- Depends on: nothing definitive — convention choice.
-- Affects: seeding logic, slug generation, default-format display.
-
 **10. Card categories review**
 - Schema has 15 categories tied to baseball-style sets. Football, basketball, and hockey have slightly different card structures.
 - Depends on: real data inspection across all four sports during seeding.
@@ -279,16 +301,6 @@ We've been assuming several things about eBay API capabilities based on web UI b
 - **Schema implication:** `price_history` rows sourced from eBay must be identifiable for cleanup. The existing `source` column handles this (`source = 'ebay'`), but the cleanup tooling does not exist yet. Pre-beta build item: admin tooling to bulk-delete eBay-sourced rows on demand. See PRE-BETA-CHECKLIST.md section 6.8.
 - **Schema implication for Path B data:** Paid aggregator data has its own retention terms per their contract. Same `source` column handles identification (`source = 'card_hedge'` or similar), different deletion rules.
 - Affects: storage growth rate, chart query performance, License Agreement compliance, paid aggregator contract compliance.
-
-**12a. Tracking the data source per `current_value` write**
-- Path E+ design has multi-source pricing pipelines feeding the same `cards.current_value` column. Bulk cards from Browse API mitigation, Top Chases/Grails from paid sold-data source.
-- Need a way to track which pipeline wrote each value so the application can: (a) enforce different refresh cadences (6-hour minimum for eBay-sourced under License Agreement, paid-source refresh per their terms), (b) display confidence indicators differently per tier, (c) audit and debug pricing pipeline issues, (d) bulk-delete eBay-sourced values for License Agreement Section 16.3 compliance if contract terminates.
-- Options:
-  - New `value_source` VARCHAR column on `cards` (`'ebay_browse_mitigation'`, `'ebay_marketplace_insights'`, `'paid_aggregator'`, `'card_hedge'`, `'price_charting'`, etc.)
-  - New `value_last_source` and `value_last_calculated_at` columns paired together
-  - Extend the existing `value_last_updated` timestamp column with a source enum
-- Depends on: Final pipeline architecture (decided once Path A vs. Path B is locked).
-- Affects: refresh logic, confidence display, License Agreement compliance tooling, paid aggregator contract compliance tooling, audit logs.
 
 **12. eBay API refresh cadence per card**
 - Daily? Weekly? Tiered by card value (high-value cards refreshed more often)?
@@ -309,7 +321,18 @@ We've been assuming several things about eBay API capabilities based on web UI b
 
 Running list of every schema choice with date and reasoning. Append-only — when a decision changes, add a new entry referencing the old one. Don't delete history.
 
-*[empty — to be populated as decisions move from OPEN to DECIDED]*
+### May 2026 — Stage 0a planning session: four schema decisions locked
+Four OPEN QUESTIONS moved to DECIDED status. Full reasoning captured in the DECIDED section above. Brief log:
+
+1. **Users table identity strategy (was OPEN #7).** Locked: `users.id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE`. Replaces SERIAL. Reason: clean RLS policies via direct `auth.uid()` match. Standard Supabase pattern. Migration cost is low now, painful later. All user-related FKs migrate to UUID in the same batch (PRE-BETA-CHECKLIST.md #4).
+
+2. **`parent_set_id` for single-format sets (was OPEN #8).** Locked: NULL when only one format exists. Reason: honest representation of "no parent concept," cleanest format-switcher logic, switcher UI hides itself when 0 or 1 sibling formats exist.
+
+3. **`parent_set_id` parent identity rule (was OPEN #9).** Locked: priority chain Hobby > Jumbo > Mega > Breaker > Blaster. First format in the chain that exists for a given set is parent. Reason: Hobby is canonical user expectation, deepest pull-rate documentation, EV/ROI defaults make sense. Display order in the switcher is separate (Breaker, Jumbo, Hobby, Mega, Blaster left to right).
+
+4. **`value_source` column on `cards` (was OPEN #12a).** Locked: single `VARCHAR(40)` column with CHECK constraint and index. Tracks which pricing pipeline wrote each `current_value`. Values: `'ebay_browse_mitigation'`, `'ebay_marketplace_insights'`, `'card_hedge'`, `'price_charting'`, `'manual'`, `'placeholder'`. eBay-first framing — best case is full eBay pipeline as sole source; other values exist for Plan B fallback resilience. CHECK constraint chosen over ENUM for easier future extension. Tracked as PRE-BETA-CHECKLIST.md #4.11.
+
+**Format list note (related, not strictly schema):** Beta format scope locked at Breaker, Jumbo, Hobby, Mega, Blaster (display order, left to right). Retail dropped from beta scope, deferred as a post-beta addition (PRE-BETA-CHECKLIST.md #13.1). Schema-compatible — `box_format` is VARCHAR — no migration needed when Retail is added back.
 
 ---
 
