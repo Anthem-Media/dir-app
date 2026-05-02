@@ -31,7 +31,7 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - Card value rankings within a set by tier
 - Top Chases tab — cards with print run > 10 or no print run; drives EV/ROI math
 - Grails tab — cards with print run ≤ 10 (including 1/1s and Superfractors); excluded from EV/ROI; shows circulation status badge
-- Format switcher — tab row at top of box profile page to switch between Hobby, Jumbo, Blaster, Mega, Retail; updates MSRP, pull rates, EV, ROI
+- Format switcher — tab row at top of box profile page to switch between Breaker, Jumbo, Hobby, Mega, Blaster (left to right display order); updates MSRP, pull rates, EV, ROI. Retail dropped from beta scope (post-beta addition tracked in PRE-BETA-CHECKLIST.md).
 - Two price trend charts — (1) sealed box price in hero section, (2) card value by tier below checklist with toggle tabs
 - Checklist expand/collapse — 5 cards shown per tier by default, expand inline per tier
 - Card search within checklist tiers — real time filter by player name or card number, visible only when tier is expanded
@@ -116,7 +116,7 @@ Both yes  →  show box profile
 ### Data Sources
 - **Card checklists:** Varies by sport (see Data Entry Sources below). AI-assisted workflow — Cowork sources and structures data from reference sites into schema-ready spreadsheets. Do not scrape verbatim — build own dataset from factual information.
 - **Card pricing:** eBay sold listings via Marketplace Insights API (Path A primary) OR licensed paid aggregator like Card Hedge / PriceCharting (Path B fallback). Card-level pricing required for Top Chases and Grails specifically (~50-200 cards per box) where users care most about precision. Bulk checklist pricing comes from eBay Browse API active listings with mitigation tactics (Path E+ design assumption). Card pricing is never entered manually. See EBAY-STRATEGY.md for full strategy.
-- **Pull rates:** Manufacturer-published odds from packaging and official sites (Topps, Panini, Upper Deck). Cross-reference Beckett, Cardboard Connection, Chasing Majors, and Checklist Insider. TCDB does not publish pull rates. Chasing Majors and Checklist Insider provide format-level odds (Hobby vs Jumbo vs Blaster etc.) — required for the format switcher feature.
+- **Pull rates:** Manufacturer-published odds from packaging and official sites (Topps, Panini, Upper Deck). Cross-reference Beckett, Cardboard Connection, Chasing Majors, and Checklist Insider. TCDB does not publish pull rates. Chasing Majors and Checklist Insider provide format-level odds (Breaker vs Jumbo vs Hobby vs Mega vs Blaster) — required for the format switcher feature.
 - **Box pricing:** eBay sold listings for sealed box market prices.
 - **Release dates / MSRP:** TCDB (tcdb.com) — each box set name links directly to its TCDB page. Use as fallback when release date or MSRP is not found on Cardboard Connection, Beckett, or Baseballcardpedia.
 - **Images:** Don't let images block data entry. Enter data first, leave image_url blank. Primary image source is distributor product feeds (Dave & Adam's, Blowout Cards, Steel City, etc.) — clean, standardized, high-res box art pulled automatically as a byproduct of price scraping, same method Waxstat uses for their 27k+ box library. eBay API is the fallback for boxes no distributor carries. Manufacturer sites are a tertiary source. Placeholder images acceptable for beta. Images are never manually sourced.
@@ -146,7 +146,7 @@ Both yes  →  show box profile
 - Beta launch: Baseball, Football, Basketball, Hockey populated with full profiles for 2018-present, legacy profiles for 1995-2017. Soccer ships as "Coming Soon" — post-beta priority for population.
 - Estimated box count for full profiles (2018-present): ~1,200-2,000 boxes across all sports
 - 40-60 new box set products per year per sport from major manufacturers
-- Each set has multiple formats (Hobby, Jumbo, Blaster, Mega, Retail) — each is a separate database entry linked by `parent_set_id`
+- Each set has multiple formats (Breaker, Jumbo, Hobby, Mega, Blaster) — each is a separate database entry linked by `parent_set_id`. Retail dropped from beta scope (post-beta addition tracked in PRE-BETA-CHECKLIST.md).
 
 ### Data Entry Workflow — LOCKED
 
@@ -159,7 +159,7 @@ Provide Cowork a list of box set names for a given sport and year. Cowork genera
 Feed the source document back to Cowork. Cowork visits each URL, extracts checklist data, card numbers, pull rates, box configuration (packs per box, cards per pack), release date, MSRP, and formats everything into spreadsheet rows that match the database schema exactly. Output is one Excel file with one tab per schema table: `box_sets`, `cards`, `pull_rates`. Rules for this step:
 - `current_value` and `image_url` columns are always left blank — filled later by eBay API
 - `circulation_status` defaults to `unknown` for any card with `print_run ≤ 10`
-- Each format (Hobby, Jumbo, Blaster, Mega, Retail) is a separate row in `box_sets`, linked by a shared slug prefix
+- Each format (Breaker, Jumbo, Hobby, Mega, Blaster) is a separate row in `box_sets`, linked by a shared slug prefix
 - Pull rates differ per format — Hobby odds ≠ Blaster odds — each format gets its own rows in `pull_rates`
 - Any data not found across all sources gets a "needs review" flag in a dedicated column — it does not block the row from being included
 - Cowork pages with inconsistent formatting (pull rates buried in paragraph text vs. clean tables) may need a human review pass on flagged rows
