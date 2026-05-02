@@ -8,7 +8,9 @@
 - Add to OBSERVED whenever real data teaches us something new
 - Never delete reasoning — supersede it. Keep the history of why decisions changed.
 
-**Last updated:** April 29, 2026
+**Companion document:** EBAY-STRATEGY.md is the canonical source for eBay-specific strategy, License Agreement analysis, and the Five Paths framework. This file (SCHEMA-AND-DATA.md) captures schema and data decisions that flow from those strategic decisions. When eBay strategy changes, schema implications get captured here. Read EBAY-STRATEGY.md first when working through pricing-related schema decisions.
+
+**Last updated:** May 1, 2026 (eBay strategy session — Path E+, License Agreement constraints)
 
 ---
 
@@ -69,6 +71,13 @@ Items here have been explicitly locked in through partner discussion or project 
 - **Why:** Reduces seeding scope without abandoning the future expansion. Soccer was always a smaller market than the four core sports for the U.S. card collector audience.
 - **Source:** Planning session April 29, 2026.
 - **Schema implication:** None — schema already supports all sports. UI implication: nav tab for Soccer routes to a "Coming Soon" page rather than a filtered browse view.
+
+### Path E+ tier-aware pricing — schema implications
+- **What:** Card-level pricing in `cards.current_value` comes from two different data sources depending on card tier: bulk cards (base, common parallels, common autos of star players) get prices derived from eBay Browse API active listings with mitigation tactics applied. Top Chases and Grails get prices from a paid sold-data source (Path A: Marketplace Insights, or Path B: licensed aggregator like Card Hedge / PriceCharting).
+- **Why:** May 1, 2026 active-vs-sold research showed asking-vs-sold gap is small at high volume (where bulk cards live) and unreliable at low volume (where Top Chases and Grails live). Concentrating paid-data spend on the 50-200 highest-value cards per box (rather than every card in the checklist) makes Path B economically tractable in a way "price every card via paid data" never was. Full reasoning in EBAY-STRATEGY.md.
+- **Source:** EBAY-STRATEGY.md DECIDED section "Concentrate accuracy spend where users care most" + active-vs-sold research session May 1, 2026.
+- **Schema implication:** `cards.current_value` does not need to bifurcate by data source — same column, populated from different pipelines depending on tier. However, we likely need a new `value_source` column or similar to track which pipeline produced each value. This affects confidence display, refresh cadence, and License Agreement compliance (eBay-sourced data must follow the 6-hour minimum refresh, paid aggregator data follows their terms). See OPEN QUESTIONS for the column-design decision.
+- **Coverage display implication:** The existing `ev_cards_priced` and `ev_cards_total` columns on `box_sets` should likely become more granular: separate counts for "bulk priced via Browse API mitigation" vs. "top chases priced via paid sold-data" so the box profile page can communicate the data confidence model honestly. This is a question to settle, not a decision yet.
 
 ---
 
@@ -149,6 +158,18 @@ Mavin shut down with a public notice, but the underlying cause was loss of user 
 
 **TCGFish flagged for evaluation:** Mentioned multiple times as a cleaner Mavin alternative. Out of TCG scope but worth examining as a reference for how clean eBay aggregation can be done well. Not a data source dependency — a benchmark.
 
+### May 1, 2026 — Active-vs-sold research validates tier-aware pricing approach
+
+Hands-on research session comparing eBay active listings to sold listings across 5 cards spanning the value/volume spectrum from 2024 Topps Chrome Baseball. Full findings captured in EBAY-STRATEGY.md OBSERVED section.
+
+**Schema-relevant takeaways:**
+- Asking-vs-sold gap is small at high volume (Soto base, Soto refractor, Chourio base auto on average): mitigation tactics on Browse API data produce useful `current_value` for bulk cards.
+- Asking-vs-sold gap is large at low volume (Chourio /99 numbered refractor): mitigation does not save it. These cards need real sold data.
+- Older / vintage cards have thin data on both sides (2018 Soto base): reinforces existing decision to skip EV/ROI for legacy product.
+- Active listings outnumber sold listings significantly across all cards — supply side has more inventory than demand side absorbs at posted prices. Implication: any active-listing-derived price is statistically biased upward and needs explicit mitigation.
+
+**Implication for schema:** `cards.current_value` is single-column but multi-source. The pipeline that populates it must know which mitigation logic to apply based on card tier. New tracking column (`value_source` or similar) lets the application know which data pipeline owned each price write — affects refresh cadence enforcement (6-hour minimum for eBay-sourced under License Agreement), confidence scoring, and audit/debugging.
+
 ### April 2026 — Grading-as-a-feature opportunity
 
 Identified during eBay observation: if graded listings are easy to identify, we can store per-grade prices separately and surface them as a future feature.
@@ -189,11 +210,12 @@ We've been assuming several things about eBay API capabilities based on web UI b
 
 ### The Pricing Data Model
 
-**1. What does `current_value` on a card mean, statistically?**
-- Average of last N sales? Median? Most recent? Weighted by recency?
-- Median is more resistant to outliers (Mavin's $99,999 lesson). Recent-weighted reflects current market better but reacts to noise.
-- Depends on: nothing — this is a definitional choice.
-- Affects: every EV/ROI calculation, every checklist price, every chart.
+**1. What does `current_value` on a card mean, statistically? (Now scoped per-tier under Path E+)**
+- For bulk cards (base, common parallels, common autos of star players): derived from eBay Browse API active listings with mitigation tactics — outlier trimming (top 25% / bottom 10%), recency weighting (last 7 days higher), auction-format favoring, sample size minimum (5+ listings), confidence labeling.
+- For Top Chases and Grails: derived from paid sold-data source (Marketplace Insights or licensed aggregator) — likely median of recent sold listings with outlier rejection. Need to lock specific algorithm once Path A vs. Path B is decided.
+- Median is more resistant to outliers (Mavin's $99,999 lesson) and likely the right base statistic for both tiers. Recent-weighted variants reflect current market better but react to noise.
+- Depends on: which Path is approved (A vs. B) — paid sold-data sources may have their own pre-computed statistics that we use directly rather than re-deriving.
+- Affects: every EV/ROI calculation, every checklist price, every chart, the confidence display on box profile pages.
 
 **2. How do we handle cards with no eBay sales?**
 - Options: NULL, last-known-price-with-a-stale-flag, peer-card estimate, omit from EV.
@@ -250,10 +272,23 @@ We've been assuming several things about eBay API capabilities based on web UI b
 
 ### Data retention and refresh
 
-**11. `price_history` retention policy**
+**11. `price_history` retention policy — now constrained by License Agreement**
 - Keep all sales forever? Prune older than 2 years? Roll up older data into monthly averages?
 - Depends on: chart needs (6+ months minimum) and storage budget.
-- Affects: storage growth rate, chart query performance.
+- **License Agreement constraint (if Path A approved):** Section 16.3 of the eBay API License Agreement requires destruction of all eBay-sourced data within 10 days of contract termination. Historical price archive sourced from Marketplace Insights is conditionally ours — we keep it as long as we're under contract, must delete within 10 days if the contract ends.
+- **Schema implication:** `price_history` rows sourced from eBay must be identifiable for cleanup. The existing `source` column handles this (`source = 'ebay'`), but the cleanup tooling does not exist yet. Pre-beta build item: admin tooling to bulk-delete eBay-sourced rows on demand. See PRE-BETA-CHECKLIST.md section 6.8.
+- **Schema implication for Path B data:** Paid aggregator data has its own retention terms per their contract. Same `source` column handles identification (`source = 'card_hedge'` or similar), different deletion rules.
+- Affects: storage growth rate, chart query performance, License Agreement compliance, paid aggregator contract compliance.
+
+**12a. Tracking the data source per `current_value` write**
+- Path E+ design has multi-source pricing pipelines feeding the same `cards.current_value` column. Bulk cards from Browse API mitigation, Top Chases/Grails from paid sold-data source.
+- Need a way to track which pipeline wrote each value so the application can: (a) enforce different refresh cadences (6-hour minimum for eBay-sourced under License Agreement, paid-source refresh per their terms), (b) display confidence indicators differently per tier, (c) audit and debug pricing pipeline issues, (d) bulk-delete eBay-sourced values for License Agreement Section 16.3 compliance if contract terminates.
+- Options:
+  - New `value_source` VARCHAR column on `cards` (`'ebay_browse_mitigation'`, `'ebay_marketplace_insights'`, `'paid_aggregator'`, `'card_hedge'`, `'price_charting'`, etc.)
+  - New `value_last_source` and `value_last_calculated_at` columns paired together
+  - Extend the existing `value_last_updated` timestamp column with a source enum
+- Depends on: Final pipeline architecture (decided once Path A vs. Path B is locked).
+- Affects: refresh logic, confidence display, License Agreement compliance tooling, paid aggregator contract compliance tooling, audit logs.
 
 **12. eBay API refresh cadence per card**
 - Daily? Weekly? Tiered by card value (high-value cards refreshed more often)?
@@ -296,6 +331,11 @@ Specific moments where reality changed our thinking. Each entry includes what we
 - **Expected:** Mavin was a possible third-party data source we'd evaluate.
 - **Saw:** Mavin shut down. Reddit research revealed they died because users lost trust in their pricing accuracy (outlier manipulation, shipping inflation, sock-puppet sales).
 - **Changed:** No third-party dependency for data — pipeline is fully Ripper's. Mavin's failure modes become Ripper's design requirements: outlier detection, shipping handling, pattern detection for manipulation.
+
+### May 2026 — Active-vs-sold gap is volume-dependent, not constant
+- **Expected:** Asking-prices on eBay would be inflated by some roughly-fixed percentage vs. sold prices, allowing a single mitigation strategy to bridge the gap across all cards.
+- **Saw:** The gap is volume-dependent. High-volume cards (star base, common refractors, common autos of marquee players) have small gaps that close well after standard mitigation (outlier trimming, recency weighting, sample size minimums). Low-volume cards (numbered parallels with small print runs, vintage equivalents) have large gaps that mitigation cannot close — supply outweighs demand at the asked prices indefinitely.
+- **Changed:** Path E+ design becomes tier-aware. Bulk cards use Browse API + mitigation. Top Chases and Grails require sold-data accuracy from a paid source (Marketplace Insights or licensed aggregator). `current_value` schema design must accommodate multi-source pipelines via a `value_source` tracking column or equivalent. Validates the "concentrate accuracy where users care" product principle and bounds paid-data costs by scope rather than checklist size.
 
 ---
 
