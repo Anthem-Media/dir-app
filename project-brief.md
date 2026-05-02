@@ -115,7 +115,7 @@ Both yes  →  show box profile
 
 ### Data Sources
 - **Card checklists:** Varies by sport (see Data Entry Sources below). AI-assisted workflow — Cowork sources and structures data from reference sites into schema-ready spreadsheets. Do not scrape verbatim — build own dataset from factual information.
-- **Card pricing:** eBay sold listings (primary source). eBay API for programmatic access. Card-level pricing is required for every card — not just top chases. Never entered manually.
+- **Card pricing:** eBay sold listings via Marketplace Insights API (Path A primary) OR licensed paid aggregator like Card Hedge / PriceCharting (Path B fallback). Card-level pricing required for Top Chases and Grails specifically (~50-200 cards per box) where users care most about precision. Bulk checklist pricing comes from eBay Browse API active listings with mitigation tactics (Path E+ design assumption). Card pricing is never entered manually. See EBAY-STRATEGY.md for full strategy.
 - **Pull rates:** Manufacturer-published odds from packaging and official sites (Topps, Panini, Upper Deck). Cross-reference Beckett, Cardboard Connection, Chasing Majors, and Checklist Insider. TCDB does not publish pull rates. Chasing Majors and Checklist Insider provide format-level odds (Hobby vs Jumbo vs Blaster etc.) — required for the format switcher feature.
 - **Box pricing:** eBay sold listings for sealed box market prices.
 - **Release dates / MSRP:** TCDB (tcdb.com) — each box set name links directly to its TCDB page. Use as fallback when release date or MSRP is not found on Cardboard Connection, Beckett, or Baseballcardpedia.
@@ -140,6 +140,7 @@ Both yes  →  show box profile
 - Beta: Weekly refresh is acceptable
 - Post-beta: Daily refresh target
 - Long-term: Real-time or near-real-time (engineering hire needed)
+- **License Agreement constraint (if Path A approved):** eBay API License Agreement Section 8.1.3 caps listing data refresh at 6 hours minimum, other content at 24 hours. This is a hard floor — even if user demand would justify more frequent refresh, the cache layer must enforce the License Agreement minimums. Path E+ design respects this from day one.
 
 ### Scale
 - Beta launch: Baseball, Football, Basketball, Hockey populated with full profiles for 2018-present, legacy profiles for 1995-2017. Soccer ships as "Coming Soon" — post-beta priority for population.
@@ -229,7 +230,7 @@ Tier system:
 - **Auth emails:** All 6 branded templates live in Supabase dashboard. Light-mode design (iOS dark-mode auto-invert disabled via color-scheme meta tags). Authored in Supabase dashboard, not in codebase — edits happen in Supabase → Authentication → Emails.
 - **Payments:** Stripe (web only — all subscription management and billing handled on the final domain). No Stripe integration during beta.
 - **AI Vision:** Claude API (photo → structured JSON → box match)
-- **AI Summaries:** Claude API (price data → plain English trend summary) — post-launch feature
+- **AI Summaries:** Claude API (price data → plain English trend summary) — post-launch feature. ⚠️ BLOCKED BY DEFAULT under eBay API License Agreement Section 8.5.2.a if Path A is approved — AI ingestion of Marketplace Insights data requires explicit additional consent from eBay. Three options to revisit when feature comes up: (a) request explicit AI-use consent from eBay during contract negotiation, (b) build using non-MI data sources only (Browse API, paid aggregator, our own data), (c) drop the feature. See EBAY-STRATEGY.md.
 - **Data pipeline:** Cowork (source document generation + spreadsheet structuring), Claude Code (slug-bridge import script, pull rate scraper, eBay API integration)
 
 ---
@@ -239,13 +240,13 @@ Tier system:
 - **Final name — LOCKED:** Ripper. Domain hobbyripper.com purchased through Cloudflare. 'DIR' still present in codebase/docs — rename pass scheduled right before Pro audit #1. Other spellings (Rippr, Ripr) rejected; 'Ripper' is hobby-native, cleanly spelled, and hobbyripper.com self-describes the product.
 - **Founders:** Zach Seabolt (technical, 50%) and Cam Gibson (business, 50%)
 - **Partnership agreement:** Drafted and ready for signatures
-- **Strategy:** Leaning build-to-run (long-term operation). Not finalized but mindset has shifted from original build-to-sell framing.
+- **Strategy:** Leaning build-to-run (long-term operation). Not finalized but mindset has shifted from original build-to-sell framing. eBay strategy posture: Path A (Marketplace Insights API direct) is preferred but not make-or-break. Path E+ (hybrid Browse API for bulk checklist + paid aggregator for top chases/grails) is the design assumption regardless of Path A outcome. See EBAY-STRATEGY.md for full Five Paths framework.
 - **Potential acquirers (if strategy changes):** Fanatics, Topps, Panini
 - **Revenue model — LOCKED:** Fully paid box profiles. Free browsing on web only (homepage, browse, search, filtering). Paywall on box profile page (checklist, pull rates, EV, ROI, price trends). Conversion funnel: visit → browse → click box → paywall → pay. All payment via Stripe on the web. iOS app is auth-only — no in-app purchases ever.
 - **Beta access model — LOCKED:** Auth required from day one. All beta signups get `plan = 'beta'` with full premium access. No Stripe during beta. Paywall accepts `'beta'` OR `'paid'`. See Beta Access Model section above.
 - **Price range if subscription:** $4.99-$9.99/mo range
 - **Buy Now / affiliate system:** Price comparison with multiple distributors on box profile pages. Starts with 1-2 distributors, grows over time. Boxes without distributor listings fall back to "Find on eBay" affiliate link. Every box profile has a monetization path. System built but launches empty — populated when Cam has distributor partnerships (during beta). New database tables needed: `distributors` and `distributor_listings`.
-- **eBay Partner Network:** Free to join, 1-4% commission (collectibles 3-4%), 24-hour cookie. Sign up when real data is live. Don't apply with dummy data.
+- **eBay Partner Network:** Free to join, 1-4% commission (collectibles 3-4%), 24-hour cookie window, $550 USD cap per qualifying purchase. Sign up when real data is live on the site (POC phase complete on hobbyripper.com). EPN approval is fast and low-bar — does not gate Marketplace Insights, but Marketplace Insights gates on EPN approval. Sequence: EPN application → EPN approval → Buy API Application (single combined ask) → Application Growth Check review.
 - **Distributor outreach:** No conversations until app is ready for launch or in beta. Cam handles all distributor relationships.
 - **Email list:** All user emails are owned and stored in the database. Sign-up form includes email opt-in checkbox (`email_opt_in` boolean on users table). A verified, opt-in email list of active sports card collectors is a valuable asset for marketing and for acquisition value. Captured from day one during beta. (Note: email opt-in is UNCHECKED by default on the signup form — user must actively opt in.)
 - **Domain:** Not yet owned. Blocked on name lock. Once final name is chosen, buy immediately — domain squatting risk on promising product names.
@@ -310,9 +311,11 @@ The database schema supports all sports from day one. The UI supports all sports
 3. **Auth flow polish** — decide on Google OAuth, improve post-login redirect, build password reset flow
 4. **Database schema amendments** — apply all pending changes documented in the checklist
 5. **Data seeding** — end-to-end test with one box set, then full seed
-6. **eBay integration** — proof of concept, Partner Network signup, full pipeline
-7. **Infrastructure scaling** — Supabase Pro upgrade, scale audit session
-8. **Pro code audits** — three scheduled audits against $5k budget
+6. **eBay integration** — EPN enrollment, Card Hedge/PriceCharting outreach (Path B research), capability verification, Buy API Application (single combined ask), Application Growth Check review. Full sequence in EBAY-STRATEGY.md and PRE-BETA-CHECKLIST.md section 6.
+7. **LLC formation** — required before Marketplace Insights contract signing because the License Agreement includes an indemnification clause. Moved up from previously deferred status.
+8. **License Agreement compliance build items** — if Path A approved: 6-hour refresh cadence enforcement, delete-when-unavailable cleanup pipeline, visual separation of eBay vs. non-eBay data in Buy Now UI, 10-day data destruction tooling, AI ingestion blocked status awareness. Build with these constraints in mind even pre-approval to avoid retrofit costs.
+9. **Infrastructure scaling** — Supabase Pro upgrade, scale audit session
+10. **Pro code audits** — three scheduled audits against $5k budget
 
 ---
 
@@ -324,7 +327,7 @@ In rough priority order:
 3. Personal collection tracker and wishlist
 4. Price alerts and notifications
 5. Coming Soon / upcoming releases section with countdown timers
-6. Plain English AI trend summaries
+6. Plain English AI trend summaries — ⚠️ blocked by default under eBay License Agreement if built on Marketplace Insights data; revisit feasibility when feature is scoped (see Tech Stack note above)
 7. Light/dark mode toggle in user settings
 8. Portfolio value tracking over time (graph your collection's total value)
 9. **Grading ROI calculator.** Show raw, PSA 9, and PSA 10 average prices for every card, alongside a calculation of grading upside — price delta minus grading service fees. Answers a question every collector has when they pull a high-value card from a box: "Is this worth grading?" No competing tool surfaces all three price points and the grading economics in one place. Schema is designed to support this from day one — eBay sales are stored with grade tier on every row, so adding the feature later is a UI build, not a data rebuild.
