@@ -218,6 +218,19 @@ These amendments were decided on during UI development but deferred until the da
 - **Status:** Not started — sequenced after EPN approval
 - **What:** Submit Buy API Application questionnaire as ONE cohesive partnership package. Four APIs requested together: Browse API rate limit increase, Marketplace Insights API scoped to top chases/grails, Feed API for bulk listing efficiency, Notification API for price alert features.
 - **Why combined, not separate:** Application Growth Check is a single review process for both rate limit increases and restricted API access. Submitting fragmented applications doesn't preserve negotiating leverage and weakens the partnership story.
+- **Sandbox-verify before submitting:** Call-volume estimates in the application must be validated against real API behavior, not extrapolated from documentation. Specific verifications required:
+  - Confirm Marketplace Insights supports batched lookups (multiple cards per call) or requires one call per card. Affects MI volume estimate by potentially an order of magnitude.
+  - Confirm Feed v1 API category structure for sports trading cards. Confirm whether one snapshot per top-level category covers our needs or finer-grained pulls are required.
+  - Confirm actual Feed v1 file size for sports cards. Affects local cache architecture, not rate limits.
+  - Confirm Browse API behavior with Ripper's actual search syntax (card name + negative keywords + condition filters). Affects Browse volume estimate.
+  - Test the cumulative pattern: simulate one box's pricing pipeline end-to-end in sandbox and observe actual call counts vs. estimates.
+  - Document findings in EBAY-STRATEGY.md OBSERVED before application submission.
+- **Per-API rate-limit asks (per the API Call Volume Math section in EBAY-STRATEGY.md):**
+  - Browse API: default tier with modest cushion (~10,000-25,000/day) for safety margin
+  - Feed v1 API: default tier (75,000/day) is sufficient — no elevated ask
+  - Marketplace Insights: elevated ask (5-10× default, target 250,000-500,000/day) — only API needing meaningful increase
+  - Notification API: default tier (10,000/day) is sufficient — no elevated ask
+- **Cover letter framing:** Position Ripper as a "good API citizen" — using Feed v1 architecturally to minimize eBay infrastructure load, asking for elevated limits only where genuinely needed (Marketplace Insights), accepting defaults everywhere else. This reads stronger than asking for elevated limits across the board.
 - **Done when:** Application submitted with mocks, data flows, per-API call volume estimates, and cover letter framing the partnership as driving traffic to eBay through analytics. EPN approval confirmed before submission.
 - **Dependencies:** EPN approval (#6.1)
 - **Blocks:** Application Growth Check review (#6.5)

@@ -8,7 +8,7 @@
 - Add to OBSERVED whenever real interaction with eBay teaches us something new
 - Update Schema and Roadmap impacts when constraints surface
 
-**Last updated:** May 1, 2026 (active-vs-sold research)
+**Last updated:** May 1, 2026 (rate limit math + Path Z fallback)
 
 ---
 
@@ -44,9 +44,59 @@ TOS-violating but operationally feasible. Many products in this space appear to 
 **Path E — Hybrid (Browse API + paid aggregator for top chases/grails).**
 Active-listing data from Browse API powers the bulk of any box checklist (base, common parallels, common autos of star players — high-volume cards where asking prices track sold prices well after mitigation). A paid sold-data source (Path B candidates) powers Top Chases and Grails specifically — the high-value, low-volume cards where users care most about precision and where active-listing data breaks down. Confirmed viable by hands-on May 1, 2026 research session showing asking-vs-sold gap is small at high volume but unreliable at low volume. Concentrates accuracy spend where users notice it most. Probably Ripper's primary operating mode if Path A is denied — and a reasonable design even if Path A is approved (smaller, more targeted Marketplace Insights ask).
 
-**Sequencing.** Path A goes in immediately because it's free to attempt and is the cheapest option if approved. While Path A is in review, Path B research happens in parallel — Card Hedge and PriceCharting emails capture pricing/terms/durability info regardless of Path A outcome. Path E+ (Browse + paid aggregator hybrid) is now the design assumption for both Path A approved and Path A denied scenarios — even with Marketplace Insights, the hybrid is a more defensible product than full-checklist sold-data dependency. Path C is a long-term option, Path D is a last resort.
+**Path Z — eBay-only (true worst case).**
+The strictest fallback if both Path A (Marketplace Insights direct) AND Path B (paid aggregator) are unavailable: denied, unaffordable, or terms-incompatible. Under Path Z, ALL pricing — bulk checklist, top chases, grails — comes from eBay active listings via Browse + Feed APIs. No sold data anywhere. Operationally workable on the rate-limit side (active-listing volume fits comfortably in default Feed v1 tier per the API Call Volume Math section above). Product-wise it forces real compromises because the May 1 active-vs-sold research showed mitigation tactics break down on low-volume cards — exactly where top chases and grails live.
 
-The framing shift this represents: the original DECIDED entry "Ripper's core EV/ROI architecture is allowed under the License Agreement" was strictly true but practically optimistic. The corrected framing is "Ripper's core architecture is achievable through multiple paths. Path E+ (hybrid) is now the design assumption. Path A reduces cost and adds precision but is no longer make-or-break."
+**Path Z product-shape options (decision needed if Path Z becomes reality):**
+- **Option A — Honest labeling:** Show asking prices throughout, label everything as "Asking" not "Value." EV becomes "Estimated Asking-Price Total" not "Expected Value." Top chases get explicit "Recent sales unavailable" notes with eBay sale-history links. Most honest, weakest headline numbers vs. competitors.
+- **Option B — Drop EV/ROI entirely:** Show pull rates, checklist, per-card asking prices. No aggregated box-value calculation. Differentiation drops to "best checklist + pull rates." Closer to Waxstat positioning.
+- **Option C — Confidence bands:** Show EV and ROI but with explicit per-card confidence ranges based on listing volume. "Soto base: $5 ± 10%." "Chourio /99: $200 ± 60%." Total EV becomes a range, not a point estimate. Statistically most honest, hardest to market clearly.
+- **Option D — Scope reduction:** Skip EV/ROI everywhere (not just legacy). Product becomes "the hobby's best box checklist database with affiliate-driven Buy Now." Massive positioning shift, simpler product, possibly more defensible against competitor data wars.
+
+**Path Z status:** Not chosen, but documented as a real option. If both Path A and Path B fail, this is our floor. Decision on which Option (A/B/C/D) to take is a partner-level decision, not a Claude decision. Worth talking through with Cam before it becomes urgent.
+
+**Sequencing.** Path A goes in immediately because it's free to attempt and is the cheapest option if approved. While Path A is in review, Path B research happens in parallel — Card Hedge and PriceCharting emails capture pricing/terms/durability info regardless of Path A outcome. Path E+ (Browse + paid aggregator hybrid) is the design assumption for both Path A approved and Path A denied scenarios — even with Marketplace Insights, the hybrid is a more defensible product than full-checklist sold-data dependency. Path C is a long-term option, Path D is a last resort, Path Z is the documented worst-case fallback if everything else fails.
+
+The framing shift this represents: the original DECIDED entry "Ripper's core EV/ROI architecture is allowed under the License Agreement" was strictly true but practically optimistic. The corrected framing is "Ripper's core architecture is achievable through multiple paths. Path E+ (hybrid) is now the design assumption. Path A reduces cost and adds precision but is no longer make-or-break. Path Z is documented so we don't have to improvise if the worst case happens."
+
+---
+
+## API Call Volume Math
+
+Real default limits per API per the eBay API Call Limits documentation. These are the limits if our application is approved at default tier — accessing Buy APIs at all requires Application Growth Check approval per the asterisk in eBay's documentation.
+
+| API | Default daily limit | Ripper's estimated daily need | Within default? |
+|---|---|---|---|
+| Browse API | 5,000 | ~2,000-5,000 (ad-hoc lookups, since Feed handles bulk) | Yes, with cushion |
+| Feed v1 API | 75,000 | ~24 (one feed per category × 4 refresh cycles × 6 categories) | Yes, easily |
+| Marketplace Insights | 5,000 | ~150,000-200,000 (top chases × box count, daily refresh) | **No — 30-40× over** |
+| Notification API | 10,000 | hundreds (subscription management + admin) | Yes |
+
+**Volume assumptions used above:**
+- 2,000 boxes at scale (1,200 at beta)
+- ~200 cards per modern box checklist
+- ~50-200 top chases/grails per box (Marketplace Insights scope)
+- 6-hour refresh on listing data (License Agreement minimum)
+- 24-hour refresh on non-listing data (License Agreement minimum)
+
+**Architectural conclusion:**
+- Active-listing volume fits comfortably in default tiers via Feed v1 API. We do NOT need elevated Browse rate limits as long as Feed v1 handles bulk. This is a strong "good API citizen" signal in the application.
+- Marketplace Insights is the ONLY API where we need a meaningful rate-limit increase. Estimated ask: somewhere in the 250,000-500,000 calls/day range (5-10× default) to support 2,000 boxes × top chases/grails refresh patterns with safety margin.
+- Notification API default is fine. Push-driven architecture means low ongoing call volume regardless of scale.
+
+**Application package implications:**
+- Browse API: ask for default tier with modest cushion (maybe 10,000-25,000/day) for safety margin
+- Feed v1 API: default fine, no elevated ask needed
+- Marketplace Insights: elevated ask required (5-10× default)
+- Notification API: default fine, no elevated ask needed
+
+**Open questions before final application submission:**
+- Does Marketplace Insights support batched lookups (multiple cards per call)? If yes, our ~200,000 calls/day estimate could drop significantly. Sandbox-verify before submitting.
+- Does Feed v1 API for sports cards return one snapshot per top-level category, or does it require finer-grained pulls? Affects the ~24/day estimate.
+- What's the actual feed file size for sports cards? Affects local cache architecture decisions, not rate limits directly.
+- Both questions should be answered during sandbox testing in Phase 3 before the application goes in.
+
+**Source:** Real default limits from https://developer.ebay.com/develop/get-started/api-call-limits, validated May 1, 2026.
 
 ---
 
