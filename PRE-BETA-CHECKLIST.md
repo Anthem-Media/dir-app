@@ -111,62 +111,71 @@
 
 ---
 
-## 4. Database Schema Amendments
 
-These amendments were decided on during UI development but deferred until the database phase. All should be applied before beta.
 
-### 4.1 Add `circulation_status` to `cards` table
-- **Status:** Documented in CLAUDE.md and CONTEXT.md; not applied
-- **Details:** `VARCHAR(20) DEFAULT 'unknown'`, values: `unknown`, `in_circulation`, `pulled_sold`. Powers the Grails tab circulation badge. Only meaningful for cards with `print_run` ≤ 10.
+4. Database Schema Amendments
+Status: ALL APPLIED — May 2026 Stage 1 Step 3 schema apply.
+These amendments were decided on during UI development and deferred until the database phase. All 11 were applied as part of the May 2026 Stage 1 Step 3 schema apply, which wrote a fresh dir_database_schema.sql against an empty Supabase public schema. The previous schema file is preserved as **OLD**dir_database_schema**OLD**.sql for reference.
+The end-to-end signup test on hobbyripper.com confirmed the auth trigger works: a fresh signup created an auth.users row, the on_auth_user_created trigger fired, and a matching public.users row was populated correctly with email, display_name, email_opt_in, and plan='free'.
+4.1 Add circulation_status to cards table — ✅ APPLIED May 2026
 
-### 4.2 Add `parent_set_id` to `box_sets` table
-- **Status:** Documented; not applied
-- **Details:** `INT REFERENCES box_sets(id) NULL`. Groups all formats of the same set together. Powers the format switcher.
+VARCHAR(20) DEFAULT 'unknown' with CHECK constraint allowing 'unknown', 'in_circulation', 'pulled_sold'. Powers the Grails tab circulation badge. Only meaningful for cards with print_run ≤ 10.
 
-### 4.3 Add `distributors` table
-- **Status:** Documented; not applied
-- **Details:** For the Buy Now affiliate system. Columns: distributor name, website, logo, affiliate URL pattern.
+4.2 Add parent_set_id to box_sets table — ✅ APPLIED May 2026
 
-### 4.4 Add `distributor_listings` table
-- **Status:** Documented; not applied
-- **Details:** Which distributor has which box, at what price, with what affiliate link.
+INT REFERENCES box_sets(id) self-referencing FK, NULL allowed. Index idx_box_sets_parent added. Groups all formats of the same set together. Powers the format switcher. NULL when only one format exists per Stage 0a decision.
 
-### 4.5 Add `email_opt_in` to `users` table
-- **Status:** Currently stored in Supabase's `auth.users.raw_user_meta_data`
-- **Details:** `BOOLEAN DEFAULT FALSE`. Captured from signup form. Moves to users profile table when it's created.
+4.3 Add distributors table — ✅ APPLIED May 2026
 
-### 4.6 Remove `password_hash` from `users` table
-- **Status:** Still in schema file
-- **Details:** Supabase Auth manages passwords in its own `auth.users` table. Our `users` table becomes a profile table linked to Supabase auth users by ID.
+New table for the Buy Now affiliate system. Columns: id, name, slug, website_url, logo_url, affiliate_url_pattern, is_active, created_at.
 
-### 4.7 Flip tier numbering in schema and `checklistUtils.js`
-- **Status:** Currently inverted (Tier 1 = Base, Tier 5 = Premium Hits). `sortTiersByValue` sorts descending as a workaround.
-- **Details:** Flip schema so Tier 1 = Premium Hits, Tier 5 = Base/Rookies. Update `sortTiersByValue` to sort ascending.
+4.4 Add distributor_listings table — ✅ APPLIED May 2026
 
-### 4.8 Update `plan` column on `users` to accept `'beta'`
-- **Status:** Schema currently accepts `'free'` and `'paid'`; needs `'beta'` added
-- **Details:** Required by the locked beta access model. Paywall check is `plan IN ('beta', 'paid')`.
+New table joining distributors and box_sets with prices and affiliate links. Columns: id, distributor_id, box_set_id, price, affiliate_url, in_stock, last_checked, created_at. UNIQUE on (distributor_id, box_set_id). Indexes on distributor_id and box_set_id.
 
-### 4.9 Add `is_featured` to `box_sets` table
-- **Status:** Not applied
-- **Details:** `BOOLEAN DEFAULT FALSE`. Powers homepage featured box curation — set to `TRUE` for boxes displayed in featured homepage sections. Manually managed in the Supabase table editor during beta. No admin UI needed for this field until a proper admin panel is built.
+4.5 Add email_opt_in to users table — ✅ APPLIED May 2026
 
-### 4.10 Add `ev_cards_priced` and `ev_cards_total` to `box_sets` table
-- **Status:** Not applied
-- **Details:** `ev_cards_priced SMALLINT` and `ev_cards_total SMALLINT`. Written at the same time EV is calculated and cached. Powers the EV coverage display ("X of Y cards priced") on the box profile page. Grails (print_run ≤ 10) are excluded from both counts — same exclusion rule as EV itself.
-- **⚠️ Must be applied before full database seeding begins.** These columns get written during EV calculation. If seeding runs before they exist, all EV writes will fail or require retrofitting.
-- **Timing:** Database phase, after POC, before full seed. Apply alongside all other schema amendments in section 4.
+BOOLEAN DEFAULT FALSE. Captured from signup form. Populated by the handle_new_user() trigger function from auth.users.raw_user_meta_data.
 
-### 4.11 Add `value_source` column to `cards` table
-- **Status:** Not applied — locked in Stage 0a planning session, May 2026
-- **Details:** `value_source VARCHAR(40)` with a CHECK constraint listing the realistic universe of source values, and an index on the column. Tracks which pricing pipeline wrote each `current_value`.
-- **CHECK constraint values:** `'ebay_browse_mitigation'`, `'ebay_marketplace_insights'`, `'card_hedge'`, `'price_charting'`, `'manual'`, `'placeholder'` (or NULL).
-- **Index:** `CREATE INDEX idx_cards_value_source ON cards(value_source);` — needed because License Agreement Section 16.3 cleanup queries filter by source and must run fast.
-- **Why:** Path E+ design has multiple pricing pipelines feeding the same `cards.current_value` column. The app needs to know source for: (a) refresh cadence enforcement (6h for eBay-sourced per License Agreement, paid-source per their terms), (b) License Agreement Section 16.3 compliance bulk-delete tooling, (c) tier-aware confidence display, (d) audit/debugging.
-- **Eβay-first framing:** Best case is a full eBay pipeline (Browse + Marketplace Insights) as sole source. Other source values exist for Plan B fallback resilience (Card Hedge, PriceCharting) but aren't expected to populate in the happy path. This is future-proofing, not a commitment to multi-source pricing as a goal. If the pricing strategy pivots significantly (e.g., pushed away from eBay entirely), the CHECK constraint will need to be updated — small migration, no schema rebuild. That expectation is accepted.
-- **Pipeline behavior:** Every pipeline that writes `current_value` MUST also write `value_source` and update `value_last_updated`. Wrap this in a function (e.g., `update_card_value(card_id, new_value, source)`) so individual pipelines can't forget.
-- **⚠️ Must be applied before any pricing pipeline writes real data.** Apply alongside all other schema amendments in section 4.
-- **Timing:** Database phase, after POC, before full seed. Apply alongside all other schema amendments in section 4.
+4.6 Remove password_hash from users table — ✅ APPLIED May 2026
+
+Column removed entirely. Supabase Auth manages passwords in auth.users. Our public.users table is now a profile table linked to Supabase auth users by UUID.
+
+4.7 Flip tier numbering in schema — ✅ APPLIED May 2026 (database side only)
+
+Schema flipped: Tier 1 = Premium Hits, Tier 5 = Base/Rookies. card_categories seed data updated.
+⚠️ src/utils/checklistUtils.js still needs updating — the codebase-side flip is a follow-up Sonnet task. Currently sortTiersByValue sorts descending as a workaround. Update to sort ascending now that schema is flipped.
+
+4.8 Update plan column on users to accept 'beta' — ✅ APPLIED May 2026
+
+VARCHAR(20) DEFAULT 'free' with CHECK constraint allowing 'free', 'beta', 'paid'. Paywall check is plan IN ('beta', 'paid').
+
+4.9 Add is_featured to box_sets table — ✅ APPLIED May 2026
+
+BOOLEAN DEFAULT FALSE. Powers homepage featured box curation. Manually managed in the Supabase table editor during beta.
+
+4.10 Add ev_cards_priced and ev_cards_total to box_sets table — ✅ APPLIED May 2026
+
+SMALLINT columns, NULL allowed. Written when EV is calculated. Powers the EV coverage display ("X of Y cards priced") on the box profile page. Grails (print_run ≤ 10) excluded from both counts.
+
+4.11 Add value_source column to cards table — ✅ APPLIED May 2026
+
+VARCHAR(40) with CHECK constraint allowing exactly 'ebay_browse_mitigation', 'ebay_marketplace_insights', 'card_hedge', 'price_charting', 'manual', 'placeholder' (NULL also allowed). Index idx_cards_value_source added. Tracks which pricing pipeline wrote each current_value. eBay-first framing per Stage 0a.
+
+4.12 Users table identity = UUID matching auth.users(id) — ✅ APPLIED May 2026
+
+Stage 0a schema decision (was tracked separately from #4.1–#4.11 in the original list). Implemented during the May 2026 schema apply.
+users.id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE.
+All four user-FK tables (saved_boxes, price_alerts, user_collection, user_wishlist) flipped to user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE.
+handle_new_user() function (SECURITY DEFINER, SET search_path = public) and on_auth_user_created trigger created on auth.users. End-to-end signup test confirmed the trigger fires and populates public.users correctly.
+
+4.13 Row Level Security policies — ⚠️ NOT APPLIED — new pre-beta task
+
+Status: Not started. Schema applied with RLS disabled per Supabase warning during the May 2026 schema apply.
+Why deferred: Enabling RLS without writing policies is worse than leaving RLS off — every query gets denied. RLS enable + policy writing must be one coordinated task.
+Risk if forgotten: With RLS off, any client using the project's anon key can read/write any user-data table. Not exploitable today (no real users, no real frontend wiring to user-data tables yet) but cannot ship to beta this way.
+Done when: RLS enabled on all four user-data tables (saved_boxes, price_alerts, user_collection, user_wishlist) plus users itself, with policies that enforce user_id = auth.uid() on read/write. Tested with two test accounts to confirm one can't see the other's data.
+Timing: Before beta launch. Should land before any user-data table starts getting wired into the frontend.
 
 ---
 

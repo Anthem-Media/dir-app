@@ -321,6 +321,14 @@ We've been assuming several things about eBay API capabilities based on web UI b
 
 Running list of every schema choice with date and reasoning. Append-only — when a decision changes, add a new entry referencing the old one. Don't delete history.
 
+### May 2026 — Stage 1 Step 3: schema applied to Supabase
+First production schema apply. Wrote a fresh dir_database_schema.sql against an empty Supabase public schema, incorporating all 11 amendments from PRE-BETA-CHECKLIST.md section #4 plus all four Stage 0a schema decisions (logged below). Previous schema file preserved as **OLD**dir_database_schema**OLD**.sql. Apply was a single SQL Editor run — no migration needed because no prior tables existed in public. End-to-end signup test on hobbyripper.com confirmed the on_auth_user_created trigger fires correctly and populates public.users with email, display_name (from auth metadata), email_opt_in (from auth metadata), and plan='free'. Schema applied with RLS disabled per Supabase's warning — RLS enable + policy writing is tracked as a pre-beta task in PRE-BETA-CHECKLIST.md #4.13.
+Notable follow-up tasks created by this apply:
+
+src/utils/checklistUtils.js — sortTiersByValue still sorts descending. Now that the database tier numbering is flipped (Tier 1 = Premium Hits, Tier 5 = Base), the codebase needs a corresponding flip to ascending sort. Sonnet task.
+View v_top_cards_by_set does not yet expose value_source. Add when the box profile page wants to display pricing-confidence indicators.
+RLS policies (PRE-BETA-CHECKLIST.md #4.13) — schema is wide open until policies are written.
+
 ### May 2026 — Stage 0a planning session: four schema decisions locked
 Four OPEN QUESTIONS moved to DECIDED status. Full reasoning captured in the DECIDED section above. Brief log:
 
