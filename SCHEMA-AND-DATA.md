@@ -117,6 +117,33 @@ Items here have been explicitly locked in through partner discussion or project 
 - **Companion table symmetry:** The `price_history` table already tracks `source` for individual sale rows. Adding `value_source` to `cards` makes the design symmetric — same concept in both related tables.
 - **Source:** Stage 0a planning session, May 2026. Tracked as PRE-BETA-CHECKLIST.md #4.11 schema amendment.
 
+### Two-layer data model: atomic facts → schema-shaped spreadsheet (locked May 2026)
+- **What:** Source data is collected first as free-form atomic facts documents (.md files, one per box set, stored in /data/facts/). Schema-shaped spreadsheets are derived from those atomic docs via AI shaping (Cowork). The atomic layer is the true source of truth.
+- **Why:** Atomic facts documents don't reference the schema — they capture player names, card numbers, print runs, pull odds, MSRP, and release dates in plain language. If the schema changes (tier numbering flip, new columns, restructured tables), the collected data survives intact. Re-import is a reshape task, not a re-collection task. Schema-shaped spreadsheets are derived artifacts, not originals.
+- **Source:** Stage 1 Step 4 planning session, May 2026.
+- **Schema implication:** None to the schema itself. Implication for data entry workflow: /data/facts/ directory must be created and maintained. Atomic docs come before any Cowork shaping run.
+
+### Path A pricing rows: per-printing model, no format duplication (locked May 2026)
+- **What:** The `cards` table has one row per (card subject × parallel). The format dimension (Hobby / Jumbo / Blaster / Breaker / Mega) lives exclusively in `pull_rates` and is never duplicated in `cards`. A single "Adley Rutschman Magenta Refractor /399" row prices the card once; its pull odds differ per format row in `pull_rates`.
+- **Why:** Card identity is format-agnostic. A Magenta /399 is the same card whether it was pulled from a Hobby or a Blaster. Duplicating a card row per format would balloon the `cards` table (×5 for every parallel) and produce contradictory `current_value` fields with no clean way to reconcile them. EV math joins `cards` to `pull_rates` at query time — format specificity lives there.
+- **Row count estimate:** ~10,500 rows per modern Topps Chrome box at full per-printing accuracy (all subjects × all parallels).
+- **Source:** Stage 1 Step 4 planning session, May 2026.
+- **Schema implication:** No change needed — current schema already reflects this. Confirmed as intentional design, not an oversight.
+
+### Subject-level batching for eBay calls (locked May 2026)
+- **What:** eBay Browse API and Marketplace Insights calls are issued at the card-subject level, not the card-printing level. A single query like "Adley Rutschman 2023 Topps Chrome" returns up to 200 listings covering all parallels of that subject in one API call. Parallels are disambiguated after retrieval by matching listing titles against the known parallel names and print runs in the `cards` table.
+- **Why:** A naive per-printing approach (one call per parallel) would require ~10,500 calls per box. Subject-level batching collapses that to ~300–500 calls per box (~10–30× reduction), staying within practical rate limits and making weekly refresh economically viable without Marketplace Insights elevated access.
+- **Tradeoff:** Disambiguation happens post-call in our pipeline, not at the eBay query layer. Some listings will be ambiguous (no parallel name in title, no card number). Those get confidence-scored and flagged for review rather than discarded.
+- **Source:** Stage 1 Step 4 planning session, May 2026.
+- **Schema implication:** None to the current schema. Pipeline design implication: the eBay integration script must group cards by subject before issuing calls, then fan results back out to individual card rows.
+
+### Guaranteed pulls — schema amendment required (locked May 2026)
+- **What:** Each box format has manufacturer-stated guaranteed pulls — deterministic floors that are always present in a box regardless of probability (e.g., Hobby = 1 autograph guaranteed, Jumbo = 3 autos guaranteed, Blaster = 2 Sepia Refractors + 2 Pink Refractors guaranteed). These are not odds — they are certainties that must be treated as `pull_probability = 1.0` in EV math, as a separate additive term.
+- **Why:** Omitting guaranteed pulls understates EV. Including them as regular `pull_rates` rows is wrong because they'd be weighted by their odds (which are irrelevant — they always hit). EV math must handle guaranteed pulls as a distinct, additive component.
+- **Data sources:** Cardboard Connection, Baseballcardpedia, manufacturer product sheets — the same sources already used for pull rates.
+- **Source:** Stage 1 Step 4 planning session, May 2026.
+- **Schema implication:** Schema amendment required. Exact structure (JSON column on `box_sets` vs. separate `guaranteed_pulls` table) is an open question — see OPEN QUESTIONS section. Amendment must be in place before any guaranteed-pull data is imported.
+
 ---
 
 ## OBSERVED
@@ -226,6 +253,15 @@ Identified during eBay observation: if graded listings are easy to identify, we 
 - Card value trend chart on box profile page should show at least 6 months of history.
 - **Implication:** `price_history` retention policy needs to be defined. eBay API initial pull needs to go back at least 6 months on first seed.
 
+### May 2026 — eBay call volume math for Path A scope
+
+Estimated call volume for Path A integration modeled during Stage 1 Step 4 planning session:
+
+- **Subject-level batching:** ~300–500 eBay calls per box set (one query per card subject, disambiguating parallels post-call). This is ~10–30× fewer calls than a naive per-printing approach.
+- **Weekly refresh at full beta scale:** ~600 box sets in scope × ~150–170 subjects per box ÷ batching efficiency factor ≈ **65,000–90,000 daily Browse API calls** at weekly refresh cadence.
+- **Important caveat:** These numbers are derived from the integration model, not measured against real eBay API traffic. Actual call volume will be confirmed during the eBay API capability verification session (OPEN QUESTIONS #0) and the Browse API integration POC.
+- **Rate limit context:** Default Browse API tier is 5,000 calls/day — far below production needs. Production access requires Application Growth Check approval (PRE-BETA-CHECKLIST.md #6.3). The combined application will include a Browse API limit-increase ask.
+
 ---
 
 ## OPEN QUESTIONS
@@ -285,6 +321,14 @@ We've been assuming several things about eBay API capabilities based on web UI b
 - Depends on: real eBay data flowing in to set sensible thresholds.
 - Affects: ongoing data quality maintenance, weekly review time investment.
 
+**7a. Per-parallel pull rates not yet supported by schema**
+- **What:** Current `pull_rates` table is keyed by `(box_set_id, category_id)`. All Numbered Refractors within a category share one pull rate. In reality each parallel has its own printed odds — a Red /5 Refractor has very different odds from a Magenta /399 Refractor, but both fall under "Numbered Refractor."
+- **Example (2024 Topps Chrome Hobby):** Magenta /399 representative rate is ~1:96 packs. Red /5 is ~1:7,680 packs. Using the category-level rate for both would significantly over-count the EV contribution of ultra-low-print parallels.
+- **Current state:** EV math is approximate because it uses a single representative rate per category. Acceptable for POC; not acceptable for production accuracy.
+- **Options:** (a) Add a `parallel_name` or `print_run` column to `pull_rates` to key per-printing; (b) restructure `pull_rates` to reference `cards.id` directly (one rate per card row); (c) accept category-level rates with a documented accuracy caveat.
+- **Depends on:** Pull rate data availability — manufacturers publish category-level odds, not per-parallel odds. Per-parallel rates require inference from print run and box configuration math.
+- **Affects:** EV calculation accuracy, `ev_cards_total` coverage logic, schema amendment scope.
+
 ### Structural schema decisions
 
 **10. Card categories review**
@@ -310,10 +354,19 @@ We've been assuming several things about eBay API capabilities based on web UI b
 ### Source-of-truth data format
 
 **13. How do we structure raw collected data so it survives a schema rebuild?**
-- Spreadsheets currently mirror schema tables. If schema changes, spreadsheets become stale.
-- Options: keep raw "facts" spreadsheets separate from schema-shaped import spreadsheets, with a transformation step between.
-- Depends on: deciding what the "atomic facts" about a card and box actually are.
-- Affects: data entry workflow, ability to rebuild from collected data without re-collecting.
+**— ANSWERED May 2026 Step 4. Two-layer model adopted. See DECIDED: "Two-layer data model: atomic facts → schema-shaped spreadsheet."**
+- **Answer:** Atomic facts documents (.md files, one per box set, stored in /data/facts/) are the source of truth. They capture raw facts in plain language without referencing the schema. Schema-shaped spreadsheets are derived from atomic docs via AI shaping (Cowork) and are treated as artifacts, not originals. A schema rebuild requires reshaping atomic docs into the new structure — not re-collecting source data from TCDB, Cardboard Connection, or eBay all over again.
+- **Affects:** Data entry workflow — /data/facts/ directory must exist and be maintained from the first data entry session onward.
+
+### Guaranteed pulls schema design
+
+**14. How should guaranteed pulls be stored in the schema?**
+- **Context:** Each box format has manufacturer-stated guaranteed pulls — deterministic floors that are always present regardless of probability (e.g., Hobby = 1 autograph, Jumbo = 3 autos, Blaster = 2 Sepia + 2 Pink Refractors). These are certainties in EV math, not probabilities, and must be stored separately from `pull_rates`. Schema amendment is required before any guaranteed-pull data is imported.
+- **Option A — JSON column on `box_sets`:** Add `guaranteed_pulls JSONB` column holding `{ "autographs": 1, "specific_parallels": ["Sepia Refractor", "Pink Refractor"] }`. Simpler to implement, no new table, easy to read at query time.
+- **Option B — Separate `guaranteed_pulls` table:** New table keyed by `(box_set_id, category_id_or_parallel_name)` with a `quantity` column. Cleaner for complex querying, consistent with how `pull_rates` is structured, easier to JOIN in EV calculations.
+- **Tradeoff:** JSON is faster to implement and queries cleanly for the simple "sum the guaranteed auto value" use case. Separate table is more queryable if guaranteed pull data ever needs filtering or aggregation beyond a simple sum.
+- **Depends on:** How EV calculation logic will consume this data — simple sum vs. complex query shapes the table-vs-JSON choice.
+- **Affects:** Schema amendment scope, EV calculation logic, data entry pipeline.
 
 ---
 
@@ -341,6 +394,18 @@ Four OPEN QUESTIONS moved to DECIDED status. Full reasoning captured in the DECI
 4. **`value_source` column on `cards` (was OPEN #12a).** Locked: single `VARCHAR(40)` column with CHECK constraint and index. Tracks which pricing pipeline wrote each `current_value`. Values: `'ebay_browse_mitigation'`, `'ebay_marketplace_insights'`, `'card_hedge'`, `'price_charting'`, `'manual'`, `'placeholder'`. eBay-first framing — best case is full eBay pipeline as sole source; other values exist for Plan B fallback resilience. CHECK constraint chosen over ENUM for easier future extension. Tracked as PRE-BETA-CHECKLIST.md #4.11.
 
 **Format list note (related, not strictly schema):** Beta format scope locked at Breaker, Jumbo, Hobby, Mega, Blaster (display order, left to right). Retail dropped from beta scope, deferred as a post-beta addition (PRE-BETA-CHECKLIST.md #13.1). Schema-compatible — `box_format` is VARCHAR — no migration needed when Retail is added back.
+
+### May 2026 — Stage 1 Step 4: pricing data model locked
+
+Four data model and pipeline decisions locked in this session. Full reasoning in the DECIDED section above. No schema changes were made in this step — decisions are pipeline-level. Schema amendments for guaranteed pulls and per-parallel pull rates are queued for a future session.
+
+1. **Two-layer data model.** Atomic facts docs (.md, /data/facts/) are the source of truth. Schema-shaped spreadsheets are derived artifacts. Survives any schema rebuild. Answers OPEN QUESTIONS #13 (marked ANSWERED above).
+
+2. **Path A pricing rows: per-printing, no format duplication.** `cards` table has one row per (subject × parallel). Format dimension lives only in `pull_rates`. ~10,500 rows per modern Topps Chrome at full per-printing accuracy.
+
+3. **Subject-level batching for eBay calls.** One query per card subject (e.g., "Adley Rutschman 2023 Topps Chrome") covers all parallels in one call. ~10–30× call volume reduction vs. naive per-printing approach. Estimated ~65,000–90,000 daily Browse API calls at weekly refresh for ~600 boxes — to be confirmed during eBay API capability verification session (OPEN QUESTIONS #0).
+
+4. **Guaranteed pulls require schema amendment.** Manufacturer-stated deterministic floors (e.g., Hobby = 1 auto guaranteed) must be handled separately from probabilistic `pull_rates`. Schema amendment structure (JSON column vs. separate table) is an open question — see OPEN QUESTIONS #14.
 
 ---
 
