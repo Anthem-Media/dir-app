@@ -1,7 +1,7 @@
 # Context
 
 ## Current State
-Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Resend live and tested under burst load, all 6 auth email templates branded, password reset flow built/branded/tested end-to-end, email verification permanently ON. POC (Proof of Concept) phase is current: hook up hobbyripper.com in Vercel, connect Supabase with minimal real data, run the 2024 Topps Chrome Baseball pipeline end-to-end, and populate homepage images. Rename pass (DIR → Ripper across codebase and docs) is scheduled after POC is complete and working on hobbyripper.com, right before Pro audit #1. eBay Partner Network enrollment is queued for as soon as real data is live on the domain.
+Auth phase COMPLETE. Email Infrastructure phase COMPLETE. POC phase in progress — hobbyripper.com live on Vercel, Supabase hooked up. Stage 1 Step 4 (data pipeline test) is in progress: atomic facts doc (`/data/facts/2023-topps-chrome-baseball.facts.md`) and schema-shaped seed spreadsheet (~10,500 rows across 3 tabs) have been built for 2023 Topps Chrome Baseball as the POC pipeline test box. Slug-bridge script not yet written. Homepage image URLs populated for all 56 BOXES entries in `src/utils/homePageMockData.js`. Rename pass (DIR → Ripper across codebase and docs) is scheduled after POC is complete and working on hobbyripper.com, right before Pro audit #1. eBay Partner Network enrollment is queued for as soon as real data is live on the domain.
 
 ## What's Been Decided and Locked
 - **Scope:** Baseball, Football, Basketball, Hockey at beta launch. Soccer dropped from beta scope — becomes a "Coming Soon" link in the navigation. Soccer remains on the post-beta roadmap. All four launch sports need full database population for beta. No TCG categories.
@@ -72,6 +72,12 @@ Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Res
 - **Coming soon / upcoming releases — POST-LAUNCH:** A "Coming Soon" section on the homepage showing upcoming box releases with countdown timers. No new schema needed — uses existing `release_date` and `is_active` columns on `box_sets`. Unreleased boxes entered with `is_active = FALSE` and a future `release_date`. On release day `is_active` flips to `TRUE` automatically. Zach will build a personal notification tool to alert him when new boxes are announced. Post-launch only — not in beta scope.
 - **EV coverage display — LOCKED:** EV on the box profile page shows "Based on X of Y cards priced" using `ev_cards_priced` and `ev_cards_total` columns on `box_sets`. Both written when EV is calculated. Grails excluded from both counts. Transparent coverage builds trust — no other tool shows this.
 - **New Release badge — LOCKED:** Boxes where `release_date >= NOW() - INTERVAL '30 days'` display a "New Release" badge. No new column needed — derived from existing `release_date`. Badge sets user expectations on thin EV coverage for recent releases.
+- **Two-layer data model — LOCKED:** Atomic facts docs (one `.md` file per box, stored in `/data/facts/`) are the source of truth for all box data. Schema-shaped spreadsheets are derived artifacts generated from those atomic docs via AI shaping (Cowork Step 2). The atomic layer survives schema rebuilds — if the schema changes, re-shape from the facts file, not vice versa.
+- **Path A pricing rows — LOCKED:** Per-printing model in the `cards` table. No format dimension duplicated in `cards`. Format dimension lives only in `pull_rates`. Roughly 10,500 rows per modern Topps Chrome box at full accuracy (one row per subject × parallel combination).
+- **Subject-level batching for eBay — LOCKED:** One Browse API search per card subject (e.g. "Adley Rutschman 2023 Topps Chrome") returns all parallels in a single call. Cuts call volume ~10–30× vs. naive per-printing approach. Estimated ~65,000–90,000 Browse API calls/day at weekly refresh for ~600 boxes.
+- **Guaranteed pulls — CONFIRMED FEATURE:** Each format has manufacturer-stated guaranteed pulls (Hobby = 1 auto guaranteed, Jumbo = 3 autos guaranteed, etc.). These are certainties in EV math, not probabilities. Schema amendment required before guaranteed-pull data can be imported. Structural choice (JSONB column vs. separate table) is an open question — see SCHEMA-AND-DATA.md #14.
+- **eBay rate limits — UNKNOWN UNTIL PARTNERSHIP CALL:** Cam is using personal network to get an eBay contact. EBAY-STRATEGY synopsis prepared with formal call volume request (~100K Browse API calls/day, 50–100K Marketplace Insights calls/day). Numbers are derived from math, not measured. Rate limits remain unknown until the partnership conversation completes.
+- **Three vendor inquiries in flight (May 2026):** SportsCardsPro (CSV scriptability question), Card Hedge (API pricing), Beckett (data licensing for partners). All awaiting reply.
 ## Hard No List (v1)
 - Marketplace
 - Community features
@@ -156,6 +162,10 @@ Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Res
 55. ✅ Multi-aggregator landscape research complete — Card Ladder, Market Movers, Card Hedge AI, PriceCharting/SportsCardsPro, 130 Point all documented in EBAY-STRATEGY.md OBSERVED
 56. ✅ Active-vs-sold research session completed — hands-on research across 5 card tiers from 2024 Topps Chrome Baseball confirming asking-vs-sold gap is small at high volume and large at low volume
 57. ✅ Five Paths framework defined and sequenced — Path E+ hybrid (Browse API for bulk + paid aggregator for Top Chases/Grails) confirmed as design assumption for both Path A approved and Path A denied scenarios
+58. ✅ 2023 Topps Chrome Baseball atomic facts doc built and locked (`/data/facts/2023-topps-chrome-baseball.facts.md`)
+59. ✅ 2023 Topps Chrome Baseball seed spreadsheet generated (~10,500 rows, 3 tabs — `box_sets`, `cards`, `pull_rates` — slug references in place of FK IDs)
+60. ✅ Homepage image URLs populated for all 56 BOXES entries in `src/utils/homePageMockData.js`
+61. ✅ eBay partnership ask synopsis written (call volume request ~100K Browse/day, 50–100K Marketplace Insights/day — in working notes, not yet committed to docs)
 
 ## Full Roadmap
 1. ~~Codebase audit~~ ✅
@@ -270,6 +280,10 @@ Auth phase COMPLETE. Email Infrastructure phase COMPLETE — custom SMTP via Res
 - ⚠️ **LLC formation must complete before signing the Marketplace Insights agreement.** Previously deferred until revenue — superseded for the eBay timeline. License Agreement Section 15 (Indemnification) exposes individual signatories personally. Capital cost ~$50-300. Cam owns this.
 - ⚠️ **Path D (scraping) is a hard no for production.** Apify, Oxylabs, and similar tools may be used for one-off research only — not as the production pipeline. Using a scraper while applying for Marketplace Insights would likely surface during review and result in instant denial.
 - ⚠️ **AI trend summaries are blocked by default.** License Agreement Section 8.5.2.a prohibits ingesting Marketplace Insights data into any AI model without eBay's explicit written consent. AI photo scan (image → box identification) is fine — it doesn't ingest eBay data. AI trend summaries require explicit additional consent. See PRE-BETA-CHECKLIST.md.
+- ⚠️ **Spreadsheet has placeholder subject names for some rare parallels.** YouthQuake (~50 rows), Topps Chrome Exposé (~30 rows), and TacoFractor (~200 rows) use placeholder subject names. Replace with real subject names from Diamond Cards Online before that data hits production.
+- ⚠️ **`pull_rates` schema limitation: per-parallel rates not yet supported.** EV math currently uses category-representative rates, which is approximate. Schema amendment queued. See SCHEMA-AND-DATA.md OPEN QUESTIONS #7a.
+- ⚠️ **Guaranteed pulls schema amendment queued.** Structure decision (JSONB column vs. separate table) unresolved. Must be resolved before guaranteed-pull data can be imported. See SCHEMA-AND-DATA.md OPEN QUESTIONS #14.
+- ⚠️ **PRE-BETA-CHECKLIST.md #5.1 references 2024 Topps Chrome as the POC box.** Live site uses 2023 Topps Chrome Baseball. Doc fix queued for a later session.
 
 ## Development Guidelines
 - Use this Project chat for planning, strategy, and decisions
