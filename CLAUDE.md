@@ -189,7 +189,7 @@ Buy Now system: price comparison with multiple distributors. Fallback to "Find o
 
 ## Documentation Update Workflow
 
-When updates are needed across multiple MD files (project-brief.md, CLAUDE.md, CONTEXT.md, PRE-BETA-CHECKLIST.md, SCALING-REFERENCE.md, REFERENCES.md, requirements.md) at the end of a planning session:
+When updates are needed across multiple MD files (project-brief.md, CLAUDE.md, CONTEXT.md, PRE-BETA-CHECKLIST.md, SCALING-REFERENCE.md, USER-LOAD-TESTING.md, REFERENCES.md, requirements.md) at the end of a planning session:
 
 - DO NOT have the planning chat rewrite full file contents for manual copy-paste. That burns the planning chat's output tokens on content that's mostly duplicating existing file content.
 - DO have the planning chat produce a single Claude Code prompt listing targeted str_replace edits by file and section. Claude Code reads the files from its own context and applies surgical edits.

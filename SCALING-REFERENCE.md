@@ -308,6 +308,8 @@ Before adding any new third-party service to the stack, answer these questions a
 
 ## Scheduled: Full Scale Audit Session (post-auth-phase)
 
+**Companion document:** USER-LOAD-TESTING.md is the operational playbook for this session — methodology, critical user paths, staged ramp, what to measure, tools, and how to interpret results. Read it before the session begins.
+
 After the auth phase closes out (auth context, protected routes, sign out all complete), a dedicated scale audit session will walk every feature and every database table to identify bottlenecks at the 100/1k/10k/100k user ceilings. Findings will flow into:
 
 - This document — per-feature bottleneck analysis, expanded third-party service entries
