@@ -10,7 +10,7 @@
 
 **Companion document:** EBAY-STRATEGY.md is the canonical source for eBay-specific strategy, License Agreement analysis, and the Five Paths framework. This file (SCHEMA-AND-DATA.md) captures schema and data decisions that flow from those strategic decisions. When eBay strategy changes, schema implications get captured here. Read EBAY-STRATEGY.md first when working through pricing-related schema decisions.
 
-**Last updated:** May 1, 2026 (eBay strategy session — Path E+, License Agreement constraints)
+**Last updated:** May 2026 (Stage 1 Step 4 planning session — atomic facts data model, per-printing pricing rows, POC pricing posture)
 
 ---
 
@@ -25,7 +25,7 @@ This is a separate design layer from the schema itself. The schema is *one possi
 Ripper is a pricing analytics tool. If the prices are wrong, every downstream feature (EV, ROI, top chases, charts) is wrong. Schema decisions that affect pricing are the highest-stakes decisions in the system. They get the most thinking, the most caution, and the most careful design.
 
 ### 80% accurate is the POC bar
-For the proof-of-concept (2024 Topps Chrome Baseball), the goal is "credible enough for expert reviewers to react to," not "perfect." The remaining 20% accuracy gets dialed in based on what Cam's network identifies as wrong or missing. Don't over-engineer before learning.
+For the proof-of-concept (2023 Topps Chrome Baseball), the goal is "credible enough for expert reviewers to react to," not "perfect." The remaining 20% accuracy gets dialed in based on what Cam's network identifies as wrong or missing. Don't over-engineer before learning.
 
 ### Schema flexibility for future features
 Some features (like the Grading ROI calculator) aren't in scope for beta but should be enabled by the schema design. Storing per-grade prices in the database now — even if only the raw price is displayed — means future features become UI builds, not data rebuilds.
@@ -143,6 +143,33 @@ Items here have been explicitly locked in through partner discussion or project 
 - **Data sources:** Cardboard Connection, Baseballcardpedia, manufacturer product sheets — the same sources already used for pull rates.
 - **Source:** Stage 1 Step 4 planning session, May 2026.
 - **Schema implication:** Schema amendment required. Exact structure (JSON column on `box_sets` vs. separate `guaranteed_pulls` table) is an open question — see OPEN QUESTIONS section. Amendment must be in place before any guaranteed-pull data is imported.
+
+### Two-layer atomic facts data model — DECIDED May 2026
+- **What:** Source data flows in two layers. Layer 1 is atomic facts documents — free-form markdown, one per box, stored in `/data/facts/` (e.g. `/data/facts/2023-topps-chrome-baseball.facts.md`). Source-by-source bullets, open-questions section, no schema assumptions. Layer 2 is the schema-shaped seed spreadsheet — one Excel file, one tab per schema table (`box_sets`, `cards`, `pull_rates`), generated from the atomic facts doc via AI shaping. Slug references in place of FK IDs. `_needs_review` and `_source_notes` columns present on the worksheet, dropped before CSV export.
+- **Why:** Resolves the "rebuild-proof data collection" guiding principle into concrete artifacts. The atomic layer is the source of truth and survives schema rebuilds. If the schema changes, regenerate the schema-shaped spreadsheet from the atomic facts doc — do not re-collect from TCDB, Cardboard Connection, or eBay. The two layers also separate concerns cleanly: the atomic layer captures *what is true about this box*, the schema layer captures *how that truth maps to current schema columns*.
+- **Source-agnostic by design:** The atomic facts model holds regardless of which pricing data source ends up being the primary (eBay, SportsCardsPro, or any future option). Pricing data slots into the schema layer at import time; the atomic layer doesn't depend on it.
+- **Locked through:** Stage 1 Step 4 planning session, May 2026. Closes OPEN QUESTION #13 (now removed from that section).
+
+### Per-printing pricing rows in `cards` table — DECIDED May 2026
+- **What:** Each unique printing (player + parallel + numbering tier) is one row in the `cards` table with its own `current_value`. Format dimension (Hobby vs Jumbo vs Blaster vs Mega vs Breaker) lives ONLY in the `pull_rates` table. Pricing rows are NOT duplicated across formats.
+- **Why:** A Soto refractor is the same card whether you pulled it from a Hobby box or a Jumbo box — the pricing should be identical because the card is identical. Duplicating the same pricing row across formats would create update anomalies, inflate row counts, and obscure the fact that format only affects pull odds, not card value.
+- **Row count implication:** ~10,500 rows for a modern Topps Chrome box (one row per printing across all parallels for all subjects). This sits well within Postgres comfortable territory.
+- **Source-agnostic by design:** This is a schema-shape decision, not a pricing-source decision. Holds for eBay, SportsCardsPro, or any other source — they all populate the same per-printing rows.
+- **Locked through:** Stage 1 Step 4 planning session, May 2026.
+
+### Subject-level batching for eBay calls — DECIDED CONDITIONAL May 2026
+- **What:** When eBay is the active pricing data source (Plan A or Path E+ hybrid per CONTEXT.md "Pricing data source — current posture"), pricing calls batch by card subject. One search per subject returns all parallels for that subject in a single call. Naive per-printing queries would hit eBay once per parallel; subject-level batching consolidates them.
+- **Why:** Cuts eBay call volume by roughly 10-30x compared to naive per-printing queries. Critical for staying inside rate limits at scale and for the volume estimates submitted in the Buy API Application.
+- **Conditional:** This decision applies ONLY when the eBay pipeline is the active pricing source. Not relevant for the POC SportsCardsPro path (Stage 1 Step 4) or for full Plan B fallback (SportsCardsPro for cards). When the POC pipeline is in use, this decision is dormant — it activates if and when eBay becomes the active source.
+- **Volume figures are derived not measured.** The 10-30x reduction estimate will be validated against real API behavior during eBay capability verification (PRE-BETA-CHECKLIST #6.0).
+- **Locked through:** Stage 1 Step 4 planning session, May 2026.
+
+### Guaranteed pulls per box — FEATURE DECIDED May 2026 (structure OPEN)
+- **What:** Each format has manufacturer-stated guaranteed pulls. Examples: Hobby = 1 auto guaranteed per box, Jumbo = 3 autos guaranteed, Blaster = 2 Sepia + 2 Pink Refractors guaranteed. Guaranteed pulls have probability = 1.0 within the box and are conceptually a special case of pull rates — but they are presented to users as a distinct feature ("what you are guaranteed to get") rather than mixed into the probabilistic Pull Rates display.
+- **Why include the feature:** Guaranteed pulls are a major buying-decision factor for collectors choosing between formats. Hobby's "1 guaranteed auto" is one of the most commonly cited reasons to pay the Hobby premium. Surfacing this on the box profile page is table-stakes for a serious analytics product.
+- **Why structure is OPEN:** Two real options. JSON column on `box_sets` (e.g. `guaranteed_pulls JSONB`) is fast to add and flexible for varied guarantee shapes (auto count, parallel count, tier mix). Bad for queries — "show me boxes that guarantee an auto" becomes a JSONB query, not a simple JOIN. Separate `box_guarantees` table with FKs to `box_sets` and `card_categories` is the cleaner relational model — queryable, normalized, but more rows to maintain and a more involved schema amendment. Decision pending until we know whether queryability matters for any beta feature beyond display. See OPEN QUESTIONS for the structural question.
+- **Not blocking Stage 1 Step 4.** The existing pipeline works end-to-end without guaranteed pulls. Schema amendment queued for a focused session before full seed.
+- **Locked through:** Stage 1 Step 4 planning session, May 2026.
 
 ---
 
@@ -262,6 +289,27 @@ Estimated call volume for Path A integration modeled during Stage 1 Step 4 plann
 - **Important caveat:** These numbers are derived from the integration model, not measured against real eBay API traffic. Actual call volume will be confirmed during the eBay API capability verification session (OPEN QUESTIONS #0) and the Browse API integration POC.
 - **Rate limit context:** Default Browse API tier is 5,000 calls/day — far below production needs. Production access requires Application Growth Check approval (PRE-BETA-CHECKLIST.md #6.3). The combined application will include a Browse API limit-increase ask.
 
+### May 2026 — SportsCardsPro vendor reply on data access
+Vendor responded to the inquiry sent in the previous planning session. Quoted reply:
+
+> "For Pokemon cards and other items on PriceCharting, you can download all of the category at once. You will get a url to do that when you subscribe and access your API token.
+> On Sports cards, the only method is the Download Price list link and the underlying URL's.
+> It might be possible to write a script to access those. We have a rate limit on CSV downloads of 1 per 5 minutes though so can't use it to access tons of data in a short time period."
+
+- **Saw:** Sports cards do not have a sanctioned bulk download endpoint — only per-set CSV downloads via website URLs. Rate limit is hard: 1 CSV per 5 minutes, which translates to 12/hour or 288/day if run continuously. The vendor's framing is technical-mechanism-only — they did NOT address commercial use of the data as the silent backend of a paid analytics product.
+- **Implication for POC:** Workable. One CSV for 2023 Topps Chrome Baseball is one rate-limit window. Manageable for beta-scope seeding (a few hundred unique sets across four sports — initial seed runs in days, not minutes).
+- **Implication for production:** The commercial-use question is unanswered. POC use is acceptable because no users see the data yet (only Zach and Cam reviewing). Beta launch requires explicit written commercial-use confirmation. PRE-BETA-CHECKLIST #6.2 stays open and gets a Cam-led follow-up email.
+- **Schema implication:** None directly. The CSV-shape unknown is real and gets resolved by the SportsCardsPro Legendary subscription review checkpoint (see "POC pricing posture" entry below).
+
+### May 2026 — POC pricing posture established
+Stage 1 Step 4 needs at least one functioning price chart on the box profile page to be credibly "end-to-end." The combination of (a) eBay capability verification not yet done, (b) Path A and Path B both gated on partnership outreach, and (c) a credible-but-uncertain SportsCardsPro option drove a POC-scoped decision separate from the long-term Five Paths framework.
+
+- **Saw:** No single pricing source is fully approved for production use yet. Plan A (eBay) is gated on EPN approval plus Marketplace Insights application. Plan B (SportsCardsPro) has technical access confirmed but commercial terms unconfirmed. Both timelines are weeks-to-months, not days.
+- **POC posture (locked for Step 4 only):** Use SportsCardsPro CSV download for card-level pricing on 2023 Topps Chrome Baseball. Manually seed sealed-box price history for the same box over a 90-day window with one data point per week (~13 points), pulled from eBay sold listings, written to `price_history` with `source = 'manual'`. This produces enough data to render the sealed box price trend chart in the hero section.
+- **Why this is acceptable for POC:** No real users see the data yet. The pipeline is being tested by Zach and Cam only. The POC's bar is "credible enough for expert reviewers to react to," not "production-grade." Production pricing source gets locked in based on which of Plan A or Plan B converts first.
+- **Schema implication:** `price_history.source` already supports `'manual'` per the schema's existing source column. No amendment needed for the manual seeding work. SportsCardsPro CSV imports get a new source value when they go in — value name TBD when we see the CSV structure (likely `'sportscardspro'` or `'pricecharting'`). Tracked under OPEN QUESTIONS pricing-data-model section as a value_source addition.
+- **Next gate:** SportsCardsPro Legendary subscription is incoming. First action after subscribing is to download one 2023 Topps Chrome Baseball CSV and inspect format BEFORE writing slug-bridge import logic. The CSV's actual structure (column headers, parallel naming, card-number presence, per-printing vs aggregated breakouts) determines whether the import needs normalization. ~10 minutes of review.
+
 ---
 
 ## OPEN QUESTIONS
@@ -351,13 +399,6 @@ We've been assuming several things about eBay API capabilities based on web UI b
 - Depends on: eBay API rate limits, price volatility tolerance, scaling reference.
 - Affects: data freshness, API quota usage, infrastructure cost.
 
-### Source-of-truth data format
-
-**13. How do we structure raw collected data so it survives a schema rebuild?**
-**— ANSWERED May 2026 Step 4. Two-layer model adopted. See DECIDED: "Two-layer data model: atomic facts → schema-shaped spreadsheet."**
-- **Answer:** Atomic facts documents (.md files, one per box set, stored in /data/facts/) are the source of truth. They capture raw facts in plain language without referencing the schema. Schema-shaped spreadsheets are derived from atomic docs via AI shaping (Cowork) and are treated as artifacts, not originals. A schema rebuild requires reshaping atomic docs into the new structure — not re-collecting source data from TCDB, Cardboard Connection, or eBay all over again.
-- **Affects:** Data entry workflow — /data/facts/ directory must exist and be maintained from the first data entry session onward.
-
 ### Guaranteed pulls schema design
 
 **14. How should guaranteed pulls be stored in the schema?**
@@ -367,6 +408,16 @@ We've been assuming several things about eBay API capabilities based on web UI b
 - **Tradeoff:** JSON is faster to implement and queries cleanly for the simple "sum the guaranteed auto value" use case. Separate table is more queryable if guaranteed pull data ever needs filtering or aggregation beyond a simple sum.
 - **Depends on:** How EV calculation logic will consume this data — simple sum vs. complex query shapes the table-vs-JSON choice.
 - **Affects:** Schema amendment scope, EV calculation logic, data entry pipeline.
+
+### Schema structure for guaranteed pulls
+
+**15. JSON column on `box_sets` vs. separate `box_guarantees` table**
+- Guaranteed pulls feature is DECIDED (see DECIDED section). The question is how to store the data.
+- Option A: `guaranteed_pulls JSONB` column on `box_sets`. Fast to add, flexible for varied guarantee shapes. Not queryable as a simple JOIN.
+- Option B: Separate `box_guarantees` table with FKs to `box_sets` and `card_categories`. Queryable, normalized, more rows to maintain.
+- Depends on: whether any beta feature beyond display requires querying guaranteed pulls (e.g. "filter boxes by guarantee type" in browse). If display-only, Option A wins on simplicity. If queryable, Option B.
+- Affects: schema amendment scope, EV calculation logic (guaranteed pulls likely become EV inputs at probability 1.0 — need to confirm whether the EV calculator treats them as a separate category or just as a 1.0-probability pull rate row).
+- Pre-resolution work: confirm whether the EV calculator treats guaranteed pulls structurally identically to high-probability pull rates, or whether they need their own code path.
 
 ---
 
@@ -406,6 +457,21 @@ Four data model and pipeline decisions locked in this session. Full reasoning in
 3. **Subject-level batching for eBay calls.** One query per card subject (e.g., "Adley Rutschman 2023 Topps Chrome") covers all parallels in one call. ~10–30× call volume reduction vs. naive per-printing approach. Estimated ~65,000–90,000 daily Browse API calls at weekly refresh for ~600 boxes — to be confirmed during eBay API capability verification session (OPEN QUESTIONS #0).
 
 4. **Guaranteed pulls require schema amendment.** Manufacturer-stated deterministic floors (e.g., Hobby = 1 auto guaranteed) must be handled separately from probabilistic `pull_rates`. Schema amendment structure (JSON column vs. separate table) is an open question — see OPEN QUESTIONS #14.
+
+### May 2026 — Stage 1 Step 4 planning session: data model and POC pricing posture
+Four decisions logged at the planning level. None of these are schema migrations against an applied database — they're commitments that frame upcoming schema work and the next round of imports. Brief log:
+
+1. **Two-layer atomic facts data model.** Atomic facts `.md` documents (per box, in `/data/facts/`) feed schema-shaped spreadsheets via AI shaping. Atomic layer is source of truth and survives schema rebuilds. Source-agnostic by design. Closes OPEN QUESTION #13. Full reasoning in DECIDED section.
+
+2. **Per-printing pricing rows in `cards` table.** Each unique printing is one row with its own `current_value`. Format dimension lives only in `pull_rates`. ~10,500 rows for a modern Topps Chrome box. Schema-shape decision, source-agnostic. Full reasoning in DECIDED section.
+
+3. **Subject-level batching for eBay calls (CONDITIONAL).** One search per subject returns all parallels in a single call. Cuts eBay call volume ~10-30x. Conditional — applies only when eBay is the active pricing source. Dormant during POC SportsCardsPro path. Full reasoning in DECIDED section.
+
+4. **Guaranteed pulls feature DECIDED, structure OPEN.** Manufacturer-stated guarantees (Hobby = 1 auto, Jumbo = 3 autos, etc.) are a real product feature. Storage option (JSONB column on `box_sets` vs. separate `box_guarantees` table) is open — see OPEN QUESTIONS #15. Schema amendment queued for focused session before full seed. Not blocking Stage 1 Step 4.
+
+**POC pricing posture (also logged):** SportsCardsPro CSV for card pricing on 2023 Topps Chrome Baseball + manual sealed-box seeding over 90-day window. POC-scoped decision, separate from the Five Paths long-term framework. Full reasoning in OBSERVED section. No schema changes required — `price_history.source` already supports the manual values; SportsCardsPro source value gets added when CSV structure is reviewed.
+
+**Source:** Stage 1 Step 4 planning session, May 2026. Continues from previous CONTEXT.md updates same session.
 
 ---
 
