@@ -62,7 +62,7 @@ export function AppNav() {
           {/* Left — brand (links to homepage) */}
           <Link to="/" className="site-top-bar__brand">
             <span className="site-top-bar__logo">Ripper.</span>
-            <span className="site-top-bar__logo-name">Diamond in the Rough</span>
+            <span className="site-top-bar__logo-name">think inside the box</span>
           </Link>
 
           {/* Center — search */}
