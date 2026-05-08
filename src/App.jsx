@@ -22,9 +22,10 @@
 
 import { Routes, Route } from 'react-router-dom';
 
-import { AppNav }      from './components/AppNav';
-import { SiteNavBar }  from './components/SiteNavBar';
-import { SiteFooter }  from './components/SiteFooter';
+import { AppNav }       from './components/AppNav';
+import { SiteNavBar }   from './components/SiteNavBar';
+import { SiteFooter }   from './components/SiteFooter';
+import { ScrollToTop }  from './components/ScrollToTop';
 
 import { HomePage }       from './pages/HomePage';
 import { BrowsePage }     from './pages/BrowsePage';
@@ -45,6 +46,7 @@ import { NAV_TABS } from './utils/navMockData';
 function App() {
   return (
     <>
+      <ScrollToTop />
       <AppNav />
       <SiteNavBar tabs={NAV_TABS} />
       <main>
