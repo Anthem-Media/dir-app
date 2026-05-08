@@ -61,7 +61,7 @@ export function AppNav() {
 
           {/* Left — brand (links to homepage) */}
           <Link to="/" className="site-top-bar__brand">
-            <span className="site-top-bar__logo">DIR</span>
+            <span className="site-top-bar__logo">Ripper.</span>
             <span className="site-top-bar__logo-name">Diamond in the Rough</span>
           </Link>
 
@@ -109,6 +109,23 @@ export function AppNav() {
               </>
             )}
           </nav>
+
+          {/* Mobile-only right slot: tagline when signed out, account bubble when signed in.
+              Hidden on desktop via CSS — desktop auth state lives in site-top-bar__actions.
+              Loading renders nothing to avoid flashing the wrong state on session restore. */}
+          <div className="site-top-bar__mobile-right">
+            {loading ? null : user ? (
+              <button
+                className="site-top-bar__account-bubble"
+                type="button"
+                aria-label={`Account: ${displayName}`}
+              >
+                {(displayName ?? '?').charAt(0).toUpperCase()}
+              </button>
+            ) : (
+              <span className="site-top-bar__tagline">think inside the box</span>
+            )}
+          </div>
 
         </div>
       </header>
