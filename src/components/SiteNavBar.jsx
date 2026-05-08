@@ -33,7 +33,7 @@
  * matches the current route is highlighted with site-nav-bar__tab--active.
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { NAV_DROPDOWN_DATA } from '../utils/navMockData';
 import './SiteNavBar.css';
@@ -85,6 +85,39 @@ export function SiteNavBar({ tabs }) {
   const touchMovedRef    = useRef(false);
   const isTouchActiveRef = useRef(false);
   const wasTouchTapRef   = useRef(false);
+  // Page-wide touch tracker — true while any finger is on the screen anywhere on
+  // the page, plus a 350 ms linger after touchend. This closes the gap that
+  // isTouchActiveRef leaves open: when the user starts a vertical scroll in the
+  // page content area (below the nav), no touchstart fires on site-nav-bar__inner,
+  // so isTouchActiveRef stays false. Mobile browsers then fire a synthetic
+  // mouseenter as the scrolling finger passes over the sticky nav tabs, and without
+  // this second guard, openDropdown() would be called and the panel would drop open.
+  const isPageTouchActiveRef = useRef(false);
+  const pageTouchEndTimerRef = useRef(null);
+
+  useEffect(() => {
+    function onDocTouchStart() {
+      clearTimeout(pageTouchEndTimerRef.current);
+      isPageTouchActiveRef.current = true;
+    }
+    function onDocTouchEnd() {
+      // Delay clearing so we also block the synthetic mouse events browsers emit
+      // within ~300 ms after a touch sequence ends.
+      pageTouchEndTimerRef.current = setTimeout(() => {
+        isPageTouchActiveRef.current = false;
+      }, 350);
+    }
+    document.addEventListener('touchstart', onDocTouchStart, { passive: true });
+    document.addEventListener('touchend',   onDocTouchEnd,   { passive: true });
+    document.addEventListener('touchcancel', onDocTouchEnd,  { passive: true });
+    return () => {
+      document.removeEventListener('touchstart', onDocTouchStart);
+      document.removeEventListener('touchend',   onDocTouchEnd);
+      document.removeEventListener('touchcancel', onDocTouchEnd);
+      clearTimeout(pageTouchEndTimerRef.current);
+    };
+  }, []);
+
   const navigate  = useNavigate();
   const location  = useLocation();
 
@@ -567,9 +600,13 @@ export function SiteNavBar({ tabs }) {
               }
             }}
             onMouseEnter={() => {
-              // On mobile, onMouseEnter fires as a finger scrolls across buttons.
-              // Guard against this by ignoring mouseenter while a touch is active.
-              if (isTouchActiveRef.current) return;
+              // Suppress mouseenter while any touch gesture is active on the page.
+              // isTouchActiveRef covers touches that started on the nav bar itself.
+              // isPageTouchActiveRef covers the case where the touch started in the
+              // page content area — in that scenario isTouchActiveRef is never set,
+              // but mobile browsers still fire synthetic mouseenter events as the
+              // scrolling finger passes over the sticky nav.
+              if (isTouchActiveRef.current || isPageTouchActiveRef.current) return;
               openDropdown(tab);
             }}
             onMouseLeave={scheduleClose}
