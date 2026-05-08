@@ -166,60 +166,104 @@
   color: var(--color-text-primary);
 }
 
+/* ── Mobile right slot ───────────────────────────────────────────────────── */
+/* Hidden on desktop — enabled inside the @media block below */
+
+.site-top-bar__mobile-right {
+  display: none;
+}
+
+/* Tagline shown in the right slot when the user is signed out */
+.site-top-bar__tagline {
+  font-size: 10px;
+  font-style: italic;
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* Account bubble — first letter of display name / email in an accent circle */
+.site-top-bar__account-bubble {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent-text);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+
+.site-top-bar__account-bubble:hover {
+  background: var(--color-accent);
+  color: var(--color-nav-text);
+}
+
 /* ── Responsive ────────────────────────────────────────────────────────── */
 
 @media (max-width: 900px) {
-  /* Two-zone mobile layout: [hamburger · Sign In · Sign Up] ··· [DIR logo]
-     Items are reordered with CSS `order` so no JSX restructuring is needed.
-     `margin-left: auto` on the brand pushes it to the far right regardless
-     of how wide the left group is — no absolute positioning required. */
+  /* Three-zone grid: 1fr | auto | 1fr
+     Equal flanking columns ensure the center auto-sized column is always
+     visually centered. Each visible child is explicitly placed with
+     grid-column — no order values, no absolute positioning, no ambiguity. */
   .site-top-bar__inner {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     padding: 0 16px;
-    /* gap provides the 8px spacing between hamburger and Sign In/Sign Up;
-       margin-left: auto on the brand handles the separation to the right side */
-    gap: 8px;
+    gap: 0;
   }
 
-  /* Hamburger — left-most item */
+  /* Column 1 — hamburger, left-aligned */
   .site-top-bar__hamburger {
     display: flex;
-    order: 1;
-    flex-shrink: 0;
+    grid-column: 1;
+    justify-self: start;
   }
 
-  /* Sign In / Sign Up — grouped directly after the hamburger */
-  .site-top-bar__actions {
-    order: 2;
-    gap: 8px;
-    /* Prevent the buttons from ever wrapping to a second line */
-    flex-wrap: nowrap;
-  }
-
-  /* DIR logo — pushed to the far right by margin-left: auto */
+  /* Column 2 — "Ripper." brand, centered */
   .site-top-bar__brand {
-    order: 3;
-    margin-left: auto;
-    flex-shrink: 0;
+    grid-column: 2;
+    justify-self: center;
+    margin-left: 0;
   }
 
-  /* "Diamond in the Rough" tagline — no room on mobile */
+  /* Column 3 — tagline or account bubble, right-aligned */
+  .site-top-bar__mobile-right {
+    display: flex;
+    align-items: center;
+    grid-column: 3;
+    justify-self: end;
+  }
+
+  /* Desktop auth buttons fully hidden — mobile-right owns the right zone */
+  .site-top-bar__actions {
+    display: none;
+  }
+
+  /* "Diamond in the Rough" subtitle — no room on mobile */
   .site-top-bar__logo-name {
     display: none;
   }
 
-  /* Hide the search bar — no room on mobile */
+  /* Search bar hidden — mobile search sits below the nav strip */
   .site-top-bar__search {
     display: none;
   }
 
-  /* Hide About / News / Help links — moved to the hamburger menu on mobile */
+  /* About / News / Help links — accessible via hamburger menu */
   .site-top-bar__link {
     display: none;
   }
 
-  /* Hide notification bell — no room on mobile */
+  /* Notification bell — no room on mobile */
   .site-top-bar__icon-btn {
     display: none;
   }
