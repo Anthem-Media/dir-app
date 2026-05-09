@@ -15,10 +15,10 @@ export function SiteFooter() {
 
         {/* Left — brand */}
         <div className="site-footer__brand">
-          <span className="site-footer__logo">DIR</span>
+          <span className="site-footer__logo">Ripper.</span>
           <p className="site-footer__tagline">Think inside the box.</p>
           <p className="site-footer__copyright">
-            &copy; {new Date().getFullYear()} Diamond in the Rough
+            &copy; {new Date().getFullYear()} Ripper
           </p>
         </div>
 
