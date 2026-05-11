@@ -70,6 +70,22 @@ Dark mode. All colors defined as CSS variables in index.css — never hardcode h
 - Error background tint: `--color-red-bg`
 - Error border: `--color-red-border`
 
+## UI Skill Guardrails
+
+An external UI skill called "impeccable" is installed in this Claude environment. It provides design patterns and layout opinions. Treat it as a **reference only** — it is subordinate to this file and to the existing design system.
+
+### Hard rules — never violated by any skill output:
+1. All colors must use existing CSS variables from `index.css`. Do not introduce new color values, hex codes, font stacks, or spacing scales without first updating `index.css`.
+2. Do not change any existing CSS variable name or value without an explicit instruction to do so.
+3. The Recharts SVG hex exception is the only permitted hardcoded hex in the codebase — documented in `TierPriceTrendChart.jsx` and `PriceTrendChart.jsx`. No new exceptions.
+
+### UI redesign policy:
+- The current design (dark mode, purple accent, current component structure) is the locked baseline.
+- A full UI redesign is a planned milestone — it happens **after** POC is complete and real data is live. It does not happen incrementally or as a side effect of other work.
+- When the redesign milestone begins, the approach is: (1) evaluate impeccable patterns against the existing design, (2) decide what to keep vs. adopt, (3) update CSS variables, (4) apply page by page in one clean pass, (5) audit, (6) commit. It is not a gradual drift.
+- It is entirely possible the redesign concludes that the current design is kept as-is and impeccable's patterns are not adopted. That is a valid outcome. Do not treat impeccable adoption as a foregone conclusion.
+- Until the redesign milestone is explicitly started, all UI work must match the existing design system — not impeccable's defaults.
+
 ## About the Developer
 
 Zach Seabolt has no formal coding background. He builds through iterative conversations with Claude. Always explain what code does and why. Never assume prior knowledge. Explain terminal commands before asking him to run them.
