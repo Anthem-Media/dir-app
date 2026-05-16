@@ -177,6 +177,22 @@ Risk if forgotten: With RLS off, any client using the project's anon key can rea
 Done when: RLS enabled on all four user-data tables (saved_boxes, price_alerts, user_collection, user_wishlist) plus users itself, with policies that enforce user_id = auth.uid() on read/write. Tested with two test accounts to confirm one can't see the other's data.
 Timing: Before beta launch. Should land before any user-data table starts getting wired into the frontend.
 
+4.14 Add box_guarantees table for guaranteed pulls per box — PENDING
+
+New table with four columns plus standard id/timestamps:
+- id SERIAL PRIMARY KEY
+- box_set_id INT NOT NULL REFERENCES box_sets(id) ON DELETE CASCADE
+- category_id INT NOT NULL REFERENCES card_categories(id)
+- count SMALLINT NOT NULL
+- notes TEXT
+- created_at TIMESTAMP DEFAULT NOW()
+Indexes on box_set_id and category_id.
+
+- **Why needed:** Powers the guaranteed pulls feature on the box profile page (display under "packs and cards per box," format-switcher-aware). Also feeds the EV calculator as probability-1.0 inputs. Fully DECIDED schema-side — see SCHEMA-AND-DATA.md DECIDED section "Guaranteed pulls per box — FULLY DECIDED May 2026".
+- **Done when:** Table created in Supabase via migration. Indexes added. At least one row inserted and verified for 2023 Topps Chrome Baseball (any format) as smoke test. SCHEMA-AND-DATA.md updated with "APPLIED" status on this item. dir_database_schema.sql updated to include the new table definition.
+- **Dependencies:** None — additive only, no existing data affected. Can be applied in a focused session whenever Zach is ready.
+- **Blocks:** Guaranteed pulls UI work being wired to real Supabase data (currently the weekend plan is hardcoded data in DUMMY_FORMAT_DATA, with Supabase wiring queued for next week).
+
 ---
 
 ## 5. Data Seeding

@@ -164,11 +164,32 @@ Items here have been explicitly locked in through partner discussion or project 
 - **Volume figures are derived not measured.** The 10-30x reduction estimate will be validated against real API behavior during eBay capability verification (PRE-BETA-CHECKLIST #6.0).
 - **Locked through:** Stage 1 Step 4 planning session, May 2026.
 
-### Guaranteed pulls per box — FEATURE DECIDED May 2026 (structure OPEN)
-- **What:** Each format has manufacturer-stated guaranteed pulls. Examples: Hobby = 1 auto guaranteed per box, Jumbo = 3 autos guaranteed, Blaster = 2 Sepia + 2 Pink Refractors guaranteed. Guaranteed pulls have probability = 1.0 within the box and are conceptually a special case of pull rates — but they are presented to users as a distinct feature ("what you are guaranteed to get") rather than mixed into the probabilistic Pull Rates display.
+### Guaranteed pulls per box — FULLY DECIDED May 2026
+- **What:** Each format has manufacturer-stated guaranteed pulls. Examples: Hobby = 1 auto guaranteed per box, Jumbo = 3 autos guaranteed, Blaster = 4 Refractors guaranteed, Mega = 10 X-Factor parallels guaranteed (X-Factor is a variation of Refractor — stored under the generic Refractor category), Breaker Delight = 2 autos + 6 refractors + 3 numbered base/insert + 1 insert. Guaranteed pulls have probability = 1.0 within the box and are conceptually a special case of pull rates — but they are presented to users as a distinct feature ("what you are guaranteed to get") rather than mixed into the probabilistic Pull Rates display.
 - **Why include the feature:** Guaranteed pulls are a major buying-decision factor for collectors choosing between formats. Hobby's "1 guaranteed auto" is one of the most commonly cited reasons to pay the Hobby premium. Surfacing this on the box profile page is table-stakes for a serious analytics product.
-- **Why structure is OPEN:** Two real options. JSON column on `box_sets` (e.g. `guaranteed_pulls JSONB`) is fast to add and flexible for varied guarantee shapes (auto count, parallel count, tier mix). Bad for queries — "show me boxes that guarantee an auto" becomes a JSONB query, not a simple JOIN. Separate `box_guarantees` table with FKs to `box_sets` and `card_categories` is the cleaner relational model — queryable, normalized, but more rows to maintain and a more involved schema amendment. Decision pending until we know whether queryability matters for any beta feature beyond display. See OPEN QUESTIONS for the structural question.
-- **Not blocking Stage 1 Step 4.** The existing pipeline works end-to-end without guaranteed pulls. Schema amendment queued for a focused session before full seed.
+- **Structure DECIDED — separate `box_guarantees` table (Option A):** Four-column relational shape: `(box_set_id, category_id, count, notes)`. One row per guarantee category per format. Multi-guarantee formats (e.g. Breaker Delight) get multiple rows. Product-specific parallel/insert names (X-Factor, YouthQuake, Ray Wave) treat as variations of existing generic categories — no display_name column needed.
+- **Why Option A (separate table) over Option B (JSON column on box_sets) or display_name column:**
+  - Heterogeneous data shape: Breaker Delight has four guarantee categories per box; Hobby has one. Multi-row relational storage handles this natively. JSON would encode relational data inside JSON.
+  - Future filterability: "show me boxes that guarantee an auto" is a clean JOIN against box_guarantees. JSONB containment queries are uglier and harder to optimize.
+  - Cleaner EV math integration: the EV calculator already joins cards to pull_rates. Adding box_guarantees to that join is a natural extension. Storing as JSON would require parsing inside the calculator — fragile.
+  - Product-specific names map cleanly to existing card_categories: X-Factor → Refractor, YouthQuake → Insert, Ray Wave → Refractor. Per Cam's confirmation, these variation names don't need first-class display fields. The generic category is the right abstraction.
+- **Edge case — "or" guarantees:** Breaker Delight's "3 numbered base or insert" guarantee is stored as `count = 3`, `category_id = Base` (more representative), with the full text in the notes column. The only "or"-style guarantee encountered in 2023 Topps Chrome. Future "or" guarantees follow the same pattern. If "or" guarantees become common enough across the catalog, schema can be revisited then — premature normalization avoided.
+- **Proposed table schema (for the separate migration session):**
+  ```sql
+  CREATE TABLE box_guarantees (
+      id           SERIAL PRIMARY KEY,
+      box_set_id   INT NOT NULL REFERENCES box_sets(id) ON DELETE CASCADE,
+      category_id  INT NOT NULL REFERENCES card_categories(id),
+      count        SMALLINT NOT NULL,
+      notes        TEXT,
+      created_at   TIMESTAMP DEFAULT NOW()
+  );
+  CREATE INDEX idx_box_guarantees_box_set ON box_guarantees(box_set_id);
+  CREATE INDEX idx_box_guarantees_category ON box_guarantees(category_id);
+  ```
+- **EV math implication:** Guaranteed pulls feed the EV calculator as probability-1.0 inputs. The calculator must JOIN box_guarantees in addition to pull_rates and use `count × category_average_value` for guarantee contribution. Implementation details deferred to the EV calculator work, but the JOIN structure is what the schema is designed around.
+- **Not blocking Stage 1 Step 4.** The existing pipeline works end-to-end without guaranteed pulls. Schema migration queued for a focused session — see PRE-BETA-CHECKLIST.md.
+- **Source-agnostic by design:** This is a schema-shape decision, not a pricing-source decision. Independent of eBay vs SportsCardsPro vs any other pricing path.
 - **Locked through:** Stage 1 Step 4 planning session, May 2026.
 
 ---
@@ -399,26 +420,6 @@ We've been assuming several things about eBay API capabilities based on web UI b
 - Depends on: eBay API rate limits, price volatility tolerance, scaling reference.
 - Affects: data freshness, API quota usage, infrastructure cost.
 
-### Guaranteed pulls schema design
-
-**14. How should guaranteed pulls be stored in the schema?**
-- **Context:** Each box format has manufacturer-stated guaranteed pulls — deterministic floors that are always present regardless of probability (e.g., Hobby = 1 autograph, Jumbo = 3 autos, Blaster = 2 Sepia + 2 Pink Refractors). These are certainties in EV math, not probabilities, and must be stored separately from `pull_rates`. Schema amendment is required before any guaranteed-pull data is imported.
-- **Option A — JSON column on `box_sets`:** Add `guaranteed_pulls JSONB` column holding `{ "autographs": 1, "specific_parallels": ["Sepia Refractor", "Pink Refractor"] }`. Simpler to implement, no new table, easy to read at query time.
-- **Option B — Separate `guaranteed_pulls` table:** New table keyed by `(box_set_id, category_id_or_parallel_name)` with a `quantity` column. Cleaner for complex querying, consistent with how `pull_rates` is structured, easier to JOIN in EV calculations.
-- **Tradeoff:** JSON is faster to implement and queries cleanly for the simple "sum the guaranteed auto value" use case. Separate table is more queryable if guaranteed pull data ever needs filtering or aggregation beyond a simple sum.
-- **Depends on:** How EV calculation logic will consume this data — simple sum vs. complex query shapes the table-vs-JSON choice.
-- **Affects:** Schema amendment scope, EV calculation logic, data entry pipeline.
-
-### Schema structure for guaranteed pulls
-
-**15. JSON column on `box_sets` vs. separate `box_guarantees` table**
-- Guaranteed pulls feature is DECIDED (see DECIDED section). The question is how to store the data.
-- Option A: `guaranteed_pulls JSONB` column on `box_sets`. Fast to add, flexible for varied guarantee shapes. Not queryable as a simple JOIN.
-- Option B: Separate `box_guarantees` table with FKs to `box_sets` and `card_categories`. Queryable, normalized, more rows to maintain.
-- Depends on: whether any beta feature beyond display requires querying guaranteed pulls (e.g. "filter boxes by guarantee type" in browse). If display-only, Option A wins on simplicity. If queryable, Option B.
-- Affects: schema amendment scope, EV calculation logic (guaranteed pulls likely become EV inputs at probability 1.0 — need to confirm whether the EV calculator treats them as a separate category or just as a 1.0-probability pull rate row).
-- Pre-resolution work: confirm whether the EV calculator treats guaranteed pulls structurally identically to high-probability pull rates, or whether they need their own code path.
-
 ---
 
 ## Schema Decisions Log
@@ -472,6 +473,20 @@ Four decisions logged at the planning level. None of these are schema migrations
 **POC pricing posture (also logged):** SportsCardsPro CSV for card pricing on 2023 Topps Chrome Baseball + manual sealed-box seeding over 90-day window. POC-scoped decision, separate from the Five Paths long-term framework. Full reasoning in OBSERVED section. No schema changes required — `price_history.source` already supports the manual values; SportsCardsPro source value gets added when CSV structure is reviewed.
 
 **Source:** Stage 1 Step 4 planning session, May 2026. Continues from previous CONTEXT.md updates same session.
+
+### May 2026 — Stage 1 Step 4 planning session continued: guaranteed pulls structure decided
+
+The guaranteed pulls structural choice (previously OPEN — JSON column on box_sets vs. separate box_guarantees table) is now DECIDED in favor of the separate table (Option A). Four-column relational shape: `(box_set_id, category_id, count, notes)`. Full reasoning in DECIDED section above.
+
+Key reasoning summary:
+1. Multi-row relational shape handles heterogeneous guarantee structures cleanly (Breaker Delight has four guarantee rows; Hobby has one).
+2. Filterability — future "show me boxes that guarantee an auto" feature is a clean JOIN.
+3. EV math integration — clean JOIN extension of existing cards × pull_rates join.
+4. Product-specific names (X-Factor, YouthQuake, Ray Wave) map to generic card_categories per Cam's confirmation — no display_name override column required.
+
+Schema migration NOT applied in this session. Migration is queued as a focused session (see PRE-BETA-CHECKLIST.md schema amendment item). The DECIDED entry above contains the proposed table schema and indexes for that future session.
+
+**Source:** Stage 1 Step 4 planning session, May 2026. Continues from prior Stage 1 Step 4 decisions in same session.
 
 ---
 
