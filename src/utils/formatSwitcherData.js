@@ -115,7 +115,7 @@ export const DUMMY_FORMAT_DATA = {
     guarantees: [
       { count: 2, category: 'Base Auto', notes: null },
       { count: 6, category: 'Refractor', notes: null },
-      { count: 3, category: 'Base',      notes: '3 Numbered Base/Insert' },
+      { count: 3, category: 'Base',      notes: 'Numbered Base/Insert' },
       { count: 1, category: 'Insert',    notes: null },
     ],
   },
