@@ -40,6 +40,12 @@ export const DUMMY_FORMAT_DATA = {
       { id: 'pr-auto-relic',category: 'Auto Relic',     probability: 1 / 48   }, // 1:48 packs
       { id: 'pr-case-hit',  category: 'Case Hit',       probability: 1 / 96   }, // 1:96 packs
     ],
+    // Manufacturer-stated guaranteed pulls per box (probability = 1.0).
+    // Mirrors the eventual box_guarantees table shape: count, category, notes.
+    // When `notes` is present, the UI displays it in place of `category`.
+    guarantees: [
+      { count: 1, category: 'Base Auto', notes: null },
+    ],
   },
 
   jumbo: {
@@ -59,6 +65,9 @@ export const DUMMY_FORMAT_DATA = {
       { id: 'pr-auto',      category: 'Autographs',     probability: 1 / 3    }, // 1:3 packs
       { id: 'pr-auto-relic',category: 'Auto Relic',     probability: 1 / 36   }, // 1:36 packs
       { id: 'pr-case-hit',  category: 'Case Hit',       probability: 1 / 72   }, // 1:72 packs
+    ],
+    guarantees: [
+      { count: 3, category: 'Base Auto', notes: null },
     ],
   },
 
@@ -80,6 +89,9 @@ export const DUMMY_FORMAT_DATA = {
       { id: 'pr-auto-relic',category: 'Auto Relic',     probability: 1 / 84   }, // 1:84 packs
       { id: 'pr-case-hit',  category: 'Case Hit',       probability: 1 / 144  }, // 1:144 packs
     ],
+    guarantees: [
+      { count: 4, category: 'Refractor', notes: null },
+    ],
   },
 
   breaker: {
@@ -100,6 +112,12 @@ export const DUMMY_FORMAT_DATA = {
       { id: 'pr-auto-relic',category: 'Auto Relic',     probability: 1 / 8   },
       { id: 'pr-case-hit',  category: 'Case Hit',       probability: 1 / 16  },
     ],
+    guarantees: [
+      { count: 2, category: 'Base Auto', notes: null },
+      { count: 6, category: 'Refractor', notes: null },
+      { count: 3, category: 'Base',      notes: '3 Numbered Base/Insert' },
+      { count: 1, category: 'Insert',    notes: null },
+    ],
   },
 
   mega: {
@@ -119,6 +137,9 @@ export const DUMMY_FORMAT_DATA = {
       { id: 'pr-auto',      category: 'Autographs',     probability: 1 / 28   }, // 1:28 packs
       { id: 'pr-auto-relic',category: 'Auto Relic',     probability: 1 / 60   }, // 1:60 packs
       { id: 'pr-case-hit',  category: 'Case Hit',       probability: 1 / 120  }, // 1:120 packs
+    ],
+    guarantees: [
+      { count: 10, category: 'Refractor', notes: null },
     ],
   },
 

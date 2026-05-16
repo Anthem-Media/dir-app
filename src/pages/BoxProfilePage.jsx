@@ -196,6 +196,16 @@ export function BoxProfilePage() {
               {formatData.cardsPerPack} cards/pack &nbsp;&bull;&nbsp;
               {formatData.totalCards} total cards
             </p>
+            {/* Manufacturer-stated guaranteed pulls per box (probability = 1.0).
+                Reads from formatData.guarantees so it updates with the format switcher.
+                Each entry renders as `{count} {notes || category}`. Hidden entirely when no guarantees. */}
+            {formatData.guarantees && formatData.guarantees.length > 0 && (
+              <p className="box-profile-page__config">
+                {formatData.guarantees
+                  .map((g) => `${g.count} ${g.notes || g.category}`)
+                  .join(' • ')}
+              </p>
+            )}
           </div>
 
           {/* Four metric cards — MSRP, EV, and ROI update with the selected format */}
