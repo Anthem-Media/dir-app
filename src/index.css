@@ -9,7 +9,7 @@
 /* ─── Design Tokens ───────────────────────────────────────────────────── */
 :root {
   /* Brand colors */
-  --color-green:          #7c6fff;  /* now aliases --color-accent; all non-financial green uses become purple */
+  --color-green:          #ef4444;  /* now aliases --color-accent; all non-financial green uses become purple */
   --color-red:            #dc2626;
 
   /* Financial sentiment — green/red for positive/negative ROI and EV values only */
@@ -34,12 +34,12 @@
   --color-surface-hover:  var(--color-background-tertiary);  /* hover state for list items */
 
   /* Accent */
-  --color-accent:         #7c6fff;  /* primary interactive color (buttons, links, focus rings) */
-  --color-accent-bg:      #2a2560;  /* tinted accent background for badges, highlights */
-  --color-accent-text:    #a89fff;  /* lighter accent for text on dark surfaces */
+  --color-accent:         #ef4444;  /* primary interactive color (buttons, links, focus rings) */
+  --color-accent-bg:      #2d0f0f;  /* tinted accent background for badges, highlights */
+  --color-accent-text:    #fca5a5;  /* lighter accent for text on dark surfaces */
 
   /* Green-dark — hover state for --color-green (now a darker purple) */
-  --color-green-dark:     #6355e8;
+  --color-green-dark:     #c0392b;
 
   /* Borders */
   --color-border:         #2a2a2e;
@@ -53,8 +53,8 @@
   --color-nav-active:     rgba(124, 111, 255, 0.20);
 
   /* Badge/tag tints — used for accent badges, RC tags, focus rings, etc. */
-  --color-green-bg:       #2a2560;  /* accent background tint (aliases --color-accent-bg) */
-  --color-green-border:   #7c6fff;  /* accent border/text on dark surfaces (aliases --color-accent) */
+  --color-green-bg:       #2d0f0f;  /* accent background tint (aliases --color-accent-bg) */
+  --color-green-border:   #ef4444;  /* accent border/text on dark surfaces (aliases --color-accent) */
   --color-red-bg:         #450a0a;
   --color-red-border:     #7f1d1d;
   --color-success:        #16a34a;  /* mirrors --color-positive; used for success banners on auth pages */
