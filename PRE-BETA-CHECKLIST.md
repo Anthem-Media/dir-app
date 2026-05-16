@@ -192,6 +192,7 @@ Indexes on box_set_id and category_id.
 - **Done when:** Table created in Supabase via migration. Indexes added. At least one row inserted and verified for 2023 Topps Chrome Baseball (any format) as smoke test. SCHEMA-AND-DATA.md updated with "APPLIED" status on this item. dir_database_schema.sql updated to include the new table definition.
 - **Dependencies:** None — additive only, no existing data affected. Can be applied in a focused session whenever Zach is ready.
 - **Blocks:** Guaranteed pulls UI work being wired to real Supabase data (currently the weekend plan is hardcoded data in DUMMY_FORMAT_DATA, with Supabase wiring queued for next week).
+- **SQL file status (May 2026):** dir_database_schema.sql NOW CONTAINS the box_guarantees CREATE TABLE statement. The schema file is current. The migration against Supabase has NOT been run yet — status remains PENDING. When the migration session runs, the SQL is already drafted and audited — just needs to be executed against the live database, smoke-tested, and the status updated to APPLIED with a date.
 
 4.15 Replace hardcoded SportsCardsPro pricing in DUMMY_FORMAT_DATA with Supabase-sourced data — PENDING
 

@@ -8,6 +8,13 @@
 -- section 4 plus the four Stage 0a schema decisions (locked May
 -- 2026). Apply once against an empty public schema via Supabase
 -- SQL Editor.
+--
+-- Architectural source of truth: box_guarantees table (#4.14)
+-- is drafted in this file but NOT YET MIGRATED against the live
+-- Supabase database. When run fresh against an empty database
+-- this file produces the complete current schema. The live
+-- database is one step behind until the #4.14 migration session.
+-- See PRE-BETA-CHECKLIST.md #4.14 for migration status.
 -- ============================================================
 
 
@@ -216,7 +223,44 @@ CREATE INDEX idx_pull_rates_box_set ON pull_rates(box_set_id);
 
 
 -- ============================================================
--- TABLE 7: PRICE_HISTORY
+-- TABLE 7: BOX_GUARANTEES
+-- Manufacturer-stated guaranteed pulls per box format
+-- Each row = one guarantee category per box_set
+-- Multi-guarantee formats (e.g. Breaker Delight) have multiple rows
+--
+-- See SCHEMA-AND-DATA.md DECIDED section "Guaranteed pulls per box
+-- — FULLY DECIDED May 2026" for full reasoning. Key decision:
+-- separate relational table (Option A) over JSON column or
+-- display_name override. Product-specific parallel names
+-- (X-Factor, YouthQuake, Ray Wave) map to generic card_categories.
+--
+-- EV math: guarantees feed the EV calculator as probability-1.0
+-- inputs. Calculator JOINs box_guarantees alongside cards and
+-- pull_rates, computing count × category_average_value for
+-- guarantee contribution.
+--
+-- "Or"-style guarantees (e.g. Breaker Delight's "3 numbered base
+-- or insert") use category_id = the more representative category
+-- with full text in notes column.
+--
+-- PRE-BETA-CHECKLIST.md #4.14 tracks the live migration of this
+-- table to Supabase.
+-- ============================================================
+CREATE TABLE box_guarantees (
+    id           SERIAL PRIMARY KEY,
+    box_set_id   INT NOT NULL REFERENCES box_sets(id) ON DELETE CASCADE,
+    category_id  INT NOT NULL REFERENCES card_categories(id),
+    count        SMALLINT NOT NULL,
+    notes        TEXT,
+    created_at   TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_box_guarantees_box_set ON box_guarantees(box_set_id);
+CREATE INDEX idx_box_guarantees_category ON box_guarantees(category_id);
+
+
+-- ============================================================
+-- TABLE 8: PRICE_HISTORY
 -- Running log of card prices over time
 -- Powers all trend charts and ROI calculations
 -- Also powers the tier price trend chart on the box profile page
@@ -245,7 +289,7 @@ CREATE INDEX idx_price_history_source ON price_history(source);
 
 
 -- ============================================================
--- TABLE 8: BOX_PRICE_HISTORY
+-- TABLE 9: BOX_PRICE_HISTORY
 -- Tracks sealed box market prices over time
 -- Powers the sealed box price trend chart in the hero section
 -- ============================================================
@@ -263,7 +307,7 @@ CREATE INDEX idx_box_price_history_date ON box_price_history(recorded_at DESC);
 
 
 -- ============================================================
--- TABLE 9: USERS
+-- TABLE 10: USERS
 -- App profile table — links 1:1 to Supabase's auth.users.
 -- Minimum age: 13 (COPPA compliance, enforced at signup UI).
 --
@@ -334,7 +378,7 @@ FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 
 -- ============================================================
--- TABLE 10: SAVED_BOXES
+-- TABLE 11: SAVED_BOXES
 -- User watchlist / saved box sets
 -- ============================================================
 CREATE TABLE saved_boxes (
@@ -350,7 +394,7 @@ CREATE INDEX idx_saved_boxes_user ON saved_boxes(user_id);
 
 
 -- ============================================================
--- TABLE 11: PRICE_ALERTS
+-- TABLE 12: PRICE_ALERTS
 -- User configured alerts for price movements
 -- ============================================================
 CREATE TABLE price_alerts (
@@ -376,7 +420,7 @@ CREATE INDEX idx_price_alerts_active ON price_alerts(is_active);
 
 
 -- ============================================================
--- TABLE 12: USER_COLLECTION
+-- TABLE 13: USER_COLLECTION
 -- Cards a user owns (post-launch feature)
 -- ============================================================
 CREATE TABLE user_collection (
@@ -396,7 +440,7 @@ CREATE INDEX idx_user_collection_card ON user_collection(card_id);
 
 
 -- ============================================================
--- TABLE 13: USER_WISHLIST
+-- TABLE 14: USER_WISHLIST
 -- Cards a user wants (post-launch feature)
 -- ============================================================
 CREATE TABLE user_wishlist (
@@ -414,7 +458,7 @@ CREATE INDEX idx_user_wishlist_card ON user_wishlist(card_id);
 
 
 -- ============================================================
--- TABLE 14: DISTRIBUTORS
+-- TABLE 15: DISTRIBUTORS
 -- Affiliate distributors carried in the Buy Now system
 -- (Dave & Adam's, Blowout Cards, Steel City, etc.).
 -- Boxes without distributor listings fall back to "Find on eBay"
@@ -433,7 +477,7 @@ CREATE TABLE distributors (
 
 
 -- ============================================================
--- TABLE 15: DISTRIBUTOR_LISTINGS
+-- TABLE 16: DISTRIBUTOR_LISTINGS
 -- Joins distributors to box_sets with prices and affiliate URLs.
 -- One distributor can list a given box at most once (UNIQUE).
 -- ============================================================
