@@ -31,7 +31,7 @@ No other tool does this. Existing apps (Market Movers, Card Ladder, CollX) are b
 - Card value rankings within a set by tier
 - Top Chases tab — cards with print run > 10 or no print run; drives EV/ROI math
 - Grails tab — cards with print run ≤ 10 (including 1/1s and Superfractors); excluded from EV/ROI; shows circulation status badge
-- Format switcher — tab row at top of box profile page to switch between Breaker, Jumbo, Hobby, Mega, Blaster (left to right display order); updates MSRP, pull rates, EV, ROI. Retail dropped from beta scope (post-beta addition tracked in PRE-BETA-CHECKLIST.md).
+- Format switcher — tab row at top of box profile page to switch between available formats (display order, left to right: Blaster, Mega, Hobby, Jumbo, Breaker Delight — least to greatest by price and odds); updates MSRP, pull rates, EV, ROI. Retail dropped from beta scope (post-beta addition tracked in PRE-BETA-CHECKLIST.md).
 - Two price trend charts — (1) sealed box price in hero section, (2) card value by tier below checklist with toggle tabs
 - Checklist expand/collapse — 5 cards shown per tier by default, expand inline per tier
 - Card search within checklist tiers — real time filter by player name or card number, visible only when tier is expanded

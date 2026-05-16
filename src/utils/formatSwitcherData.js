@@ -82,6 +82,26 @@ export const DUMMY_FORMAT_DATA = {
     ],
   },
 
+  breaker: {
+    label: 'Breaker Delight',
+    slug: 'breaker',
+    msrp: 499.99,
+    packsPerBox: 1,
+    cardsPerPack: 1,
+    totalCards: 1,
+    expectedValue: 520.00,
+    roi: calculateRoi(520.00, 499.99),
+    pullRates: [
+      { id: 'pr-base',      category: 'Base & Rookies', probability: 1.0     },
+      { id: 'pr-refractor', category: 'Refractors',     probability: 1 / 1   },
+      { id: 'pr-numbered',  category: 'Numbered',       probability: 1 / 2   },
+      { id: 'pr-relic',     category: 'Relic',          probability: 1 / 4   },
+      { id: 'pr-auto',      category: 'Autographs',     probability: 1 / 1   },
+      { id: 'pr-auto-relic',category: 'Auto Relic',     probability: 1 / 8   },
+      { id: 'pr-case-hit',  category: 'Case Hit',       probability: 1 / 16  },
+    ],
+  },
+
   mega: {
     label: 'Mega',
     slug: 'mega',
@@ -128,4 +148,4 @@ export const DUMMY_FORMAT_DATA = {
  * Using an array rather than Object.keys() keeps the display sequence intentional
  * and immune to any future JS engine key-ordering edge cases.
  */
-export const FORMAT_ORDER = ['hobby', 'jumbo', 'blaster', 'mega', 'retail'];
+export const FORMAT_ORDER = ['blaster', 'mega', 'hobby', 'jumbo', 'breaker'];
