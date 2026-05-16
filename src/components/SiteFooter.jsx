@@ -6,6 +6,7 @@
  */
 
 import { Link } from 'react-router-dom';
+import { ThemeToggle } from './ThemeToggle';
 import './SiteFooter.css';
 
 export function SiteFooter() {
@@ -20,6 +21,10 @@ export function SiteFooter() {
           <p className="site-footer__copyright">
             &copy; {new Date().getFullYear()} Ripper
           </p>
+          {/* Theme toggle sits below the copyright — unobtrusive, self-labeled. */}
+          <div className="site-footer__theme-toggle">
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Right — link columns */}
