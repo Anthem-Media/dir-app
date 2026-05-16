@@ -255,7 +255,7 @@ export function ContactPage() {
         <div className="contact-cta__inner">
           <h2 className="contact-cta__headline">We're building this for you.</h2>
           <p className="contact-cta__subtitle">
-            DIR is shaped by the community. If something is confusing, broken,
+            Ripper is shaped by the community. If something is confusing, broken,
             or missing — we want to know. Every message gets read.
           </p>
         </div>

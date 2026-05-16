@@ -18,10 +18,10 @@ import './NewsPage.css';
 const FEATURED_ARTICLE = {
   id: 'featured-1',
   category: 'Product Update',
-  headline: 'DIR Is Live: Here\'s Everything You Can Do Right Now',
+  headline: 'Ripper Is Live: Here\'s Everything You Can Do Right Now',
   date: 'April 7, 2026',
   excerpt:
-    'We built DIR because we couldn\'t find the tool we actually needed before opening a box. Today that tool is live. Here\'s a full walkthrough of what\'s available, what\'s coming, and how to get the most out of it on day one.',
+    'We built Ripper because we couldn\'t find the tool we actually needed before opening a box. Today that tool is live. Here\'s a full walkthrough of what\'s available, what\'s coming, and how to get the most out of it on day one.',
 };
 
 // ── Recent articles ────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ const RECENT_ARTICLES = [
     headline: 'How We Calculate Expected Value',
     date: 'March 28, 2026',
     excerpt:
-      'Expected value is the most useful number in sports card investing — and the most misunderstood. Here\'s exactly how DIR calculates it, what data goes in, and what the result actually means.',
+      'Expected value is the most useful number in sports card investing — and the most misunderstood. Here\'s exactly how Ripper calculates it, what data goes in, and what the result actually means.',
   },
   {
     id: 'article-2',
@@ -66,8 +66,8 @@ export function NewsPage() {
       */}
       <section className="news-hero">
         <div className="news-hero__inner">
-          <p className="news-hero__eyebrow">DIR Journal</p>
-          <h1 className="news-hero__headline">Latest from DIR.</h1>
+          <p className="news-hero__eyebrow">Ripper Journal</p>
+          <h1 className="news-hero__headline">Latest from Ripper.</h1>
           <p className="news-hero__subtitle">
             Product updates, deep dives on box analytics, and everything happening
             in the hobby that we think is worth your time.

@@ -439,6 +439,56 @@ POC weekend work (May 2026) puts real SportsCardsPro card pricing for 2023 Topps
 
 ---
 
+## 14. Theme System (Pre-Beta)
+
+Light/dark mode support shipped during the May 2026 POC weekend (CSS variable override block, ThemeToggle component in the footer, localStorage persistence under key `'dir-theme'`). These follow-ups must close before public beta.
+
+### 14.1 Light mode flash fix — inline script in index.html
+- **Status:** Open
+- **Why needed:** ThemeToggle reads localStorage in a `useEffect` on mount, which runs after the first paint. Users who previously chose light mode will see a one-frame flash of dark mode before React applies the saved preference. Acceptable for internal testing; not acceptable for public beta.
+- **Done when:** An inline `<script>` is added as the FIRST child of `<head>` in `index.html`. The script reads `localStorage.getItem('dir-theme')` and calls `document.documentElement.setAttribute('data-theme', 'light')` synchronously before any other tag executes, so users who previously chose light mode never see a flash of dark. Script is ~5 lines, wrapped in an IIFE to avoid polluting the global scope, no dependencies. See `src/components/ThemeToggle.jsx` for the exact localStorage key (`'dir-theme'`) and the attribute-set vs. attribute-remove convention (dark mode = attribute absent, light mode = attribute = `"light"`).
+- **Dependencies:** None — pure HTML edit, isolated change.
+- **Blocks:** Public beta launch. Hardcoded internal-tester acceptance does not extend to public users.
+
+### 14.2 Move theme toggle from footer to user settings page
+- **Status:** Open
+- **Why deferred:** The toggle was placed in the footer during the May 2026 POC weekend as the only reachable global location before the Account Management phase (section #10) builds out a real user settings page. Footer placement makes the toggle a primary site chrome element rather than a per-user preference — semantically wrong for a polished product.
+- **Done when:** Theme toggle is removed from `src/components/SiteFooter.jsx` and rendered inside the user settings page (built during the Account Management phase). All persistence behavior — the `'dir-theme'` localStorage key, the `data-theme` attribute application logic, the pre-paint flash-fix script — is preserved unchanged; only the location of the UI control moves. The footer's "Light mode" / "Dark mode" pill button stops appearing on every page.
+- **Dependencies:** Account Management phase (#10) reaching the point where a user settings page exists.
+- **Blocks:** Public beta launch is preferred but not strictly blocked. Worst-case fallback: ship beta with footer placement and migrate during the post-beta polish loop. Document the decision explicitly if shipping with footer placement.
+
+---
+
+## 15. UI Redesign Milestone (Post-POC, Post-Real-Data)
+
+These items are deliberately deferred to the planned UI redesign milestone (see CLAUDE.md → UI Redesign Policy). They are NOT pre-beta — they are scheduled for after the POC pipeline is complete and real data is live on hobbyripper.com, as part of a single coherent redesign pass rather than incremental drift. Bundling them here so the milestone has a clear pre-built work list.
+
+### 15.1 Rename legacy `--color-green-*` variables
+- **Status:** Open — deferred to UI redesign milestone
+- **Why deferred:** When the accent color flipped from purple to red in May 2026, the `--color-green` / `--color-green-bg` / `--color-green-border` / `--color-green-dark` variables were preserved as-is for backwards compatibility — their values were updated to red, but their names remained "green" because they're referenced in dozens of component CSS files. Renaming them mid-feature would scatter a find-and-replace across many unrelated files, increasing the risk of bugs slipping in during otherwise-focused work.
+- **Why it matters:** The names are actively misleading. A future developer reading `.about-hero__cta { background: var(--color-green); }` reasonably expects a green background and gets red. Every future dev wastes ten minutes confirming the variable does what it says it doesn't.
+- **Done when:** All four legacy variables are renamed (likely to `--color-accent` / `--color-accent-bg` / `--color-accent-border` / `--color-accent-dark`, consolidating with the existing `--color-accent` family — or removed entirely if redundant). The rename is applied across every component CSS file that references them, not just `src/index.css`. THEME.md is updated to remove the "legacy alias" rows and to reflect the consolidated accent family. Dark and light mode appearance is byte-identical before and after the rename.
+- **Dependencies:** UI redesign milestone scheduled.
+- **Blocks:** Nothing operationally — the names are stylistic, not functional. But schedule before Pro audit #2 if possible, because an audit on the current naming will surface confusion as a finding.
+- **Reference:** THEME.md (How to Retheme section documents which variables currently hold the accent value).
+
+### 15.2 Refactor `--color-nav-bg` and `--color-nav-text` (split nav vs. feature-dark roles)
+- **Status:** Open — deferred to UI redesign milestone
+- **Why deferred:** `--color-nav-bg` and `--color-nav-text` are doing structural double-duty across the codebase. They color (a) the bottom navigation bar — which should flip with theme — and (b) the dark accent hero / CTA / brand-panel sections on About, News, Help, Contact, SignIn, SignUp, CheckEmail, ResetPassword, plus BoxSetCard text overlays and FilterSidebar accents — which must stay dark in both modes regardless of theme. A grep across `src/` during the May 2026 light-mode work confirmed about ten consumers of these variables in the second category. Overriding the variables globally in light mode would break all of those. The bottom nav was instead handled with a `[data-theme="light"] .site-nav-bar { ... }` scoped selector — a workaround, not the structurally correct fix.
+- **Why it matters:** The current design forces every future theme change to weigh "will this break the About hero?" against "will this fix the bottom nav?" — a question that wouldn't exist if the two concerns were separated.
+- **Done when:** New variables `--color-feature-dark-bg` and `--color-feature-dark-text` are introduced in `src/index.css` `:root` (values mirror the current `--color-nav-bg` / `--color-nav-text` dark values). Every component CSS file that currently uses `--color-nav-bg` / `--color-nav-text` for a dark accent section (About/News/Help/Contact/SignIn/SignUp/CheckEmail/ResetPassword/BoxSetCard/FilterSidebar — full list in May 2026 grep output) is migrated to the new variable pair. `--color-nav-bg` / `--color-nav-text` are then narrowed to the bottom nav bar only and given proper `[data-theme="light"]` overrides instead of the current scoped-selector workaround. The scoped selector workaround in `src/index.css` (`[data-theme="light"] .site-nav-bar { background: ...; }` plus tab color and active-border overrides) is removed and replaced by the cleaner variable-level override. Dark mode appearance is byte-identical before and after.
+- **Dependencies:** UI redesign milestone scheduled. Likely lands in the same redesign pass as #15.1 — both are sweep-across-CSS-files tasks.
+- **Blocks:** Nothing today, but every new dark-themed feature section added to the app inherits the same double-duty trap until this is fixed.
+
+### 15.3 SiteNavBar dropdown shadow — replace hardcoded `rgba(0, 0, 0, 0.40)` with a CSS variable
+- **Status:** Open — deferred to UI redesign milestone
+- **Why deferred:** `src/components/SiteNavBar.css:85` declares `box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40)` as a hardcoded value. The dark-mode 40% opacity is too heavy for the light-mode dropdown panel, so a `[data-theme="light"] .site-nav-bar__dropdown { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12); }` scoped override was added during the May 2026 light-mode work. This works visually but leaves a hardcoded color value in component CSS — a violation of the codebase rule "Use CSS variables for ALL colors". The proper fix requires adding a new variable to `:root`, which was off-limits during the focused theme session.
+- **Done when:** A new variable (e.g. `--color-shadow-overlay`) is added to `:root` with the dark-mode value (`rgba(0, 0, 0, 0.40)`) and overridden in `[data-theme="light"]` to the lighter value (`rgba(0, 0, 0, 0.12)`). `SiteNavBar.css:85` is updated to consume the variable. The light-mode scoped-selector override in `src/index.css` is removed. THEME.md is updated to document the new variable. The full hex-search audit (`grep -rniE "#[0-9a-f]{3}([0-9a-f]{3})?\b" src/`) plus rgba/rgb sweep returns clean.
+- **Dependencies:** UI redesign milestone scheduled. Bundles naturally with #15.1 and #15.2 because all three are CSS variable hygiene tasks.
+- **Blocks:** Nothing today. Cosmetic / hygiene only.
+
+---
+
 ## How this list gets maintained
 
 - **Add to it immediately when anything is deferred.** Do not trust memory.

@@ -47,7 +47,7 @@ const FOUNDERS = [
   {
     name: 'Cam Gibson',
     role: 'Co-founder · Business & Distribution',
-    bio: 'Deep roots in the hobby industry. Cam handles business development, partnerships, and the distribution network that gets DIR in front of the right people. If you\'ve been to a card show in the last five years, you\'ve probably crossed paths.',
+    bio: 'Deep roots in the hobby industry. Cam handles business development, partnerships, and the distribution network that gets Ripper in front of the right people. If you\'ve been to a card show in the last five years, you\'ve probably crossed paths.',
   },
 ];
 
@@ -66,12 +66,12 @@ export function AboutPage() {
         <div className="about-hero__inner">
 
           <div className="about-hero__content">
-            <p className="about-hero__eyebrow">About DIR</p>
+            <p className="about-hero__eyebrow">About Ripper</p>
             <h1 className="about-hero__headline">
               The Smartest Way<br />to Buy Sports Cards.
             </h1>
             <p className="about-hero__subtitle">
-              DIR gives box buyers the data they've always needed — real pull rates,
+              Ripper gives box buyers the data they've always needed — real pull rates,
               honest ROI, and actual market prices — so you can open smarter
               and spend better. No guesswork. No hype.
             </p>
@@ -103,7 +103,7 @@ export function AboutPage() {
             <h2 className="about-mission__heading">Built for the box buyer.</h2>
             <p className="about-mission__subheading">
               Every tool in this hobby is built around individual cards.
-              DIR is built around the box — the only decision that matters
+              Ripper is built around the box — the only decision that matters
               before you open anything.
             </p>
           </div>
