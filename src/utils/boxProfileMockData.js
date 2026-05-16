@@ -12,7 +12,7 @@ export const MOCK_BOX = {
   manufacturer: 'Topps',
   year: 2023,
   format: 'Hobby',
-  imageUrl: null, // placeholder until real images are added
+  imageUrl: 'https://cdn.shopify.com/s/files/1/0662/9749/5709/files/b4919d4bfc6a19370b7af14a9e3e62d161b13060_blob.png?v=1772612167',
   config: {
     packsPerBox: 18,
     cardsPerPack: 4,
