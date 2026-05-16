@@ -146,7 +146,7 @@ Both yes  →  show box profile
 - Beta launch: Baseball, Football, Basketball, Hockey populated with full profiles for 2018-present, legacy profiles for 1995-2017. Soccer ships as "Coming Soon" — post-beta priority for population.
 - Estimated box count for full profiles (2018-present): ~1,200-2,000 boxes across all sports
 - 40-60 new box set products per year per sport from major manufacturers
-- Each set has multiple formats (Breaker, Jumbo, Hobby, Mega, Blaster) — each is a separate database entry linked by `parent_set_id`. Retail dropped from beta scope (post-beta addition tracked in PRE-BETA-CHECKLIST.md).
+- Each set has multiple formats (Breaker Delight, Jumbo, Hobby, Mega, Blaster) — each is a separate database entry linked by `parent_set_id`. Retail dropped from beta scope (post-beta addition tracked in PRE-BETA-CHECKLIST.md).
 
 ### Data Entry Workflow — LOCKED
 

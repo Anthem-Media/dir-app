@@ -193,14 +193,23 @@ Indexes on box_set_id and category_id.
 - **Dependencies:** None — additive only, no existing data affected. Can be applied in a focused session whenever Zach is ready.
 - **Blocks:** Guaranteed pulls UI work being wired to real Supabase data (currently the weekend plan is hardcoded data in DUMMY_FORMAT_DATA, with Supabase wiring queued for next week).
 
+4.15 Replace hardcoded SportsCardsPro pricing in DUMMY_FORMAT_DATA with Supabase-sourced data — PENDING
+
+POC weekend work (May 2026) puts real SportsCardsPro card pricing for 2023 Topps Chrome Baseball into the dummy data layer for demo purposes. This pricing must be replaced with Supabase-sourced data (via the slug-bridge import + the cards table's current_value column, populated from a SportsCardsPro CSV import pipeline) before beta launch.
+
+- **Why deferred:** POC purpose is demonstrating the math on real data; the data delivery mechanism (hardcoded vs Supabase) does not affect the math itself. Doing both in the POC weekend was scoped down to keep momentum. Supabase wiring is the larger of the two tasks and gets its own focused sessions.
+- **Done when:** The DUMMY_FORMAT_DATA hardcoded prices are removed. useBoxProfile reads pricing from the cards table via Supabase. Box profile page for 2023 Topps Chrome Baseball renders identical or near-identical EV/ROI math sourced from Supabase. A code audit confirms no hardcoded prices remain.
+- **Dependencies:** Slug-bridge script (already queued, separate Opus session). SportsCardsPro CSV import pipeline (queued). Card-pricing data refresh process (queued).
+- **Blocks:** Beta launch. Hardcoded data CANNOT ship to public users.
+
 ---
 
 ## 5. Data Seeding
 
-### 5.1 End-to-end pipeline test with 2024 Topps Chrome Baseball
+### 5.1 End-to-end pipeline test with 2023 Topps Chrome Baseball
 - **Status:** Pipeline designed, not yet tested
 - **Details:** Run all five steps (source doc, spreadsheet populate, slug-bridge, CSV import, eBay API pricing) against one box set. Confirm EV, ROI, checklist, format switcher, and price charts all work with real data.
-- **Done when:** The 2024 Topps Chrome Baseball box set is fully populated in Supabase with real pull rates, real eBay prices, real images — and the box profile page renders correctly.
+- **Done when:** The 2023 Topps Chrome Baseball box set is fully populated in Supabase with real pull rates, real eBay prices, real images — and the box profile page renders correctly.
 
 ### 5.2 Full seed — all four launch sports
 - **Status:** Blocked on #5.1 passing

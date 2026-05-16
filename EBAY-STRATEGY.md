@@ -332,6 +332,21 @@ The current License Agreement we read is dated September 3, 2025, with a banner 
 
 **Implication:** This file becomes stale. Any change to Ripper's eBay relationship needs to start with re-reading the current License Agreement. Calendar reminder for periodic re-reads (every 6 months minimum).
 
+### May 2026 — SportsCardsPro reply documented
+
+Vendor responded to the May 2026 inquiry. Quoted reply summary (verbatim quotes preserved in CONTEXT.md and SCHEMA-AND-DATA.md OBSERVED entries):
+
+- Sports cards do NOT have a sanctioned bulk download API endpoint. Only per-set CSV downloads via website URLs.
+- CSV rate limit: 1 download per 10 minutes (= 6/hour, 144/day if run continuously). Hard limit. Penalty for exceeding: "calls will be blocked and your account permissions revoked if it persists."
+- JSON API documented separately at 1 call per second (= 3,600/hour, 86,400/day theoretical max). Tier-gated and not the primary mechanism for our use case.
+- Commercial-use authorization was NOT addressed in the vendor reply. The vendor described mechanism only, not licensing for use of the data as the backend of a paid analytics product. This is a real open question for any production use beyond POC.
+
+POC implication: workable. One CSV for one box (2023 Topps Chrome Baseball) is one rate-limit window. Beta-scope seeding (a few hundred unique sets) seeds in ~2 days at full pace.
+
+Commercial-use implication: unconfirmed. Cam-led follow-up email required to confirm commercial terms in writing before beta launch. Tracked as PRE-BETA-CHECKLIST.md #6.2.
+
+This observation does NOT change Path B's status. Path B remains a credible fallback if Path A (Marketplace Insights via EPN) does not approve or does not meet volume needs. SportsCardsPro/PriceCharting is the leading Path B candidate based on this reply.
+
 ---
 
 ## OPEN QUESTIONS
