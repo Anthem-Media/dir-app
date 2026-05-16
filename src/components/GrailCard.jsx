@@ -11,25 +11,25 @@
  * @param {object}  card
  * @param {string}  card.playerName        - Player's full name
  * @param {string}  card.variationName     - Card variation (e.g. "Gold Refractor Auto /10")
- * @param {number}  card.printRun          - Print run count (≤ 10 for grails)
  * @param {boolean} card.isAutograph       - Whether the card has an on-card autograph
  * @param {number}  card.currentValue      - Current market value in USD
  * @param {string}  card.circulationStatus - 'unknown', 'in_circulation', or 'pulled_sold'
  */
 
 import { formatCurrency } from '../utils/formatters';
-import { formatPrintRun, getCirculationBadgeConfig } from '../utils/grailsUtils';
+import { getCirculationBadgeConfig } from '../utils/grailsUtils';
 import './GrailCard.css';
 
 export function GrailCard({ card }) {
-  const { playerName, variationName, printRun, isAutograph, currentValue, circulationStatus } = card;
+  const { playerName, variationName, isAutograph, currentValue, circulationStatus } = card;
   const { label: badgeLabel } = getCirculationBadgeConfig(circulationStatus);
 
   return (
     <div className="grail-card">
-      {/* Print run — the defining characteristic of a grail, displayed prominently */}
-      <div className="grail-card__print-run">
-        {formatPrintRun(printRun)}
+      {/* Card thumbnail — placeholder until real card images are sourced.
+          Matches TopChaseRow.jsx so both lists line up visually. */}
+      <div className="grail-card__image">
+        <div className="grail-card__image-placeholder" aria-hidden="true" />
       </div>
 
       {/* Player name, auto tag, and variation */}
