@@ -107,6 +107,82 @@
 
   /* Positive financial indicators — same green works on both backgrounds */
   --color-positive:             #16a34a;
+
+  /* Legacy alias overrides — these :root variables are independent declarations,
+     not real var() aliases, so they need their own light-mode values. The intent
+     of the original aliasing is preserved: --color-bg tracks --color-background-primary,
+     --color-bg-subtle tracks --color-background-tertiary. */
+  --color-bg:                   #f5f5f7;
+  --color-bg-subtle:            #ededf0;
+
+  /* Borders — light-mode-appropriate grays */
+  --color-border-strong:        #c9c9cf;
+  --color-border-subtle:        #ededf0;
+
+  /* Muted text — slightly darker than dark-mode value for readability on light bg */
+  --color-text-muted:           #6e6e72;
+
+  /* Nav bar hover/active — only consumed by SiteNavBar.css (confirmed via grep).
+     Safe to override globally without affecting other components. */
+  --color-nav-hover:            rgba(0, 0, 0, 0.06);
+  --color-nav-active:           rgba(239, 68, 68, 0.12);
+
+  /* --color-nav-bg and --color-nav-text are intentionally NOT overridden here.
+     They're used by ten+ dark accent feature sections across the app (About hero,
+     News/Help/Contact hero+footer, SignIn/SignUp brand panels, BoxSetCard text
+     overlays, etc.) that are meant to stay dark in both modes. Component-scoped
+     overrides below handle the bottom nav bar — the only place those variables
+     need to flip in light mode. */
+}
+
+/* ─── Light Mode Component Overrides ──────────────────────────────────────
+   Cases where a variable can't be overridden globally (because the same
+   variable serves both "should stay dark" and "should turn light" surfaces)
+   are handled here with light-mode-scoped selectors. Dark mode is unaffected
+   because these rules only match when data-theme="light" is set on <html>.   */
+
+/* Site header — elevated panel surface, brighter than the page below.
+   Uses --color-background-secondary so it reads as a distinct white plane on
+   the slightly-grey page background. Dark mode header continues to use
+   --color-bg (the legacy alias) and is unchanged.                            */
+[data-theme="light"] .site-top-bar {
+  background: var(--color-background-secondary);
+}
+
+/* Bottom nav bar — flips to a light surface in light mode. Tab text and the
+   active-tab underline switch to the primary text color so they read on white.
+   Cannot override --color-nav-bg / --color-nav-text globally because they're
+   doing double-duty for the dark hero/CTA sections on About/News/Help/etc.    */
+[data-theme="light"] .site-nav-bar {
+  background: var(--color-background-secondary);
+}
+
+[data-theme="light"] .site-nav-bar__tab {
+  color: var(--color-text-primary);
+}
+
+[data-theme="light"] .site-nav-bar__tab--active {
+  border-bottom-color: var(--color-text-primary);
+}
+
+/* Search bar — light gray background matches the page bg (--color-background-primary)
+   per the spec; sits visually inside the now-white header.                    */
+[data-theme="light"] .search-bar__input {
+  background: var(--color-background-primary);
+}
+
+/* About page cards — elevated white surfaces above the now-grey mission and
+   founders sections. The dark hero/CTA above and below stay dark by design.   */
+[data-theme="light"] .about-mission__card,
+[data-theme="light"] .about-founders__card {
+  background: var(--color-background-secondary);
+}
+
+/* SiteNavBar dropdown shadow — the dark-mode rgba(0,0,0,0.40) hardcoded in
+   the component CSS is far too heavy on a light dropdown panel. Lighter
+   shadow in light mode preserves the elevation cue without the heavy bruise. */
+[data-theme="light"] .site-nav-bar__dropdown {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 /* ─── Reset ───────────────────────────────────────────────────────────── */
