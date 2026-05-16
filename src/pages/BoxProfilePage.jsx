@@ -184,12 +184,19 @@ export function BoxProfilePage() {
 
         {/* Box metadata + metric cards */}
         <div className="box-profile-page__hero-info">
+          {/* Split into hero-header (title + subtitle) and hero-stats (pack config + guarantees)
+              so the mobile media query can place them independently in a CSS grid —
+              header full-width on top, stats next to the box image. Desktop spacing is
+              preserved because hero-meta's flex column still wraps both sub-blocks. */}
           <div className="box-profile-page__hero-meta">
-            <h1 className="box-profile-page__title">{box.name}</h1>
+            <div className="box-profile-page__hero-header">
+              <h1 className="box-profile-page__title">{box.name}</h1>
             {/* box.format is replaced by formatData.label so it updates with the switcher */}
             <p className="box-profile-page__subtitle">
               {box.manufacturer} &middot; {box.year} &middot; {formatData.label}
             </p>
+            </div>
+            <div className="box-profile-page__hero-stats">
             {/* Pack config is format-specific — totalCards pre-computed in formatSwitcherData.js */}
             <p className="box-profile-page__config">
               {formatData.packsPerBox} packs/box &nbsp;&bull;&nbsp;
@@ -206,6 +213,7 @@ export function BoxProfilePage() {
                   .join(' • ')}
               </p>
             )}
+            </div>
           </div>
 
           {/* Four metric cards — MSRP, EV, and ROI update with the selected format */}

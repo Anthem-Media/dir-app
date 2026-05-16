@@ -81,6 +81,16 @@
   gap: 6px;
 }
 
+/* Sub-blocks inside hero-meta. Each is a flex column with the same 6px gap so
+   the desktop spacing reads identically to a single flat list. They exist as
+   separate elements so the mobile grid can place them in different rows. */
+.box-profile-page__hero-header,
+.box-profile-page__hero-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .box-profile-page__title {
   font-size: 28px;
   font-weight: 700;
@@ -267,5 +277,77 @@
 @media (max-width: 480px) {
   .box-profile-page__pull-rate-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── MOBILE HERO REARRANGEMENT ─────────────────────────────────────────────
+   On mobile, the hero is laid out as a CSS grid with four rows:
+     1. Title + subtitle (full width)
+     2. Box image (left ~45%) + pack stats (right ~55%)
+     3. Metric cards (full width, 2x2)
+     4. Buy Now (full width)
+
+   hero-info and hero-meta use display: contents so their children become
+   direct grid items of hero — that's how the title sub-block can sit above
+   the image while the stats sub-block sits next to it.
+
+   This rule is placed after the 640px/480px media queries on purpose: its
+   grid display overrides the older flex-direction: column behavior at all
+   sizes ≤ 768px. */
+@media (max-width: 768px) {
+  .box-profile-page__hero {
+    display: grid;
+    grid-template-columns: 45% 1fr;
+    grid-template-areas:
+      "header  header"
+      "image   stats"
+      "metrics metrics"
+      "buynow  buynow";
+    column-gap: 16px;
+    row-gap: 20px;
+    align-items: start;
+  }
+
+  .box-profile-page__hero-info,
+  .box-profile-page__hero-meta {
+    display: contents;
+  }
+
+  .box-profile-page__hero-header {
+    grid-area: header;
+  }
+
+  .box-profile-page__hero-image {
+    grid-area: image;
+    width: 100%;
+  }
+
+  .box-profile-page__hero-image img {
+    width: 100%;
+    height: auto;
+  }
+
+  .box-profile-page__image-placeholder {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 4;
+  }
+
+  .box-profile-page__hero-stats {
+    grid-area: stats;
+    align-self: start;
+  }
+
+  .box-profile-page__metrics {
+    grid-area: metrics;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .box-profile-page__buy-now {
+    grid-area: buynow;
+  }
+
+  .box-profile-page__buy-now-btn {
+    width: 100%;
   }
 }
