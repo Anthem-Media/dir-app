@@ -32,13 +32,19 @@ export const DUMMY_FORMAT_DATA = {
     expectedValue: 162.50,
     roi: calculateRoi(162.50, 149.99), // ≈ +8.3% vs MSRP
     pullRates: [
-      { id: 'pr-base',      category: 'Base & Rookies', probability: 1.0      }, // guaranteed every pack
-      { id: 'pr-refractor', category: 'Refractors',     probability: 1 / 4    }, // 1:4 packs
-      { id: 'pr-numbered',  category: 'Numbered',       probability: 1 / 12   }, // 1:12 packs
-      { id: 'pr-relic',     category: 'Relic',          probability: 1 / 24   }, // 1:24 packs
-      { id: 'pr-auto',      category: 'Autographs',     probability: 1 / 6    }, // 1:6 packs
-      { id: 'pr-auto-relic',category: 'Auto Relic',     probability: 1 / 48   }, // 1:48 packs
-      { id: 'pr-case-hit',  category: 'Case Hit',       probability: 1 / 96   }, // 1:96 packs
+      { category: 'Base',                     oddsNumerator: 1, oddsDenominator: 52,    probability: 0.019231, source: 'Baseballcardpedia' },
+      { category: 'Base Rookie',              oddsNumerator: 1, oddsDenominator: 52,    probability: 0.019231, source: 'Baseballcardpedia' },
+      { category: 'Refractor',                oddsNumerator: 1, oddsDenominator: 3,     probability: 0.333333, source: 'Baseballcardpedia' },
+      { category: 'Rookie Refractor',         oddsNumerator: 1, oddsDenominator: 3,     probability: 0.333333, source: 'Baseballcardpedia' },
+      { category: 'Numbered Refractor',       oddsNumerator: 1, oddsDenominator: 96,    probability: 0.010417, source: 'Baseballcardpedia' },
+      { category: 'Numbered Rookie Refractor',oddsNumerator: 1, oddsDenominator: 96,    probability: 0.010417, source: 'Baseballcardpedia' },
+      { category: 'Superfractor',             oddsNumerator: 1, oddsDenominator: 37469, probability: 0.000027, source: 'Baseballcardpedia' },
+      { category: 'Insert',                   oddsNumerator: 1, oddsDenominator: 6,     probability: 0.166667, source: 'Baseballcardpedia' },
+      { category: 'Short Print',              oddsNumerator: 1, oddsDenominator: 497,   probability: 0.002012, source: 'Baseballcardpedia' },
+      { category: 'Base Auto',                oddsNumerator: 1, oddsDenominator: 52,    probability: 0.019231, source: 'Baseballcardpedia' },
+      { category: 'Refractor Auto',           oddsNumerator: 1, oddsDenominator: 172,   probability: 0.005814, source: 'Baseballcardpedia' },
+      { category: 'Numbered Autograph',       oddsNumerator: 1, oddsDenominator: 291,   probability: 0.003436, source: 'Baseballcardpedia' },
+      { category: 'Memorabilia / Relic',      oddsNumerator: 1, oddsDenominator: 575,   probability: 0.001739, source: 'Baseballcardpedia' },
     ],
     // Manufacturer-stated guaranteed pulls per box (probability = 1.0).
     // Mirrors the eventual box_guarantees table shape: count, category, notes.
