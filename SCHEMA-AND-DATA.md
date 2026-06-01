@@ -420,6 +420,22 @@ We've been assuming several things about eBay API capabilities based on web UI b
 - Depends on: eBay API rate limits, price volatility tolerance, scaling reference.
 - Affects: data freshness, API quota usage, infrastructure cost.
 
+### Auto sub-category schema gap (must resolve before full seed)
+
+**10a. Should card_categories be expanded to cover auto sub-types?**
+The current 15 categories lump all unnumbered autos under Base Auto and all numbered autos under Numbered Autograph. Sets like 2023 Topps Chrome Baseball have semantically distinct auto sub-categories (Legends, 1988-style, Radiating Rookies, Dual Rookies, Authentics Autos) that share pull rate logic but are distinct product categories collectors care about.
+- Option A: Add sub-categories within Tier 2 — e.g. 'Legends Auto', 'Dual Auto', 'Relic Auto'. More accurate, more rows, more pull rate complexity.
+- Option B: Keep 15 categories, use notes or variation_name to distinguish sub-types. Simpler schema, less granular filtering.
+- Depends on: whether the checklist UI needs to filter by auto sub-type, and whether pull rates differ enough between sub-types to matter for EV math.
+- Affects: card_categories table, pull_rates table, checklist rendering, EV math.
+
+### value_source CHECK constraint — add 'sportscardspro'
+
+**10b. Add 'sportscardspro' to value_source CHECK constraint**
+The current CHECK constraint on cards.value_source does not include 'sportscardspro'. The POC rebuild script writes this value. Must be added before any SCP-sourced data is imported to Supabase.
+- Done when: Schema migration adds 'sportscardspro' to the CHECK constraint. dir_database_schema.sql updated to match. PRE-BETA-CHECKLIST.md updated.
+- Blocks: Supabase import of SCP-sourced card pricing data.
+
 ---
 
 ## Schema Decisions Log
@@ -513,6 +529,32 @@ Specific moments where reality changed our thinking. Each entry includes what we
 - **Expected:** Asking-prices on eBay would be inflated by some roughly-fixed percentage vs. sold prices, allowing a single mitigation strategy to bridge the gap across all cards.
 - **Saw:** The gap is volume-dependent. High-volume cards (star base, common refractors, common autos of marquee players) have small gaps that close well after standard mitigation (outlier trimming, recency weighting, sample size minimums). Low-volume cards (numbered parallels with small print runs, vintage equivalents) have large gaps that mitigation cannot close — supply outweighs demand at the asked prices indefinitely.
 - **Changed:** Path E+ design becomes tier-aware. Bulk cards use Browse API + mitigation. Top Chases and Grails require sold-data accuracy from a paid source (Marketplace Insights or licensed aggregator). `current_value` schema design must accommodate multi-source pipelines via a `value_source` tracking column or equivalent. Validates the "concentrate accuracy where users care" product principle and bounds paid-data costs by scope rather than checklist size.
+
+### June 2026 — SportsCardsPro CSV is not a complete checklist
+
+- **Expected:** SportsCardsPro CSV would serve as the complete master checklist for a box set — every card in the set would appear in the CSV.
+- **Saw:** SCP is missing entire auto sub-categories for 2023 Topps Chrome Baseball. Missing categories include: Topps Chrome Authentics (TCA-, 42 relic cards), Topps Chrome Authentics Autographs (TCAA-, 18 auto-relic cards), Topps Chrome Legends Autographs (CLA-, 14 cards), 1988 Topps Baseball Autographs (88BA-, 11 cards), Dual Rookie Autographs (DRA-, 5 cards), Future Stars Autographs (FSA-, 3 cards), Radiating Rookies Autographs (RRA-, 15 cards), Topps In Technicolor Autographs (TTA-, 15 cards), Ultraviolet All-Stars Autographs (UVA-, 12 cards). These are real cards that exist in the set but SCP either doesn't carry them or doesn't have enough market activity to include them.
+- **Changed:** SportsCardsPro CSV is the master checklist for base cards, parallels, and standard autos (high volume, actively traded). Beckett and Cardboard Connection are still required for low-volume auto sub-categories and memorabilia cards that SCP misses. The pipeline for future sets is: SCP CSV first, then supplement with Beckett/Cardboard Connection for anything SCP doesn't carry.
+- **Pipeline implication:** The rebuild script (`scripts/rebuild-cards-from-scp.py`) appends missing auto sub-category rows from the original seed spreadsheet using card number prefixes (TCAA-, CLA-, 88BA-, DRA-, FSA-, RRA-, TTA-, UVA-). These rows carry no price — honest zero contribution to EV math until pricing data is available.
+
+### June 2026 — card_categories schema gap: auto sub-categories
+
+- **Expected:** 15 card categories in the schema would cover all card types across all sets.
+- **Saw:** 2023 Topps Chrome Baseball has auto sub-categories that don't map cleanly to existing categories: Dual Rookie Autographs (two players, numbered /25), Legends Autographs (retired players, unnumbered), 1988-style Autographs (unnumbered), Topps Chrome Authentics Autographs (auto + relic combined). For POC these are mapped to the closest existing category (Numbered Autograph or Base Auto) since they share the same tier and pull rate logic. This is acceptable for POC EV math but is not semantically correct.
+- **Changed:** POC proceeds with the approximation. A schema amendment to add sub-categories within Tier 2 (Autographs) is needed before full seed. This is tracked as an OPEN QUESTION below.
+- **Schema implication:** Pull rates for these sub-categories are currently lumped under Base Auto or Numbered Autograph. When proper sub-categories are added, pull rates will need to be split out per sub-category per format.
+
+### June 2026 — Baseballcardpedia pull rate categories vs. SCP card existence
+
+- **Expected:** Pull rate categories sourced from Baseballcardpedia would match the cards that actually exist in the set.
+- **Saw:** Baseballcardpedia listed Patch Auto and Memorabilia/Relic pull rates for 2023 Topps Chrome Baseball. SportsCardsPro CSV had zero Patch Auto cards. Beckett confirmed Memorabilia/Relic cards DO exist (42 Topps Chrome Authentics, Hobby and Jumbo only) but Patch Autos do not exist in this set. Baseballcardpedia pull rate categories should always be cross-checked against SCP CSV and Beckett before being accepted as accurate.
+- **Changed:** Pull rate source verification rule added: if SCP has zero cards matching a pull rate category, verify against Beckett before keeping that pull rate row. Patch Auto pull rate rows removed from 2023 Topps Chrome Baseball output. Memorabilia/Relic rows kept — confirmed real by Beckett.
+
+### June 2026 — value_source CHECK constraint missing 'sportscardspro'
+
+- **Expected:** The value_source CHECK constraint on the cards table would cover SportsCardsPro as a source.
+- **Saw:** The constraint only allows: 'ebay_browse_mitigation', 'ebay_marketplace_insights', 'card_hedge', 'price_charting', 'manual', 'placeholder'. SportsCardsPro is not in the list. The POC rebuild script currently writes 'sportscardspro' as value_source which will fail the constraint when imported to Supabase.
+- **Changed:** Schema amendment needed — add 'sportscardspro' to the value_source CHECK constraint before Supabase import. Tracked as open item below.
 
 ---
 

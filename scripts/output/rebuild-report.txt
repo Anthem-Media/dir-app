@@ -1,0 +1,27 @@
+============================================================
+REBUILD REPORT — 2023 Topps Chrome Baseball
+============================================================
+
+  Total SCP rows processed:        8,409
+  Sealed box rows skipped:             8
+  Total card rows written:         8,502
+  Rows with a price:               7,295
+  Rows with no price:              1,114
+
+------------------------------------------------------------
+TOP 10 CARDS BY SALES VOLUME
+------------------------------------------------------------
+  Jordan Walker #209 [Base]  —  943 sales  ($1.61)
+  Shohei Ohtani #17 [Base]  —  892 sales  ($4.13)
+  Gunnar Henderson #2 [Base]  —  851 sales  ($1.97)
+  Corbin Carroll #95 [Base]  —  584 sales  ($1.55)
+  Aaron Judge #62 [Base]  —  553 sales  ($2.49)
+  Jordan Walker #209 [Refractor]  —  404 sales  ($5.99)
+  Michael Harris II #79 [Base]  —  395 sales  ($1.74)
+  Gunnar Henderson #2 [Refractor]  —  379 sales  ($7.85)
+  Michael Harris II #79 [Refractor]  —  367 sales  ($1.91)
+  Aaron Judge #62 [Refractor]  —  359 sales  ($4.56)
+
+============================================================
+END OF REPORT
+============================================================

@@ -203,6 +203,14 @@ POC weekend work (May 2026) puts real SportsCardsPro card pricing for 2023 Topps
 - **Dependencies:** Slug-bridge script (already queued, separate Opus session). SportsCardsPro CSV import pipeline (queued). Card-pricing data refresh process (queued).
 - **Blocks:** Beta launch. Hardcoded data CANNOT ship to public users.
 
+4.16 Add 'sportscardspro' to value_source CHECK constraint — PENDING
+
+The cards.value_source CHECK constraint currently allows: 'ebay_browse_mitigation', 'ebay_marketplace_insights', 'card_hedge', 'price_charting', 'manual', 'placeholder'. SportsCardsPro CSV is the POC pricing source and writes 'sportscardspro' as the value_source. This will fail the constraint on Supabase import until the amendment is applied.
+
+- **Done when:** Migration run in Supabase SQL editor adding 'sportscardspro' to the CHECK constraint. dir_database_schema.sql updated to match.
+- **Dependencies:** None — additive constraint change only.
+- **Blocks:** Supabase import of the cards-rebuilt.csv output from the SCP pipeline.
+
 ---
 
 ## 5. Data Seeding
