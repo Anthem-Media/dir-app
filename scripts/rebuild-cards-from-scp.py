@@ -66,12 +66,14 @@ def parse_price(raw) -> Optional[float]:
 
 def parse_product_name(name: str):
     """
-    Parse a SCP product-name into (player_name, variation_name, card_number).
+    Parse a SCP product-name into
+    (player_name, variation_name, card_number, print_run, is_numbered).
 
     Examples:
-        "Aaron Judge #62"              -> ("Aaron Judge", "Base", "62")
-        "Aaron Judge [Aqua Lava] #62"  -> ("Aaron Judge", "Aqua Lava", "62")
-        "Aaron Judge [Blue Sonar] #62" -> ("Aaron Judge", "Blue Sonar", "62")
+        "Aaron Judge #62"              -> ("Aaron Judge", "Base", "62", None, False)
+        "Aaron Judge [Aqua Lava] #62"  -> ("Aaron Judge", "Aqua Lava", "62", None, False)
+        "Aaron Judge [Gold] #62 /50"   -> ("Aaron Judge", "Gold", "62", 50, True)
+        "Aaron Judge [Superfractor] #62 1/1" -> ("Aaron Judge", "Superfractor", "62", 1, True)
     """
     bracket_match = re.search(r"\[([^\]]+)\]", name)
     variation_name = bracket_match.group(1).strip() if bracket_match else "Base"
@@ -86,7 +88,17 @@ def parse_product_name(name: str):
         cut = min(cut, name.index("#"))
     player_name = name[:cut].strip()
 
-    return player_name, variation_name, card_number
+    # Parse print run from product-name (e.g. "/50" or "1/1")
+    print_run_match = re.search(r'(?<!\d)(\d+)/(\d+)(?!\d)', name)
+    if print_run_match:
+        denominator = int(print_run_match.group(2))
+        print_run = denominator
+        is_numbered = True
+    else:
+        print_run = None
+        is_numbered = False
+
+    return player_name, variation_name, card_number, print_run, is_numbered
 
 
 # ---------------------------------------------------------------------------
@@ -128,6 +140,8 @@ def load_and_parse_scp(path: Path):
     df_cards["_player_name"] = parsed.apply(lambda x: x[0])
     df_cards["_variation_name"] = parsed.apply(lambda x: x[1])
     df_cards["_card_number"] = parsed.apply(lambda x: x[2])
+    df_cards["_print_run"] = parsed.apply(lambda x: x[3])
+    df_cards["_is_numbered"] = parsed.apply(lambda x: x[4])
     df_cards["_current_value"] = df_cards["loose-price"].apply(parse_price)
     df_cards["_sales_volume"] = (
         pd.to_numeric(df_cards["sales-volume"], errors="coerce").fillna(0).astype(int)
@@ -196,11 +210,39 @@ def infer_category_name(card_number, variation_name, is_autograph, rookie_card, 
     return 'Numbered Refractor' if rookie_card else 'Refractor'
 
 
-def build_cards_tab(df_scp: pd.DataFrame, cards_columns: list, rookie_card_numbers: set) -> pd.DataFrame:
+def _norm_variation(v: str) -> str:
+    """Normalize a variation name for seed matching: lowercase, strip whitespace,
+    remove the word 'Refractor' — same logic used in the reconciler."""
+    return re.sub(r"\bRefractor\b", "", str(v), flags=re.IGNORECASE).strip().lower()
+
+
+def build_seed_print_run_lookup(df_seed: pd.DataFrame) -> dict:
+    """
+    Build a lookup from (card_number, normalized_variation) -> (print_run, is_numbered)
+    using the seed spreadsheet's cards tab. Used to backfill print_run and is_numbered
+    on SCP-sourced rows that don't carry that information in the CSV.
+    """
+    lookup = {}
+    for _, row in df_seed.iterrows():
+        cn = str(row.get("card_number", "")).strip()
+        vn = _norm_variation(str(row.get("variation_name", "")))
+        pr_raw = str(row.get("print_run", "")).strip()
+        in_raw = str(row.get("is_numbered", "")).strip().lower()
+        pr = pr_raw if pr_raw and pr_raw.lower() != "nan" else ""
+        is_num = True if in_raw == "true" else (False if in_raw == "false" else "")
+        if pr or is_num:
+            lookup[(cn, vn)] = (pr, is_num)
+    return lookup
+
+
+def build_cards_tab(df_scp: pd.DataFrame, cards_columns: list, rookie_card_numbers: set,
+                    seed_print_run_lookup: dict) -> pd.DataFrame:
     """
     Build a fresh cards DataFrame from SCP data.
     All columns not derivable from SCP are left blank.
     rookie_card_numbers is the set of card_number values flagged as rookies in the seed.
+    seed_print_run_lookup maps (card_number, normalized_variation) -> (print_run, is_numbered)
+    so that print run data from the seed can be carried over to SCP-sourced rows.
     """
     rows = []
     for _, row in df_scp.iterrows():
@@ -218,6 +260,19 @@ def build_cards_tab(df_scp: pd.DataFrame, cards_columns: list, rookie_card_numbe
         is_relic = "authentic" in row["_variation_name"].lower()
         out["is_relic"] = True if is_relic else False  # Topps Chrome Authentics are memorabilia cards
         out["rookie_card"] = True if row["_card_number"] in rookie_card_numbers else False
+        # Start with whatever print_run/is_numbered the SCP product name gave us
+        out["print_run"] = row["_print_run"] if row["_print_run"] is not None else ""
+        out["is_numbered"] = True if row["_is_numbered"] else False
+
+        # Override with seed data where available — seed has explicit print run values
+        # that SCP doesn't include in its product names
+        seed_key = (row["_card_number"], _norm_variation(row["_variation_name"]))
+        if seed_key in seed_print_run_lookup:
+            seed_pr, seed_is_num = seed_print_run_lookup[seed_key]
+            if seed_pr:
+                out["print_run"] = seed_pr
+            if seed_is_num != "":
+                out["is_numbered"] = seed_is_num
 
         out["category_name"] = infer_category_name(
             row["_card_number"],
@@ -387,8 +442,12 @@ def main() -> None:
     df_scp, sealed_count = load_and_parse_scp(SCP_CSV)
     print(f"  {len(df_scp):,} card rows | {sealed_count} sealed box rows skipped")
 
+    print("Building seed print run lookup...")
+    seed_print_run_lookup = build_seed_print_run_lookup(df_seed_cards)
+    print(f"  {len(seed_print_run_lookup)} seed entries with print_run or is_numbered data")
+
     print("Building cards tab...")
-    df_cards = build_cards_tab(df_scp, cards_columns, rookie_card_numbers)
+    df_cards = build_cards_tab(df_scp, cards_columns, rookie_card_numbers, seed_print_run_lookup)
     rows_before_append = len(df_cards)
 
     print("Appending missing auto rows from seed...")

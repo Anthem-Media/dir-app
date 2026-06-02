@@ -9,16 +9,19 @@ import { formatCurrency } from '../utils/formatters';
 import './TopChaseRow.css';
 
 /**
- * @param {object}  card
- * @param {string}  card.playerName    - Player's full name
- * @param {string}  card.variationName - The specific variation (e.g. "Gold Refractor Auto /50")
- * @param {string}  card.category      - Card category from the project's taxonomy
- * @param {boolean} card.isRookie      - Whether to show the RC tag
- * @param {number}  card.price         - Market value in USD
- * @param {string|null} card.imageUrl  - Card image URL (null shows placeholder)
+ * @param {object}      card
+ * @param {string}      card.playerName    - Player's full name
+ * @param {string}      card.variationName - The specific variation (e.g. "Gold Refractor Auto /50")
+ * @param {string}      card.category      - Card category from the project's taxonomy
+ * @param {boolean}     card.rookieCard    - Whether to show the RC badge
+ * @param {boolean}     card.isAutograph   - Whether to show the AUTO badge
+ * @param {number|null} card.printRun      - Print run count; null for unlimited
+ * @param {number}      card.price         - Market value in USD
+ * @param {string|null} card.imageUrl      - Card image URL (null shows placeholder)
  */
 export function TopChaseRow({ card }) {
-  const { playerName, variationName, category, isRookie, price, imageUrl } = card;
+  const { playerName, variationName, category, rookieCard, isAutograph, printRun, price, imageUrl } = card;
+  const printRunLabel = printRun != null ? (printRun === 1 ? '1/1' : `/${printRun}`) : null;
 
   return (
     <div className="top-chase-row">
@@ -34,7 +37,9 @@ export function TopChaseRow({ card }) {
       <div className="top-chase-row__info">
         <div className="top-chase-row__name-line">
           <span className="top-chase-row__player">{playerName}</span>
-          {isRookie && <span className="top-chase-row__rc-tag">RC</span>}
+          {rookieCard && <span className="top-chase-row__rc-tag">RC</span>}
+          {isAutograph && <span className="top-chase-row__auto-tag">AUTO</span>}
+          {printRunLabel && <span className="top-chase-row__print-run-tag">{printRunLabel}</span>}
         </div>
         <span className="top-chase-row__variation">{variationName}</span>
       </div>

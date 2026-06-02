@@ -60,6 +60,9 @@
   --color-success:        #16a34a;  /* mirrors --color-positive; used for success banners on auth pages */
   --color-success-bg:     #052e16;
   --color-success-border: #14532d;
+  --color-print-run:        #d97706;  /* amber/gold — numbered card print run badge */
+  --color-print-run-bg:     #1c1007;
+  --color-print-run-border: #78350f;
 
   /* Typography */
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -107,6 +110,9 @@
 
   /* Positive financial indicators — same green works on both backgrounds */
   --color-positive:             #16a34a;
+  --color-print-run:            #d97706;
+  --color-print-run-bg:         #fef3c7;
+  --color-print-run-border:     #d97706;
 
   /* Legacy alias overrides — these :root variables are independent declarations,
      not real var() aliases, so they need their own light-mode values. The intent

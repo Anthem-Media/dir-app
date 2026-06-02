@@ -220,7 +220,7 @@ export function BoxProfilePage() {
           <div className="box-profile-page__metrics">
             <MetricCard
               label="Market Price"
-              value={formatCurrency(box.pricing.marketPrice)}
+              value={formatCurrency(formatData.marketPrice)}
               subtext="eBay sold avg"
             />
             <MetricCard

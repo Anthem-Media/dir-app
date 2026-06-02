@@ -38,7 +38,7 @@ PULL_RATES_CSV = OUTPUT_DIR / "pull_rates.csv"
 OUTPUT_JS = OUTPUT_DIR / "hardcoded-data.js"
 
 HOBBY_SLUG = "2023-topps-chrome-baseball-hobby"
-TOP_CHASES_COUNT = 25
+TOP_CHASES_COUNT = 7
 
 
 # ---------------------------------------------------------------------------

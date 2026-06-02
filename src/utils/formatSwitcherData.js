@@ -25,15 +25,16 @@ export const DUMMY_FORMAT_DATA = {
   hobby: {
     label: 'Hobby',
     slug: 'hobby',
-    msrp: 149.99,
+    msrp: 129.99,
+    marketPrice: 234.89,
     packsPerBox: 18,
     cardsPerPack: 4,
     totalCards: 72,   // 18 packs × 4 cards
-    expectedValue: 162.50,
-    roi: calculateRoi(162.50, 149.99), // ≈ +8.3% vs MSRP
+    expectedValue: 103.98,
+    roi: calculateRoi(103.98, 129.99),
     pullRates: [
-      { category: 'Base',                     oddsNumerator: 1, oddsDenominator: 52,    probability: 0.019231, source: 'Baseballcardpedia' },
-      { category: 'Base Rookie',              oddsNumerator: 1, oddsDenominator: 52,    probability: 0.019231, source: 'Baseballcardpedia' },
+      { category: 'Base',                     oddsNumerator: 1, oddsDenominator: 1,     probability: 1.0,      source: 'Topps' },
+      { category: 'Base Rookie',              oddsNumerator: 1, oddsDenominator: 1,     probability: 1.0,      source: 'Topps' },
       { category: 'Refractor',                oddsNumerator: 1, oddsDenominator: 3,     probability: 0.333333, source: 'Baseballcardpedia' },
       { category: 'Rookie Refractor',         oddsNumerator: 1, oddsDenominator: 3,     probability: 0.333333, source: 'Baseballcardpedia' },
       { category: 'Numbered Refractor',       oddsNumerator: 1, oddsDenominator: 96,    probability: 0.010417, source: 'Baseballcardpedia' },
@@ -57,12 +58,13 @@ export const DUMMY_FORMAT_DATA = {
   jumbo: {
     label: 'Jumbo',
     slug: 'jumbo',
-    msrp: 229.99,
+    msrp: 349.99,
+    marketPrice: 400.00,
     packsPerBox: 6,
     cardsPerPack: 12,
     totalCards: 72,   // 6 packs × 12 cards
-    expectedValue: 244.75,
-    roi: calculateRoi(244.75, 229.99), // ≈ +6.4% vs MSRP — jumbo packs carry premium odds
+    expectedValue: 139.41,
+    roi: calculateRoi(139.41, 349.99),
     pullRates: [
       { id: 'pr-base',      category: 'Base & Rookies', probability: 1.0      },
       { id: 'pr-refractor', category: 'Refractors',     probability: 1 / 2    }, // 1:2 packs — better than hobby
@@ -80,12 +82,13 @@ export const DUMMY_FORMAT_DATA = {
   blaster: {
     label: 'Blaster',
     slug: 'blaster',
-    msrp: 24.99,
+    msrp: 34.99,
+    marketPrice: 36.00,
     packsPerBox: 7,
     cardsPerPack: 4,
     totalCards: 28,   // 7 packs × 4 cards
-    expectedValue: 18.75,
-    roi: calculateRoi(18.75, 24.99), // ≈ -25.0% vs MSRP — retail formats skew negative
+    expectedValue: 54.15,
+    roi: calculateRoi(54.15, 34.99),
     pullRates: [
       { id: 'pr-base',      category: 'Base & Rookies', probability: 1.0      },
       { id: 'pr-refractor', category: 'Refractors',     probability: 1 / 12   }, // 1:12 packs
@@ -103,12 +106,13 @@ export const DUMMY_FORMAT_DATA = {
   breaker: {
     label: 'Breaker Delight',
     slug: 'breaker',
-    msrp: 499.99,
+    msrp: 249.99,
+    marketPrice: 249.99,
     packsPerBox: 1,
     cardsPerPack: 1,
     totalCards: 1,
-    expectedValue: 520.00,
-    roi: calculateRoi(520.00, 499.99),
+    expectedValue: 178.97,
+    roi: calculateRoi(178.97, 249.99),
     pullRates: [
       { id: 'pr-base',      category: 'Base & Rookies', probability: 1.0     },
       { id: 'pr-refractor', category: 'Refractors',     probability: 1 / 1   },
@@ -129,12 +133,13 @@ export const DUMMY_FORMAT_DATA = {
   mega: {
     label: 'Mega',
     slug: 'mega',
-    msrp: 34.99,
+    msrp: 54.99,
+    marketPrice: 60.00,
     packsPerBox: 10,
     cardsPerPack: 5,
     totalCards: 50,   // 10 packs × 5 cards
-    expectedValue: 28.50,
-    roi: calculateRoi(28.50, 34.99), // ≈ -18.5% vs MSRP
+    expectedValue: 102.61,
+    roi: calculateRoi(102.61, 54.99),
     pullRates: [
       { id: 'pr-base',      category: 'Base & Rookies', probability: 1.0      },
       { id: 'pr-refractor', category: 'Refractors',     probability: 1 / 10   }, // 1:10 packs

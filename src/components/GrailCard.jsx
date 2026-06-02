@@ -21,8 +21,9 @@ import { getCirculationBadgeConfig } from '../utils/grailsUtils';
 import './GrailCard.css';
 
 export function GrailCard({ card }) {
-  const { playerName, variationName, isAutograph, currentValue, circulationStatus } = card;
+  const { playerName, variationName, rookieCard, isAutograph, printRun, currentValue, circulationStatus } = card;
   const { label: badgeLabel } = getCirculationBadgeConfig(circulationStatus);
+  const printRunLabel = printRun != null ? (printRun === 1 ? '1/1' : `/${printRun}`) : null;
 
   return (
     <div className="grail-card">
@@ -32,13 +33,13 @@ export function GrailCard({ card }) {
         <div className="grail-card__image-placeholder" aria-hidden="true" />
       </div>
 
-      {/* Player name, auto tag, and variation */}
+      {/* Player name, badges, and variation */}
       <div className="grail-card__info">
         <div className="grail-card__name-line">
           <span className="grail-card__player">{playerName}</span>
-          {isAutograph && (
-            <span className="grail-card__auto-tag">AUTO</span>
-          )}
+          {rookieCard && <span className="grail-card__rc-tag">RC</span>}
+          {isAutograph && <span className="grail-card__auto-tag">AUTO</span>}
+          {printRunLabel && <span className="grail-card__print-run-tag">{printRunLabel}</span>}
         </div>
         <span className="grail-card__variation">{variationName}</span>
       </div>
@@ -49,7 +50,7 @@ export function GrailCard({ card }) {
       </span>
 
       {/* Market value */}
-      <span className="grail-card__value">{formatCurrency(currentValue)}</span>
+      <span className="grail-card__value">{currentValue != null ? formatCurrency(currentValue) : '—'}</span>
     </div>
   );
 }

@@ -56,16 +56,34 @@
   color: var(--color-text-primary);
 }
 
-.grail-card__auto-tag {
+.grail-card__rc-tag,
+.grail-card__auto-tag,
+.grail-card__print-run-tag {
   font-size: 10px;
   font-weight: 700;
-  color: var(--color-accent-text);
-  background: var(--color-accent-bg);
-  border: 1px solid var(--color-accent);
   border-radius: 4px;
   padding: 1px 5px;
   letter-spacing: 0.04em;
   line-height: 1.4;
+  border: 1px solid;
+}
+
+.grail-card__rc-tag {
+  color: var(--color-positive);
+  background: var(--color-success-bg);
+  border-color: var(--color-success-border);
+}
+
+.grail-card__auto-tag {
+  color: var(--color-accent-text);
+  background: var(--color-accent-bg);
+  border-color: var(--color-accent);
+}
+
+.grail-card__print-run-tag {
+  color: var(--color-print-run);
+  background: var(--color-print-run-bg);
+  border-color: var(--color-print-run-border);
 }
 
 .grail-card__variation {
