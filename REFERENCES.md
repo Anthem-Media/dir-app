@@ -80,3 +80,24 @@
 - **What it is:** eBay's affiliate program. Free to join. 1-4% commission (collectibles at 3-4%). 24-hour cookie window. $550 USD cap per qualifying purchase.
 - **When to sign up:** When real data is live on the site (Phase 10-12). Don't apply with dummy data — risks rejection.
 - **How DIR uses it:** "Find on eBay" fallback link on box profiles when no distributor carries the box. Every box profile has a monetization path through either distributor Buy Now or eBay affiliate link.
+
+## Data Sources — Confirmed for POC
+
+### SportsCardsPro (sportscardspro.com)
+- **Role:** Master card checklist + pricing source
+- CSV download available via Legendary subscription
+- Covers: base cards, parallels, standard autos with market prices and sales volume
+- Missing: insert sub-categories, some auto sub-categories, print run data, grail-level cards
+- Commercial terms: pending confirmation before full seed (PRE-BETA-CHECKLIST #6.2)
+
+### Baseballcardpedia (baseballcardpedia.com)
+- **Role:** Pull rates source + auto sub-category checklists
+- URL format: baseballcardpedia.com/index.php/[Year]_Topps_Chrome
+- Covers: insertion ratios per format, full checklist including auto sub-categories
+- Note: some pull rate categories unverified (cross-check against official Topps PDF)
+
+### Official Topps Odds PDF
+- **Role:** Authoritative pull rate source
+- Available via Blowout Cards: blowoutcards.com/wp/wp-content/uploads/[year]/[month]/[product]Odds.pdf
+- Covers: all parallels, all formats, exact odds per pack and per box
+- This is the ground truth for pull rates — use over Baseballcardpedia when available

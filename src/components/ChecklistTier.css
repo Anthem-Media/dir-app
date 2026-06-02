@@ -121,34 +121,47 @@
 .checklist-tier__card-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   padding: 8px 0 8px 28px; /* indent to align under the tier label */
   border-top: 1px solid var(--color-bg-subtle);
 }
 
+/* Left column: player name + card number stacked */
+.checklist-tier__card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
 .checklist-tier__card-name {
-  flex: 1;
   font-size: 13px;
   color: var(--color-text-primary);
-  /* Prevent very long names from pushing other columns off screen */
-  min-width: 0;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .checklist-tier__card-number {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-text-secondary);
-  min-width: 72px;
-  flex-shrink: 0;
 }
 
+/* Middle column: badges (or fallback category label) */
+.checklist-tier__card-badges {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Fallback muted category name for cards with no badges */
 .checklist-tier__card-category {
   font-size: 12px;
   color: var(--color-text-muted);
-  min-width: 160px;
-  flex-shrink: 0;
 }
 
 .checklist-tier__card-value {
@@ -200,15 +213,8 @@
     gap: 8px;
   }
 
-  /* Shrink the fixed-width columns so all four stay visible on a 375px screen.
-     Name column keeps flex: 1 so it absorbs remaining space. */
-  .checklist-tier__card-number {
-    min-width: 52px;
-  }
-
-  .checklist-tier__card-category {
-    min-width: 80px;
-    font-size: 11px;
+  .checklist-tier__card-info {
+    min-width: 110px;
   }
 
   .checklist-tier__card-value {

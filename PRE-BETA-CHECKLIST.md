@@ -203,13 +203,21 @@ POC weekend work (May 2026) puts real SportsCardsPro card pricing for 2023 Topps
 - **Dependencies:** Slug-bridge script (already queued, separate Opus session). SportsCardsPro CSV import pipeline (queued). Card-pricing data refresh process (queued).
 - **Blocks:** Beta launch. Hardcoded data CANNOT ship to public users.
 
-4.16 Add 'sportscardspro' to value_source CHECK constraint — PENDING
+4.16 Add 'sportscardspro' to value_source CHECK constraint — OPEN
 
-The cards.value_source CHECK constraint currently allows: 'ebay_browse_mitigation', 'ebay_marketplace_insights', 'card_hedge', 'price_charting', 'manual', 'placeholder'. SportsCardsPro CSV is the POC pricing source and writes 'sportscardspro' as the value_source. This will fail the constraint on Supabase import until the amendment is applied.
+The cards.value_source CHECK constraint does not include 'sportscardspro'. POC rebuild script writes this value. Will fail on Supabase import.
+- **Done when:** migration adds 'sportscardspro' to CHECK constraint. dir_database_schema.sql updated.
+- **Blocks:** Supabase import of SCP-sourced pricing data.
 
-- **Done when:** Migration run in Supabase SQL editor adding 'sportscardspro' to the CHECK constraint. dir_database_schema.sql updated to match.
-- **Dependencies:** None — additive constraint change only.
-- **Blocks:** Supabase import of the cards-rebuilt.csv output from the SCP pipeline.
+### 4.17 Pull rates schema redesign — OPEN (must resolve before full seed)
+Current pull_rates table has one row per category. Needs one row per specific parallel per format to support accurate EV math. See SCHEMA-AND-DATA.md OPEN QUESTIONS for full design.
+- **Done when:** schema migration applied, pull_rates.csv rebuilt with per-parallel odds from Topps PDF, EV calculation updated.
+- **Blocks:** full seed, accurate EV display.
+
+### 4.18 Checklist tier restructure — OPEN (must resolve before full seed)
+Current 5-tier structure mixes wide value ranges within tiers. See SCHEMA-AND-DATA.md OPEN QUESTIONS for proposed restructure.
+- **Done when:** card_categories table updated, generate-checklist-data.py updated, checklist display verified.
+- **Blocks:** full seed.
 
 ---
 
@@ -494,6 +502,22 @@ These items are deliberately deferred to the planned UI redesign milestone (see 
 - **Done when:** A new variable (e.g. `--color-shadow-overlay`) is added to `:root` with the dark-mode value (`rgba(0, 0, 0, 0.40)`) and overridden in `[data-theme="light"]` to the lighter value (`rgba(0, 0, 0, 0.12)`). `SiteNavBar.css:85` is updated to consume the variable. The light-mode scoped-selector override in `src/index.css` is removed. THEME.md is updated to document the new variable. The full hex-search audit (`grep -rniE "#[0-9a-f]{3}([0-9a-f]{3})?\b" src/`) plus rgba/rgb sweep returns clean.
 - **Dependencies:** UI redesign milestone scheduled. Bundles naturally with #15.1 and #15.2 because all three are CSS variable hygiene tasks.
 - **Blocks:** Nothing today. Cosmetic / hygiene only.
+
+---
+
+## 16. Data Pipeline
+
+### 16.1 EV calculation model — OPEN
+Lock card-level vs category-level EV model before full seed. See SCHEMA-AND-DATA.md OPEN QUESTIONS.
+
+### 16.2 Browser automation for SCP CSV downloads — OPEN
+SportsCardsPro blocks automated HTTP requests (bot detection). Manual download is current workaround. Browser extension or authenticated session approach needed before seeding 600 box sets.
+- **Done when:** automated download solution identified and tested on 3+ box sets.
+- **Blocks:** efficient full seed workflow.
+
+### 16.3 Add .~lock ODS files to .gitignore — OPEN
+OpenOffice creates lock files (e.g. .~lock.2023-topps-chrome-baseball_rebuilt.ods#) when files are open. These were committed accidentally. Add pattern to .gitignore.
+- **Done when:** .gitignore updated, lock file removed from repo history.
 
 ---
 

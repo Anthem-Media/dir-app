@@ -1,0 +1,36 @@
+/*
+ * CardBadge — pill badges for card attributes in the checklist.
+ * All colors via CSS variables from index.css — no hardcoded hex.
+ */
+
+.card-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 99px;
+  border: 1px solid;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.card-badge--auto      { background: var(--badge-auto-bg);      color: var(--badge-auto-text);      border-color: var(--badge-auto-border); }
+.card-badge--rc        { background: var(--badge-rc-bg);        color: var(--badge-rc-text);        border-color: var(--badge-rc-border); }
+.card-badge--refractor { background: var(--badge-refractor-bg); color: var(--badge-refractor-text); border-color: var(--badge-refractor-border); }
+.card-badge--numbered  { background: var(--badge-numbered-bg);  color: var(--badge-numbered-text);  border-color: var(--badge-numbered-border); }
+.card-badge--relic     { background: var(--badge-relic-bg);     color: var(--badge-relic-text);     border-color: var(--badge-relic-border); }
+.card-badge--casehit   { background: var(--badge-casehit-bg);   color: var(--badge-casehit-text);   border-color: var(--badge-casehit-border); }
+.card-badge--grail     { background: var(--badge-grail-bg);     color: var(--badge-grail-text);     border-color: var(--badge-grail-border); }
+.card-badge--1of1      { background: var(--badge-1of1-bg);      color: var(--badge-1of1-text);      border-color: var(--badge-1of1-border); }
+.card-badge--sp        { background: var(--badge-sp-bg);        color: var(--badge-sp-text);        border-color: var(--badge-sp-border); }
+.card-badge--pulled    { background: var(--badge-pulled-bg);    color: var(--badge-pulled-text);    border-color: var(--badge-pulled-border); }
+.card-badge--incirc    { background: var(--badge-incirc-bg);    color: var(--badge-incirc-text);    border-color: var(--badge-incirc-border); }

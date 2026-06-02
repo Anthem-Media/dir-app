@@ -85,6 +85,26 @@ These are `var()`-of-`var()` aliases — semantic names that resolve to existing
 | `--color-nav-hover` | `rgba(255, 255, 255, 0.08)` | Hover background for nav links — a translucent white wash that works over any nav color. |
 | `--color-nav-active` | `rgba(124, 111, 255, 0.20)` | Active/selected nav link background — a translucent wash of the accent purple (`#7c6fff`). The RGB triplet `124, 111, 255` literally encodes the accent color. |
 
+### Badge tints
+
+Eleven variable groups added June 2026 for the checklist `CardBadge` component. Each group has three variables: bg (pill background), text (label + icon color), border (pill border). All are dark-mode values tuned to the existing dark palette.
+
+| Group | bg | text | border | Role |
+|---|---|---|---|---|
+| `--badge-1of1-*` | `#1c0a00` | `#fde68a` | `#78350f` | 1/1 unique cards (Superfractor etc.) |
+| `--badge-grail-*` | `#18191d` | `#d4d4d8` | `#52525b` | Grail cards (print run 2–10) |
+| `--badge-casehit-*` | `#450a0a` | `#f87171` | `#7f1d1d` | Case hit cards |
+| `--badge-auto-*` | `#1e1a3d` | `#a89fff` | `#3d3480` | Autograph cards |
+| `--badge-relic-*` | `#2d1008` | `#fb923c` | `#9a3412` | Relic / memorabilia cards |
+| `--badge-rc-*` | `#052e16` | `#4ade80` | `#14532d` | Rookie cards |
+| `--badge-refractor-*` | `#0c2340` | `#60a5fa` | `#1d4ed8` | Refractor parallels |
+| `--badge-numbered-*` | `#2d1a00` | `#fbbf24` | `#92400e` | Numbered parallels (print run > 10) |
+| `--badge-sp-*` | `#2d0a1a` | `#f9a8d4` | `#831843` | Short print cards |
+| `--badge-incirc-*` | `#052e16` | `#4ade80` | `#14532d` | In circulation (grail tracking) |
+| `--badge-pulled-*` | `#18191d` | `#71717a` | `#3f3f46` | Pulled & sold (grail tracking) |
+
+These variables are consumed only by `src/components/CardBadge.jsx` and `CardBadge.css`. No light-mode overrides defined yet — add under `[data-theme="light"]` during the UI redesign milestone.
+
 ### Badge / tag tints
 
 | Variable | Current Value | Role |

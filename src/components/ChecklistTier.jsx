@@ -25,7 +25,25 @@
 
 import { filterCardsByQuery } from '../utils/checklistUtils';
 import { formatCurrency } from '../utils/formatters';
+import { CardBadge } from './CardBadge';
 import './ChecklistTier.css';
+
+// Returns true if CardBadge would render at least one badge for this card.
+// Used to decide whether to show the plain category name fallback.
+function hasBadges(card) {
+  const pr = Number(card.print_run);
+  const hasPrintRun = card.print_run != null && card.print_run !== '' && !isNaN(pr);
+  if (hasPrintRun && pr <= 10) return true;
+  if (card.is_case_hit === true || card.is_case_hit === 'true' || card.is_case_hit === 'True') return true;
+  if (card.is_autograph === true || card.is_autograph === 'true' || card.is_autograph === 'True') return true;
+  if (card.is_relic === true || card.is_relic === 'true' || card.is_relic === 'True') return true;
+  if (card.rookie_card === true || card.rookie_card === 'true' || card.rookie_card === 'True') return true;
+  if (card.category_name && card.category_name.toLowerCase().includes('refractor')) return true;
+  if (hasPrintRun && pr > 10) return true;
+  if (card.category_name && card.category_name.toLowerCase().includes('short print')) return true;
+  if (card.circulation_status === 'in_circulation' || card.circulation_status === 'pulled_sold') return true;
+  return false;
+}
 
 // How many cards to show before the "Show all" button appears.
 const COLLAPSED_CARD_LIMIT = 5;
@@ -107,9 +125,17 @@ export function ChecklistTier({
           {visibleCards.length > 0 ? (
             visibleCards.map((card) => (
               <div key={card.id} className="checklist-tier__card-row">
-                <span className="checklist-tier__card-name">{card.name}</span>
-                <span className="checklist-tier__card-number">{card.number}</span>
-                <span className="checklist-tier__card-category">{card.category}</span>
+                <div className="checklist-tier__card-info">
+                  <span className="checklist-tier__card-name">{card.name}</span>
+                  <span className="checklist-tier__card-number">{card.number}</span>
+                </div>
+                <div className="checklist-tier__card-badges">
+                  <CardBadge card={card} />
+                  {/* Fallback: show category name in muted text when no badges render */}
+                  {!hasBadges(card) && (
+                    <span className="checklist-tier__card-category">{card.category}</span>
+                  )}
+                </div>
                 <span className="checklist-tier__card-value">
                   {card.value !== null ? formatCurrency(card.value) : ''}
                 </span>

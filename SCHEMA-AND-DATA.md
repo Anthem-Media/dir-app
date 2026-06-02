@@ -420,6 +420,44 @@ We've been assuming several things about eBay API capabilities based on web UI b
 - Depends on: eBay API rate limits, price volatility tolerance, scaling reference.
 - Affects: data freshness, API quota usage, infrastructure cost.
 
+### EV calculation model — must resolve before full seed
+
+**NEW — Pull rates are category-level, not card-level. Two valid EV models exist:**
+
+Option A — Card-level EV: per_card_probability = category_odds / cards_in_category. EV = sum of (card_price × per_card_probability) across all cards. Most accurate but requires knowing exact card count per parallel type.
+
+Option B — Category-level EV: expected_pulls = packs_per_box / category_odds_denominator. EV = sum of (expected_pulls × avg_category_value) per category. Simpler but averages hide high-value outliers within categories.
+
+Both models are mathematically equivalent when categories have uniform value distribution. They diverge when categories contain wide value ranges (e.g. Numbered Refractor spans $10-$11,998).
+
+- Depends on: pull rates schema redesign (per-parallel odds)
+- Affects: EV display, ROI display, all format calculations
+- Blocks: full seed
+
+### Pull rates schema redesign — must resolve before full seed
+
+Current pull_rates table has one row per category per format. For accurate EV math, needs one row per specific parallel per format matching the Topps official odds PDF structure. This means:
+- Splitting Numbered Refractor into: Magenta /399, Magenta Speckle /350, Purple Speckle /299, Purple /250, Aqua /199, Blue /150, Green /99, Gold /50, Orange /25, Red /5 etc.
+- Each with its own Hobby/Jumbo/Blaster/Mega/Breaker odds from the official Topps PDF
+- cards table variation_name must match pull_rates variation_name exactly for the join to work
+
+- Depends on: schema migration
+- Affects: EV model, pull rates display, checklist tier structure
+- Blocks: full seed
+
+### Checklist tier restructure — must resolve before full seed
+
+Current 5-tier structure puts Numbered Refractors ($10-$11,998) and plain Refractors ($2-$50) in the same Tier 3. This is confusing for users. Proposed restructure:
+- Tier 1: Premium Hits (Superfractor, Memorabilia/Relic, print_run ≤ 10)
+- Tier 2: Autographs (Base Auto, Refractor Auto, Numbered Autograph)
+- Tier 3: Numbered Parallels (Numbered Refractor, Numbered Rookie Refractor)
+- Tier 4: Refractors (plain Refractor, Rookie Refractor, Insert, Short Print)
+- Tier 5: Base & Rookies (Base, Base Rookie)
+
+- Depends on: pull rates schema redesign
+- Affects: checklist display, EV tier grouping, card_categories table
+- Blocks: full seed
+
 ### Auto sub-category schema gap (must resolve before full seed)
 
 **10a. Should card_categories be expanded to cover auto sub-types?**
@@ -555,6 +593,36 @@ Specific moments where reality changed our thinking. Each entry includes what we
 - **Expected:** The value_source CHECK constraint on the cards table would cover SportsCardsPro as a source.
 - **Saw:** The constraint only allows: 'ebay_browse_mitigation', 'ebay_marketplace_insights', 'card_hedge', 'price_charting', 'manual', 'placeholder'. SportsCardsPro is not in the list. The POC rebuild script currently writes 'sportscardspro' as value_source which will fail the constraint when imported to Supabase.
 - **Changed:** Schema amendment needed — add 'sportscardspro' to the value_source CHECK constraint before Supabase import. Tracked as open item below.
+
+### June 2026 — Pull rates are category-level odds per pack, not card-level
+
+- **Expected:** Pull rates from Baseballcardpedia could be used directly in card-level EV math (price × pull_probability per card).
+- **Saw:** Topps official odds PDF confirms pull rates are category-level — e.g. "Refractor 1 in 3" means any refractor appears 1 in 3 packs, not any specific refractor card. There are 220 refractor cards in the set, so any specific refractor card has a 1 in 660 chance per pack. Using category odds directly in card-level EV math overstates every card's pull probability by the number of cards in that category.
+- **Changed:** EV calculation model is unresolved. Two valid approaches exist: (1) card-level EV using category odds divided by cards in category, (2) category-level EV using expected pulls per box × average category value. Both are mathematically equivalent when done correctly. Decision deferred to dedicated session before full seed. Current hardcoded EV numbers are approximations only.
+- **Pipeline implication:** pull_rates.csv currently has one row per category per format. For accurate card-level EV, it needs one row per specific parallel per format (e.g. Magenta /399, Purple /250, Gold /50 each get their own row with their own odds from the Topps PDF). This is a schema change needed before full seed.
+
+### June 2026 — Tier numbering convention confirmed
+
+- **Expected:** Tier 1 = Base (lowest value), Tier 5 = Premium Hits (highest value).
+- **Saw:** Standard hobby industry convention is the opposite — Tier 1 = Premium Hits (best cards), Tier 5 = Base (common cards). Our schema already has this correct (Tier 1 = Premium Hits per the schema decisions log). The display was showing tiers in the wrong order with wrong labels during POC development.
+- **Changed:** Display order confirmed: Premium Hits first (top of checklist), Base & Rookies last. sortTiersByValue in checklistUtils.js handles this. Tier restructure needed before full seed — numbered parallels ($10-$11,998) should not sit in the same tier as plain refractors ($2-$50).
+
+### June 2026 — POC data pipeline validated end to end
+
+- **What was built:** Full data pipeline from SportsCardsPro CSV → verified card checklist → real prices → hardcoded into box profile page.
+- **Scripts created:**
+  - `scripts/rebuild-cards-from-scp.py` — rebuilds cards tab from SCP CSV, carries over print_run from seed, infers category_name, flags is_autograph and rookie_card
+  - `scripts/generate-hardcoded-data.py` — generates MOCK_TOP_CHASES and MOCK_PULL_RATES JavaScript from CSVs
+  - `scripts/generate-checklist-data.py` — generates MOCK_CHECKLIST_TIERS JavaScript from cards-rebuilt.csv
+  - `scripts/calculate-ev.py` — calculates EV per format from pull rates and card prices
+- **Output files:** `scripts/output/cards-rebuilt.csv` (8,502 verified cards), `scripts/output/pull_rates.csv`, `scripts/output/checklist-data.js`
+- **Known gaps before full seed:** pull rates model (per-parallel), EV calculation model, tier restructure, team/position data missing, insert cards missing from checklist, auto sub-categories incomplete
+
+### June 2026 — Base card pull rates not published by Topps
+
+- **Expected:** Topps would publish base card odds like all other parallels.
+- **Saw:** Topps official odds PDF has no row for base cards — they are considered a given (every pack contains base cards). Pull rate for base as a category is 1 in 1 (100% per pack). However per-specific-card odds are not published.
+- **Changed:** Base and Base Rookie display as 1 in 1 in the pull rates section. They are excluded from EV calculation until the EV model is properly designed. Notes added to pull_rates.csv.
 
 ---
 

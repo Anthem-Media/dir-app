@@ -3,27 +3,41 @@
 ## Current State
 Auth phase COMPLETE. Email Infrastructure phase COMPLETE. POC phase in progress — hobbyripper.com live on Vercel, Supabase hooked up. Stage 1 Step 4 (data pipeline test) is in progress: atomic facts doc (`/data/facts/2023-topps-chrome-baseball.facts.md`) and schema-shaped seed spreadsheet (~10,500 rows across 3 tabs) have been built for 2023 Topps Chrome Baseball as the POC pipeline test box. Slug-bridge script not yet written. Homepage image URLs populated for all 56 BOXES entries in `src/utils/homePageMockData.js`. Rename pass (DIR → Ripper across codebase and docs) is scheduled after POC is complete and working on hobbyripper.com, right before Pro audit #1. eBay Partner Network enrollment is queued for as soon as real data is live on the domain.
 
-### Stage 1 Step 4 — current state (May 2026)
+### Stage 1 Step 4 — current state (June 2026)
 
 End-to-end pipeline test with 2023 Topps Chrome Baseball as the POC box. Live on hobbyripper.com via Vercel. Database live in Supabase.
 
-Completed:
+**POC STATUS (June 2026): Box profile page for 2023 Topps Chrome Baseball is fully wired with real hardcoded data.** All sections display real data sourced from SportsCardsPro CSV and Baseballcardpedia:
+- Hero section: real market price, MSRP, EV, ROI per format (hardcoded from calculated values)
+- Top Chases: top 7 cards by value with RC/AUTO/print run badges
+- Grails: top 7 cards with print_run ≤ 10 with real prices
+- Pull rates: real Baseballcardpedia odds per category
+- Full checklist: 8,502 verified cards across 5 tiers with real prices
+- EV math: calculated but model needs redesign before full seed (see SCHEMA-AND-DATA.md)
+
+Known gaps before Supabase wiring:
+- EV model unresolved (pull rates are category-level, not card-level)
+- Pull rates need per-parallel redesign
+- Tier structure needs restructure
+- team/position/rookie_card data incomplete
+- Insert cards missing from checklist (SCP doesn't carry them)
+- Auto sub-categories incomplete (93 cards appended from seed, ~150 still missing parallels)
+- Grail prices sourced from SCP where available, missing for many 1/1 cards
+
+Completed (prior sessions):
 - Atomic facts doc built and locked: /data/facts/2023-topps-chrome-baseball.facts.md (one box, free-form markdown, source-by-source bullets, open-questions section)
 - Schema-shaped seed spreadsheet generated: ~10,500 rows across 3 tabs (box_sets, cards, pull_rates). Slug references in place of FK IDs. _needs_review and _source_notes columns present (worksheet-only, dropped before CSV export)
 - Homepage image URLs wired up: all 56 BOXES entries in src/utils/homePageMockData.js have real imageUrl values. Live on hobbyripper.com
 - Three external pricing-source inquiries sent: SportsCardsPro (responded — see SportsCardsPro POC viability bullet), Card Hedge (API pricing — awaiting reply), Beckett (data licensing — awaiting reply)
 - eBay partnership synopsis drafted for Cam's network outreach. Asks for ~100K Browse calls/day and ~50-100K Marketplace Insights calls/day. Numbers explicitly labeled as derived not measured.
 
-Open follow-ups for Step 4:
-- Slug-bridge script (next Claude Code Opus prompt). Reads the 3-tab seed spreadsheet, resolves slugs to Supabase IDs, writes import-ready CSVs. Self-contained
-- MOCK_PULL_RATES refactor — currently dummy data in src/hooks/useBoxProfile.js. Wire to real Supabase pull_rates rows after import
+Still open before Step 4 closes:
+- Slug-bridge script. Reads the 3-tab seed spreadsheet, resolves slugs to Supabase IDs, writes import-ready CSVs. Self-contained
 - DUMMY_FORMAT_DATA refactor — currently inlined in BoxProfilePage.jsx. Move into useBoxProfile, wire to parent_set_id group of box_sets rows
-- DUMMY_TIER_TREND_DATA — keep dummy in Step 4, just relocate into useBoxProfile so Stage 3 (eBay API or SportsCardsPro) is a pure data-source swap
-- Spreadsheet has placeholder subject names: YouthQuake (50 rows), Topps Chrome Exposé (30 rows), TacoFractor (200 rows). Replace with real names from Diamond Cards Online before that data hits production. Not blocking Step 4
-- 2024 Topps Chrome → 2023 Topps Chrome correction in PRE-BETA-CHECKLIST.md #5.1 (live site uses 2023, doc still references 2024)
-- Schema amendments queued for after Step 4: per-parallel pull rates (currently using category-representative rates, EV math is approximate). box_guarantees table migration queued separately — see PRE-BETA-CHECKLIST #4.14
-- Format tabs for 2023 Topps Chrome — pending Cam conversation about which formats actually exist for this product. May affect seed spreadsheet contents.
-- Weekend-of-May-2026 plan: three goals (box image, guaranteed pulls UI + dummy data, real SportsCardsPro pricing in dummy data layer) are scoped as HARDCODED-DATA work for the weekend. Supabase wiring for these same three goals is queued for the following week. None of the weekend's hardcoded work ships to beta — Supabase wiring must be complete and verified before beta launch. Hardcoded-to-Supabase transition is tracked under PRE-BETA-CHECKLIST.md items (#4.14 for box_guarantees, plus PRE-BETA-CHECKLIST.md #4.15 for SportsCardsPro pricing replacement).
+- DUMMY_TIER_TREND_DATA — keep dummy, relocate into useBoxProfile so Stage 3 is a pure data-source swap
+- Spreadsheet has placeholder subject names: YouthQuake (50 rows), Topps Chrome Exposé (30 rows), TacoFractor (200 rows). Replace with real names from Diamond Cards Online before production.
+- Schema amendments: per-parallel pull rates redesign, EV model lock, tier restructure. See PRE-BETA-CHECKLIST #4.17, #4.18, #16.1
+- Format tabs for 2023 Topps Chrome — pending Cam conversation about which formats exist for this product
 
 Step 4 closes when: the 2023 Topps Chrome Baseball box profile renders end-to-end on hobbyripper.com with real Supabase pull rates, format switcher pulls real rows, and price trend chart still works (with dummy data, sourced from useBoxProfile instead of inlined).
 
