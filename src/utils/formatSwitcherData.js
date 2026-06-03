@@ -25,7 +25,7 @@ export const DUMMY_FORMAT_DATA = {
   hobby: {
     label: 'Hobby',
     slug: 'hobby',
-    imageUrl: "/images/boxes/2023 topps chrome baseball hobby'.webp",
+    imageUrl: '/images/boxes/2023 topps chrome baseball hobby.webp',
     msrp: 129.99,
     marketPrice: 234.89,
     packsPerBox: 18,
