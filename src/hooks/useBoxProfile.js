@@ -14,7 +14,6 @@ import {
   MOCK_BOX,
   MOCK_TOP_CHASES,
   MOCK_GRAIL_CARDS,
-  MOCK_PULL_RATES,
   MOCK_PRICE_HISTORY,
   MOCK_CHECKLIST_TIERS,
 } from '../utils/boxProfileMockData';
@@ -28,7 +27,6 @@ export function useBoxProfile(boxId) {
     box: MOCK_BOX,
     topChases: MOCK_TOP_CHASES,
     grailCards: MOCK_GRAIL_CARDS,
-    pullRates: MOCK_PULL_RATES,
     priceHistory: MOCK_PRICE_HISTORY,
     checklistTiers: MOCK_CHECKLIST_TIERS,
     isLoading: false,

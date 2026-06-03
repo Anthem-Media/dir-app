@@ -30,6 +30,8 @@ Completed (prior sessions):
 - Homepage image URLs wired up: all 56 BOXES entries in src/utils/homePageMockData.js have real imageUrl values. Live on hobbyripper.com
 - Three external pricing-source inquiries sent: SportsCardsPro (responded — see SportsCardsPro POC viability bullet), Card Hedge (API pricing — awaiting reply), Beckett (data licensing — awaiting reply)
 - eBay partnership synopsis drafted for Cam's network outreach. Asks for ~100K Browse calls/day and ~50-100K Marketplace Insights calls/day. Numbers explicitly labeled as derived not measured.
+- Card badge system built: CardBadge.jsx + CardBadge.css in src/components/. Badges wired into checklist card rows. Field inference pattern used for mock data compatibility (card.is_autograph ?? category.includes('auto')) — real Supabase boolean fields will be used automatically once wired, no second fix needed. Superfractor 1/1 badge blocked on mock data missing print_run field — resolves automatically at Supabase wiring.
+- Top Chases stale data fixed: useState([]) with fake async timeout replaced with synchronous mock data return in useBoxProfile.js. Single source of truth confirmed — MOCK_TOP_CHASES defined once in boxProfileMockData.js, imported once in useBoxProfile.js, BoxProfilePage.jsx reads only from hook.
 
 Still open before Step 4 closes:
 - Slug-bridge script. Reads the 3-tab seed spreadsheet, resolves slugs to Supabase IDs, writes import-ready CSVs. Self-contained

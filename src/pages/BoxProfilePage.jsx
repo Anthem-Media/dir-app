@@ -72,9 +72,9 @@ export function BoxProfilePage() {
   // Which tier headers are open (collapsed by default — empty Set).
   const [expandedTiers, setExpandedTiers] = useState(new Set());
 
-  // Which open tiers are showing the full card list beyond the initial 5.
-  // Separate from expandedTiers so closing and reopening a tier resets to the 5-card view.
-  const [expandedCardLists, setExpandedCardLists] = useState(new Set());
+  // How many cards each open tier is currently showing, keyed by tier ID.
+  // Missing key = tier uses default page size. Cleared when a tier collapses.
+  const [shownCounts, setShownCounts] = useState({});
 
   // Search queries keyed by tier ID. Missing keys are treated as empty strings.
   const [tierSearchQueries, setTierSearchQueries] = useState({});
@@ -94,25 +94,17 @@ export function BoxProfilePage() {
     });
     if (isCurrentlyExpanded) {
       setTierSearchQueries((prev) => ({ ...prev, [tierId]: '' }));
-      setExpandedCardLists((prev) => {
-        const next = new Set(prev);
-        next.delete(tierId);
+      setShownCounts((prev) => {
+        const next = { ...prev };
+        delete next[tierId];
         return next;
       });
     }
   }
 
-  // Toggle between the initial 5-card view and the full card list within an open tier.
-  function handleShowAllToggle(tierId) {
-    setExpandedCardLists((prev) => {
-      const next = new Set(prev);
-      if (next.has(tierId)) {
-        next.delete(tierId);
-      } else {
-        next.add(tierId);
-      }
-      return next;
-    });
+  // Set the new total visible count for a tier, as computed by ChecklistTier.
+  function handleShowMore(tierId, newTotal) {
+    setShownCounts((prev) => ({ ...prev, [tierId]: newTotal }));
   }
 
   function handleTierSearchChange(tierId, query) {
@@ -310,7 +302,7 @@ export function BoxProfilePage() {
         </div>
         <div className="box-profile-page__pull-rate-grid">
           {formatData.pullRates.map((rate) => (
-            <PullRateCard key={rate.id} pullRate={rate} />
+            <PullRateCard key={rate.category} pullRate={rate} />
           ))}
         </div>
       </section>
@@ -365,8 +357,8 @@ export function BoxProfilePage() {
               tier={tier}
               isExpanded={expandedTiers.has(tier.id)}
               onToggle={() => handleTierToggle(tier.id)}
-              isShowingAll={expandedCardLists.has(tier.id)}
-              onShowAllToggle={() => handleShowAllToggle(tier.id)}
+              shownCount={shownCounts[tier.id] ?? 0}
+              onShowMore={(pageSize) => handleShowMore(tier.id, pageSize)}
               searchQuery={tierSearchQueries[tier.id] || ''}
               onSearchChange={(query) => handleTierSearchChange(tier.id, query)}
             />

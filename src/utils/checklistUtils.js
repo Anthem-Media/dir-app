@@ -49,8 +49,8 @@ export function filterCardsByQuery(cards, query) {
 
   const lower = trimmed.toLowerCase();
   return cards.filter((card) => {
-    const nameMatch   = card.name?.toLowerCase().includes(lower)   ?? false;
-    const numberMatch = card.number?.toLowerCase().includes(lower) ?? false;
-    return nameMatch || numberMatch;
+    const name   = card.player_name ?? card.name ?? '';
+    const number = card.card_number ?? card.number ?? '';
+    return name.toLowerCase().includes(lower) || number.toLowerCase().includes(lower);
   });
 }

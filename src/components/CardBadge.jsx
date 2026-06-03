@@ -34,15 +34,20 @@ import './CardBadge.css';
 const ICON_SIZE = 11;
 
 export function CardBadge({ card }) {
-  const {
-    print_run: printRun,
-    is_case_hit: isCaseHit,
-    is_autograph: isAutograph,
-    is_relic: isRelic,
-    rookie_card: rookieCard,
-    category_name: categoryName,
-    circulation_status: circulationStatus,
-  } = card;
+  // Support both real DB field names (category_name, is_autograph, etc.) and
+  // the simplified mock data shape (category). The ?? fallback means this
+  // component works with mock data today and real Supabase data later with no
+  // second fix required.
+  const cat = (card.category_name ?? card.category ?? '').toLowerCase();
+
+  const printRun = card.print_run ?? null;
+  const isCaseHit = card.is_case_hit ?? false;
+  const isAuto    = card.is_autograph ?? cat.includes('auto');
+  const isRelic   = card.is_relic ?? cat.includes('relic');
+  const isRC      = card.rookie_card ?? cat.includes('rookie');
+  const isRefractor = cat.includes('refractor');
+  const isSP      = cat.includes('short print');
+  const circulation = card.circulation_status ?? null;
 
   const badges = [];
 
@@ -65,7 +70,7 @@ export function CardBadge({ card }) {
   }
 
   // Case hit
-  if (isCaseHit === true || isCaseHit === 'true' || isCaseHit === 'True') {
+  if (isCaseHit === true || isCaseHit === 'true') {
     badges.push(
       <span key="casehit" className="card-badge card-badge--casehit">
         <Flame size={ICON_SIZE} />
@@ -75,7 +80,7 @@ export function CardBadge({ card }) {
   }
 
   // Auto
-  if (isAutograph === true || isAutograph === 'true' || isAutograph === 'True') {
+  if (isAuto) {
     badges.push(
       <span key="auto" className="card-badge card-badge--auto">
         <Pen size={ICON_SIZE} />
@@ -85,7 +90,7 @@ export function CardBadge({ card }) {
   }
 
   // Relic
-  if (isRelic === true || isRelic === 'true' || isRelic === 'True') {
+  if (isRelic) {
     badges.push(
       <span key="relic" className="card-badge card-badge--relic">
         <Shirt size={ICON_SIZE} />
@@ -95,7 +100,7 @@ export function CardBadge({ card }) {
   }
 
   // RC
-  if (rookieCard === true || rookieCard === 'true' || rookieCard === 'True') {
+  if (isRC) {
     badges.push(
       <span key="rc" className="card-badge card-badge--rc">
         <Star size={ICON_SIZE} />
@@ -105,7 +110,7 @@ export function CardBadge({ card }) {
   }
 
   // Refractor
-  if (categoryName && categoryName.toLowerCase().includes('refractor')) {
+  if (isRefractor) {
     badges.push(
       <span key="refractor" className="card-badge card-badge--refractor">
         <Sparkles size={ICON_SIZE} />
@@ -126,7 +131,7 @@ export function CardBadge({ card }) {
   }
 
   // Short Print
-  if (categoryName && categoryName.toLowerCase().includes('short print')) {
+  if (isSP) {
     badges.push(
       <span key="sp" className="card-badge card-badge--sp">
         <Layers size={ICON_SIZE} />
@@ -135,8 +140,8 @@ export function CardBadge({ card }) {
     );
   }
 
-  // In circulation (only meaningful on Grail cards, but rendered by condition alone)
-  if (circulationStatus === 'in_circulation') {
+  // In circulation
+  if (circulation === 'in_circulation') {
     badges.push(
       <span key="incirc" className="card-badge card-badge--incirc">
         <CircleDot size={ICON_SIZE} />
@@ -146,7 +151,7 @@ export function CardBadge({ card }) {
   }
 
   // Pulled
-  if (circulationStatus === 'pulled_sold') {
+  if (circulation === 'pulled_sold') {
     badges.push(
       <span key="pulled" className="card-badge card-badge--pulled">
         <CheckCircle size={ICON_SIZE} />

@@ -18,30 +18,40 @@
 
 import { formatCurrency } from '../utils/formatters';
 import { getCirculationBadgeConfig } from '../utils/grailsUtils';
+import { CardBadge } from './CardBadge';
 import './GrailCard.css';
 
 export function GrailCard({ card }) {
   const { playerName, variationName, rookieCard, isAutograph, printRun, currentValue, circulationStatus } = card;
   const { label: badgeLabel } = getCirculationBadgeConfig(circulationStatus);
-  const printRunLabel = printRun != null ? (printRun === 1 ? '1/1' : `/${printRun}`) : null;
+
+  // Map camelCase mock data shape to the snake_case shape CardBadge expects.
+  // Circulation status intentionally excluded — handled by the dedicated badge below
+  // so it shows all three states including 'unknown'.
+  const badgeCard = {
+    rookie_card: rookieCard,
+    is_autograph: isAutograph,
+    print_run: printRun,
+  };
+
+  const printRunDisplay = printRun != null ? (printRun === 1 ? ' 1/1' : ` /${printRun}`) : '';
 
   return (
     <div className="grail-card">
-      {/* Card thumbnail — placeholder until real card images are sourced.
-          Matches TopChaseRow.jsx so both lists line up visually. */}
+      {/* Card thumbnail — placeholder until real card images are sourced */}
       <div className="grail-card__image">
         <div className="grail-card__image-placeholder" aria-hidden="true" />
       </div>
 
-      {/* Player name, badges, and variation */}
+      {/* Line 1: player name. Line 2: variation + print run. */}
       <div className="grail-card__info">
-        <div className="grail-card__name-line">
-          <span className="grail-card__player">{playerName}</span>
-          {rookieCard && <span className="grail-card__rc-tag">RC</span>}
-          {isAutograph && <span className="grail-card__auto-tag">AUTO</span>}
-          {printRunLabel && <span className="grail-card__print-run-tag">{printRunLabel}</span>}
-        </div>
-        <span className="grail-card__variation">{variationName}</span>
+        <span className="grail-card__player">{playerName}</span>
+        <span className="grail-card__variation">{variationName}{printRunDisplay}</span>
+      </div>
+
+      {/* Attribute badges (Auto, RC, Grail/1of1) via shared CardBadge component */}
+      <div className="grail-card__badges">
+        <CardBadge card={badgeCard} />
       </div>
 
       {/* Circulation status badge — color applied via data-status in GrailCard.css */}
@@ -49,7 +59,6 @@ export function GrailCard({ card }) {
         {badgeLabel}
       </span>
 
-      {/* Market value */}
       <span className="grail-card__value">{currentValue != null ? formatCurrency(currentValue) : '—'}</span>
     </div>
   );

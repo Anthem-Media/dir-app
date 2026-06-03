@@ -103,7 +103,7 @@ Eleven variable groups added June 2026 for the checklist `CardBadge` component. 
 | `--badge-incirc-*` | `#052e16` | `#4ade80` | `#14532d` | In circulation (grail tracking) |
 | `--badge-pulled-*` | `#18191d` | `#71717a` | `#3f3f46` | Pulled & sold (grail tracking) |
 
-These variables are consumed only by `src/components/CardBadge.jsx` and `CardBadge.css`. No light-mode overrides defined yet — add under `[data-theme="light"]` during the UI redesign milestone.
+These variables are consumed only by `src/components/CardBadge.jsx` and `CardBadge.css`. Light-mode overrides for all 11 groups are defined in the `[data-theme="light"]` block in `index.css`. Pattern: very light tinted background, darkened hue for text (readable on white), medium-saturation border. Semantic hue per badge type is preserved across both modes.
 
 ### Badge / tag tints
 

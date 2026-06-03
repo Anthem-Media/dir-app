@@ -198,6 +198,12 @@ Items here have been explicitly locked in through partner discussion or project 
 
 Real-world observations that should inform schema and pricing decisions. These aren't decisions yet — they're inputs to upcoming decisions.
 
+### June 2026 — Badge system confirms schema fields are correct
+
+- All badge fields (is_autograph, rookie_card, print_run, is_relic, is_case_hit, circulation_status) already exist on the cards table. No schema changes needed for badges.
+- Mock data gap: Superfractor rows in boxProfileMockData.js do not have print_run: 1. Badge inference falls back to category string matching, which does not cover the 1/1 case. Real Supabase data must have print_run = 1 on all Superfractor rows.
+- Badge priority order locked: 1/1 → Grail → Case hit → Auto → Relic → RC → Refractor → Numbered → SP → In circulation → Pulled.
+
 ### April 2026 — eBay sold listings, initial 10-minute observation
 
 **Volume:** Tons of sold listings available for modern cards. Volume isn't the problem.

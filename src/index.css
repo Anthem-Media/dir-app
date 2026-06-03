@@ -184,6 +184,53 @@
      overlays, etc.) that are meant to stay dark in both modes. Component-scoped
      overrides below handle the bottom nav bar — the only place those variables
      need to flip in light mode. */
+
+  /* Badge tints — light-mode equivalents for all 11 CardBadge groups.
+     Pattern: very light tinted bg, darkened hue for text (readable on white),
+     medium-saturation border. Semantic hue per badge type is preserved. */
+  --badge-auto-bg:          #ede9fe;
+  --badge-auto-text:        #5b21b6;
+  --badge-auto-border:      #7c3aed;
+
+  --badge-rc-bg:            #dcfce7;
+  --badge-rc-text:          #15803d;
+  --badge-rc-border:        #16a34a;
+
+  --badge-refractor-bg:     #dbeafe;
+  --badge-refractor-text:   #1d4ed8;
+  --badge-refractor-border: #3b82f6;
+
+  --badge-numbered-bg:      #fef3c7;
+  --badge-numbered-text:    #92400e;
+  --badge-numbered-border:  #d97706;
+
+  --badge-relic-bg:         #ffedd5;
+  --badge-relic-text:       #c2410c;
+  --badge-relic-border:     #ea580c;
+
+  --badge-casehit-bg:       #fee2e2;
+  --badge-casehit-text:     #b91c1c;
+  --badge-casehit-border:   #ef4444;
+
+  --badge-grail-bg:         #f4f4f5;
+  --badge-grail-text:       #3f3f46;
+  --badge-grail-border:     #a1a1aa;
+
+  --badge-1of1-bg:          #fef9c3;
+  --badge-1of1-text:        #92400e;
+  --badge-1of1-border:      #ca8a04;
+
+  --badge-sp-bg:            #fce7f3;
+  --badge-sp-text:          #9d174d;
+  --badge-sp-border:        #db2777;
+
+  --badge-pulled-bg:        #f4f4f5;
+  --badge-pulled-text:      #52525b;
+  --badge-pulled-border:    #a1a1aa;
+
+  --badge-incirc-bg:        #dcfce7;
+  --badge-incirc-text:      #15803d;
+  --badge-incirc-border:    #16a34a;
 }
 
 /* ─── Light Mode Component Overrides ──────────────────────────────────────

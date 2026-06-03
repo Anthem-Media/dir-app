@@ -105,20 +105,40 @@ def main() -> None:
         # Build card objects
         card_lines = []
         for _, row in tier_sorted.iterrows():
-            cn = str(row.get("card_number", "")).strip()
-            vn = str(row.get("variation_name", "")).strip()
-            pn = str(row.get("player_name", "")).strip()
+            cn  = str(row.get("card_number",   "")).strip()
+            vn  = str(row.get("variation_name","")).strip()
+            pn  = str(row.get("player_name",   "")).strip()
             cat = str(row.get("category_name", "")).strip()
             val = row["_value"]
             val_js = f"{val:.2f}" if not pd.isna(val) else "null"
 
+            # print_run — integer or null
+            pr_raw = str(row.get("print_run", "")).strip()
+            try:
+                pr_js = str(int(float(pr_raw))) if pr_raw and pr_raw.lower() != "nan" else "null"
+            except (ValueError, TypeError):
+                pr_js = "null"
+
+            # boolean fields — stored as "True"/"False" strings in the CSV
+            def to_bool_js(field):
+                v = str(row.get(field, "")).strip().lower()
+                return "true" if v == "true" else "false"
+
             card_id = f"{slugify(cn)}-{slugify(vn)}"
-            number_str = f"#{cn}"
 
             card_lines.append(
-                f"    {{ id: {js_value(card_id)}, name: {js_value(pn)}, "
-                f"number: {js_value(number_str)}, category: {js_value(cat)}, "
-                f"value: {val_js} }}"
+                f"    {{ id: {js_value(card_id)}, "
+                f"card_number: {js_value(cn)}, "
+                f"player_name: {js_value(pn)}, "
+                f"variation_name: {js_value(vn)}, "
+                f"print_run: {pr_js}, "
+                f"category_name: {js_value(cat)}, "
+                f"current_value: {val_js}, "
+                f"is_autograph: {to_bool_js('is_autograph')}, "
+                f"rookie_card: {to_bool_js('rookie_card')}, "
+                f"is_relic: {to_bool_js('is_relic')}, "
+                f"is_case_hit: {to_bool_js('is_case_hit')}, "
+                f"is_numbered: {to_bool_js('is_numbered')} }}"
             )
 
         cards_block = ",\n".join(card_lines)

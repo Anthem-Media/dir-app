@@ -143,12 +143,17 @@
   text-overflow: ellipsis;
 }
 
-.checklist-tier__card-number {
+.checklist-tier__card-variation {
   font-size: 11px;
   color: var(--color-text-secondary);
 }
 
-/* Middle column: badges (or fallback category label) */
+.checklist-tier__card-number {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* Middle column: badge pills only */
 .checklist-tier__card-badges {
   flex: 1;
   min-width: 0;
@@ -156,12 +161,6 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 4px;
-}
-
-/* Fallback muted category name for cards with no badges */
-.checklist-tier__card-category {
-  font-size: 12px;
-  color: var(--color-text-muted);
 }
 
 .checklist-tier__card-value {
@@ -181,27 +180,47 @@
   border-top: 1px solid var(--color-bg-subtle);
 }
 
-/* ── Toggle button ───────────────────────────────────────────────────────── */
+/* ── Pagination controls ─────────────────────────────────────────────────── */
 
-/* Subtle text-only button — understated, not a CTA */
+/* Row that holds Show less and Show more side by side */
+.checklist-tier__pagination {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  padding: 2px 0 14px;
+  border-top: 1px solid var(--color-border-subtle);
+  margin-top: 4px;
+}
+
+/* Base: plain text pill — no background, no border, no box */
 .checklist-tier__toggle {
-  display: block;
-  width: 100%;
-  padding: 10px 0 14px;
   background: none;
   border: none;
+  outline: none;
+  box-shadow: none;
+  padding: 8px 0;
   font-size: 13px;
   font-weight: 600;
   font-family: var(--font-sans);
   color: var(--color-accent-text);
-  text-align: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.12s ease;
+  flex-shrink: 0;
 }
 
 .checklist-tier__toggle:hover {
   color: var(--color-accent);
+}
+
+/* Show less — lighter weight, muted color */
+.checklist-tier__toggle--less {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.checklist-tier__toggle--less:hover {
+  color: var(--color-text-secondary);
 }
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */

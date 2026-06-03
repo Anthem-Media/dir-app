@@ -9,18 +9,18 @@
  *
  * Purely presentational — no internal state. All behavior is driven by props:
  * - isExpanded / onToggle — tier open/closed (header click)
- * - isShowingAll / onShowAllToggle — full card list vs initial 5 (show more click)
+ * - shownCount / onShowMore — paginated card reveal (25 per click)
  * - searchQuery / onSearchChange — real-time card filter
  * All state and callbacks live in BoxProfilePage so this component stays
  * fully controlled and predictable.
  *
- * @param {object}   tier             - Tier data object from the hook
- * @param {boolean}  isExpanded       - Whether this tier is currently open
- * @param {function} onToggle         - Called when the user clicks the tier header
- * @param {boolean}  isShowingAll     - Whether the full card list is showing
- * @param {function} onShowAllToggle  - Called when the user clicks Show all / Show less
- * @param {string}   searchQuery      - Current search string for this tier (empty when collapsed)
- * @param {function} onSearchChange   - Called with the new query string on every keystroke
+ * @param {object}   tier         - Tier data object from the hook
+ * @param {boolean}  isExpanded   - Whether this tier is currently open
+ * @param {function} onToggle     - Called when the user clicks the tier header
+ * @param {number}   shownCount   - Total cards currently visible (0 = use default PAGE_SIZE)
+ * @param {function} onShowMore   - Called with PAGE_SIZE when the user clicks Show more
+ * @param {string}   searchQuery  - Current search string for this tier (empty when collapsed)
+ * @param {function} onSearchChange - Called with the new query string on every keystroke
  */
 
 import { filterCardsByQuery } from '../utils/checklistUtils';
@@ -28,32 +28,15 @@ import { formatCurrency } from '../utils/formatters';
 import { CardBadge } from './CardBadge';
 import './ChecklistTier.css';
 
-// Returns true if CardBadge would render at least one badge for this card.
-// Used to decide whether to show the plain category name fallback.
-function hasBadges(card) {
-  const pr = Number(card.print_run);
-  const hasPrintRun = card.print_run != null && card.print_run !== '' && !isNaN(pr);
-  if (hasPrintRun && pr <= 10) return true;
-  if (card.is_case_hit === true || card.is_case_hit === 'true' || card.is_case_hit === 'True') return true;
-  if (card.is_autograph === true || card.is_autograph === 'true' || card.is_autograph === 'True') return true;
-  if (card.is_relic === true || card.is_relic === 'true' || card.is_relic === 'True') return true;
-  if (card.rookie_card === true || card.rookie_card === 'true' || card.rookie_card === 'True') return true;
-  if (card.category_name && card.category_name.toLowerCase().includes('refractor')) return true;
-  if (hasPrintRun && pr > 10) return true;
-  if (card.category_name && card.category_name.toLowerCase().includes('short print')) return true;
-  if (card.circulation_status === 'in_circulation' || card.circulation_status === 'pulled_sold') return true;
-  return false;
-}
-
-// How many cards to show before the "Show all" button appears.
-const COLLAPSED_CARD_LIMIT = 5;
+const INITIAL_SIZE = 5;   // cards shown when a tier first opens
+const PAGE_SIZE = 25;     // cards added per "Show more" click
 
 export function ChecklistTier({
   tier,
   isExpanded,
   onToggle,
-  isShowingAll,
-  onShowAllToggle,
+  shownCount,
+  onShowMore,
   searchQuery,
   onSearchChange,
 }) {
@@ -62,26 +45,32 @@ export function ChecklistTier({
   // Apply the search filter first (no-op when query is blank).
   const filteredCards = filterCardsByQuery(cards, searchQuery);
 
-  // When a search query is active, lift the 5-card limit — the user is explicitly
+  // When a search query is active, show everything — the user is explicitly
   // looking for something and hiding results would be confusing.
   const hasActiveSearch = searchQuery.trim().length > 0;
 
+  // Total cards currently visible: first PAGE_SIZE by default, then +PAGE_SIZE per click.
+  // shownCount === 0 means "not yet expanded" — default to PAGE_SIZE.
+  const totalVisible = (shownCount == null || shownCount === 0) ? INITIAL_SIZE : shownCount;
+
   // Determine which cards to display:
-  //   - Tier closed:          nothing (empty array)
-  //   - Open, search active:  all filtered results (ignore card limit)
-  //   - Open, showing all:    all filtered results
-  //   - Open, default view:   first 5 filtered results
+  //   - Tier closed:         nothing (empty array)
+  //   - Open, search active: all filtered results (bypass page limit)
+  //   - Open, paginating:    filteredCards up to totalVisible
   const visibleCards = !isExpanded
     ? []
-    : isShowingAll || hasActiveSearch
+    : hasActiveSearch
       ? filteredCards
-      : filteredCards.slice(0, COLLAPSED_CARD_LIMIT);
+      : filteredCards.slice(0, totalVisible);
 
-  // Show more/less button only when:
-  //   - Tier is open
-  //   - No active search (search already shows everything matching)
-  //   - Tier has more cards than the initial limit
-  const showToggle = isExpanded && !hasActiveSearch && cards.length > COLLAPSED_CARD_LIMIT;
+  // Remaining count drives the button label.
+  const remaining = filteredCards.length - totalVisible;
+
+  // Show more button: open, no active search, cards remain hidden.
+  const showToggle = isExpanded && !hasActiveSearch && remaining > 0;
+
+  // Show less button: open, no active search, and user has expanded beyond the initial 5.
+  const showLess = isExpanded && !hasActiveSearch && totalVisible > INITIAL_SIZE;
 
   return (
     <div className="checklist-tier">
@@ -126,18 +115,32 @@ export function ChecklistTier({
             visibleCards.map((card) => (
               <div key={card.id} className="checklist-tier__card-row">
                 <div className="checklist-tier__card-info">
-                  <span className="checklist-tier__card-name">{card.name}</span>
-                  <span className="checklist-tier__card-number">{card.number}</span>
+                  <span className="checklist-tier__card-name">{card.player_name ?? card.name}</span>
+                  {/* Detail line: variation + print run.
+                      Skipped for plain Base / Base Rookie — the player name is enough. */}
+                  {(() => {
+                    const vn = card.variation_name;
+                    const isPlainBase = vn === 'Base' || vn === 'Base Rookie';
+                    if (vn && !isPlainBase) {
+                      return (
+                        <span className="checklist-tier__card-variation">
+                          {vn}{card.print_run ? ` /${card.print_run}` : ''}
+                        </span>
+                      );
+                    }
+                    return null;
+                  })()}
+                  <span className="checklist-tier__card-number">
+                    {card.card_number ? `#${card.card_number}` : card.number}
+                  </span>
                 </div>
                 <div className="checklist-tier__card-badges">
                   <CardBadge card={card} />
-                  {/* Fallback: show category name in muted text when no badges render */}
-                  {!hasBadges(card) && (
-                    <span className="checklist-tier__card-category">{card.category}</span>
-                  )}
                 </div>
                 <span className="checklist-tier__card-value">
-                  {card.value !== null ? formatCurrency(card.value) : ''}
+                  {(card.current_value ?? card.value) != null
+                    ? formatCurrency(card.current_value ?? card.value)
+                    : ''}
                 </span>
               </div>
             ))
@@ -148,13 +151,26 @@ export function ChecklistTier({
         </div>
       )}
 
-      {/* Show all / show less button — only when open, search inactive, and tier exceeds limit */}
-      {showToggle && (
-        <button className="checklist-tier__toggle" onClick={onShowAllToggle}>
-          {isShowingAll
-            ? 'Show less ↑'
-            : `Show all ${cards.length} cards ↓`}
-        </button>
+      {/* Pagination controls — horizontal row, separator above */}
+      {(showLess || showToggle) && (
+        <div className="checklist-tier__pagination">
+          {showLess && (
+            <button
+              className="checklist-tier__toggle checklist-tier__toggle--less"
+              onClick={() => onShowMore(Math.max(INITIAL_SIZE, totalVisible - PAGE_SIZE))}
+            >
+              Show less ↑
+            </button>
+          )}
+          {showToggle && (
+            <button
+              className="checklist-tier__toggle"
+              onClick={() => onShowMore(totalVisible + PAGE_SIZE)}
+            >
+              Show more ({remaining} remaining) ↓
+            </button>
+          )}
+        </div>
       )}
 
     </div>

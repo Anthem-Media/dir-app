@@ -6,6 +6,7 @@
  */
 
 import { formatCurrency } from '../utils/formatters';
+import { CardBadge } from './CardBadge';
 import './TopChaseRow.css';
 
 /**
@@ -20,8 +21,15 @@ import './TopChaseRow.css';
  * @param {string|null} card.imageUrl      - Card image URL (null shows placeholder)
  */
 export function TopChaseRow({ card }) {
-  const { playerName, variationName, category, rookieCard, isAutograph, printRun, price, imageUrl } = card;
-  const printRunLabel = printRun != null ? (printRun === 1 ? '1/1' : `/${printRun}`) : null;
+  const { playerName, variationName, rookieCard, isAutograph, printRun, price, imageUrl } = card;
+
+  // Map camelCase mock data shape to the snake_case shape CardBadge expects.
+  // At database phase this mapping goes away — the hook will return snake_case directly.
+  const badgeCard = {
+    rookie_card: rookieCard,
+    is_autograph: isAutograph,
+    print_run: printRun,
+  };
 
   return (
     <div className="top-chase-row">
@@ -29,22 +37,20 @@ export function TopChaseRow({ card }) {
         {imageUrl ? (
           <img src={imageUrl} alt={`${playerName} ${variationName}`} />
         ) : (
-          // Placeholder shown until real card images are available
           <div className="top-chase-row__image-placeholder" aria-hidden="true" />
         )}
       </div>
 
       <div className="top-chase-row__info">
-        <div className="top-chase-row__name-line">
-          <span className="top-chase-row__player">{playerName}</span>
-          {rookieCard && <span className="top-chase-row__rc-tag">RC</span>}
-          {isAutograph && <span className="top-chase-row__auto-tag">AUTO</span>}
-          {printRunLabel && <span className="top-chase-row__print-run-tag">{printRunLabel}</span>}
-        </div>
-        <span className="top-chase-row__variation">{variationName}</span>
+        <span className="top-chase-row__player">{playerName}</span>
+        <span className="top-chase-row__variation">
+          {variationName}{printRun != null ? ` /${printRun}` : ''}
+        </span>
       </div>
 
-      <span className="top-chase-row__category">{category}</span>
+      <div className="top-chase-row__badges">
+        <CardBadge card={badgeCard} />
+      </div>
 
       <span className="top-chase-row__price">{formatCurrency(price)}</span>
     </div>
