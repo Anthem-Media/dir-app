@@ -39,11 +39,10 @@ export function GrailCard({ card }) {
   return (
     <div className="grail-card">
       <div className="grail-card__image">
-        {imageUrl ? (
-          <img src={imageUrl} alt={`${playerName} ${variationName}`} />
-        ) : (
-          <div className="grail-card__image-placeholder" aria-hidden="true" />
-        )}
+        <img
+          src={imageUrl ?? '/images/cards/Ripper Placeholder Image.png'}
+          alt={`${playerName} ${variationName}`}
+        />
       </div>
 
       {/* Line 1: player name. Line 2: variation + print run. */}

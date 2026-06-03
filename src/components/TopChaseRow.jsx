@@ -34,11 +34,10 @@ export function TopChaseRow({ card }) {
   return (
     <div className="top-chase-row">
       <div className="top-chase-row__image">
-        {imageUrl ? (
-          <img src={imageUrl} alt={`${playerName} ${variationName}`} />
-        ) : (
-          <div className="top-chase-row__image-placeholder" aria-hidden="true" />
-        )}
+        <img
+          src={imageUrl ?? '/images/cards/Ripper Placeholder Image.png'}
+          alt={`${playerName} ${variationName}`}
+        />
       </div>
 
       <div className="top-chase-row__info">

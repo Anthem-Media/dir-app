@@ -25,6 +25,8 @@
   flex-shrink: 0;
   width: 36px;
   height: 50px;
+  overflow: hidden;
+  border-radius: 3px;
 }
 
 .grail-card__image img {
