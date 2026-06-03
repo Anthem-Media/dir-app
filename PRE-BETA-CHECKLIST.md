@@ -219,10 +219,9 @@ Current 5-tier structure mixes wide value ranges within tiers. See SCHEMA-AND-DA
 - **Done when:** card_categories table updated, generate-checklist-data.py updated, checklist display verified.
 - **Blocks:** full seed.
 
-### 4.19 Confirm print_run = 1 on all Superfractor rows — OPEN
-Superfractor cards must have print_run = 1 in the cards table. Mock data is missing this field. CardBadge.jsx will show the 1/1 badge automatically once real data is present — no code change needed, data-only fix.
-- **Done when:** all Superfractor rows in cards table have print_run = 1 confirmed.
-- **Blocks:** 1/1 badge rendering on Superfractors.
+### 4.19 Confirm print_run = 1 on all Superfractor rows — ✅ DONE
+Resolved automatically when the mock checklist was regenerated from `scripts/output/cards-rebuilt.csv` (June 2026). The rebuilt CSV includes `print_run: 1` on all Superfractor rows, so CardBadge.jsx now correctly shows the 1/1 badge on those cards in the mock data layer. At database phase, Supabase data must include `print_run = 1` on all Superfractor rows — no code change needed, data-only requirement.
+- **Done when:** all Superfractor rows in cards table have print_run = 1 confirmed. ✅ Confirmed in mock data layer.
 
 ---
 

@@ -40,6 +40,7 @@ export const MOCK_TOP_CHASES = [
     rookieCard: true,
     isAutograph: false,
     printRun: null,
+    imageUrl: '/images/Anthony Volpe — Logofractor Rose Gold.jpeg',
   },
   {
     id: 'tc-1-2',
@@ -50,6 +51,7 @@ export const MOCK_TOP_CHASES = [
     rookieCard: true,
     isAutograph: false,
     printRun: null,
+    imageUrl: '/images/Adley Rutschman — Sub Zero FrozenFractor.jpeg',
   },
   {
     id: 'tc-2-3',
@@ -60,6 +62,7 @@ export const MOCK_TOP_CHASES = [
     rookieCard: true,
     isAutograph: false,
     printRun: null,
+    imageUrl: '/images/Gunnar Henderson — Superfractor.jpeg',
   },
   {
     id: 'tc-79-4',
@@ -70,6 +73,7 @@ export const MOCK_TOP_CHASES = [
     rookieCard: true,
     isAutograph: false,
     printRun: null,
+    imageUrl: '/images/Michael Harris II — Superfractor.jpeg',
   },
   {
     id: 'tc-174-5',
@@ -90,6 +94,7 @@ export const MOCK_TOP_CHASES = [
     rookieCard: true,
     isAutograph: false,
     printRun: null,
+    imageUrl: '/images/Michael Harris II — Logofractor Rose Gold.jpeg',
   },
   {
     id: 'tc-93-7',
@@ -118,6 +123,7 @@ export const MOCK_GRAIL_CARDS = [
     category: 'Superfractor',
     currentValue: 5750,
     circulationStatus: 'unknown',
+    imageUrl: '/images/Gunnar Henderson — Superfractor.jpeg',
   },
   {
     id: 'gr-002',
@@ -129,6 +135,7 @@ export const MOCK_GRAIL_CARDS = [
     category: 'Superfractor',
     currentValue: 5200,
     circulationStatus: 'unknown',
+    imageUrl: '/images/Michael Harris II — Superfractor.jpeg',
   },
   {
     id: 'gr-003',
@@ -162,6 +169,7 @@ export const MOCK_GRAIL_CARDS = [
     category: 'Superfractor',
     currentValue: 1725,
     circulationStatus: 'unknown',
+    imageUrl: '/images/Shohei Ohtani — Superfractor.png',
   },
   {
     id: 'gr-006',
@@ -173,6 +181,7 @@ export const MOCK_GRAIL_CARDS = [
     category: 'Numbered Rookie Refractor',
     currentValue: 1701,
     circulationStatus: 'unknown',
+    imageUrl: '/images/Jordan Walker — Red Wave :5.jpeg',
   },
   {
     id: 'gr-007',
@@ -184,6 +193,7 @@ export const MOCK_GRAIL_CARDS = [
     category: 'Superfractor',
     currentValue: 1495,
     circulationStatus: 'unknown',
+    imageUrl: '/images/Corbin Carroll — Superfractor.jpeg',
   },
 ];
 

@@ -25,6 +25,7 @@ export const DUMMY_FORMAT_DATA = {
   hobby: {
     label: 'Hobby',
     slug: 'hobby',
+    imageUrl: "/images/boxes/2023 topps chrome baseball hobby'.webp",
     msrp: 129.99,
     marketPrice: 234.89,
     packsPerBox: 18,
@@ -58,6 +59,7 @@ export const DUMMY_FORMAT_DATA = {
   jumbo: {
     label: 'Jumbo',
     slug: 'jumbo',
+    imageUrl: '/images/boxes/2023 topps chrome baseball jumbo.webp',
     msrp: 349.99,
     marketPrice: 400.00,
     packsPerBox: 6,
@@ -82,6 +84,7 @@ export const DUMMY_FORMAT_DATA = {
   blaster: {
     label: 'Blaster',
     slug: 'blaster',
+    imageUrl: '/images/boxes/2023 topps chrome baseball blaster.webp',
     msrp: 34.99,
     marketPrice: 36.00,
     packsPerBox: 7,
@@ -106,6 +109,7 @@ export const DUMMY_FORMAT_DATA = {
   breaker: {
     label: 'Breaker Delight',
     slug: 'breaker',
+    imageUrl: '/images/boxes/2023 topps chrome baseball Breakers Delight.webp',
     msrp: 249.99,
     marketPrice: 249.99,
     packsPerBox: 1,
@@ -133,6 +137,7 @@ export const DUMMY_FORMAT_DATA = {
   mega: {
     label: 'Mega',
     slug: 'mega',
+    imageUrl: '/images/boxes/2023 topps chrome baseball mega.webp',
     msrp: 54.99,
     marketPrice: 60.00,
     packsPerBox: 10,

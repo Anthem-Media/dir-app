@@ -163,10 +163,11 @@ export function BoxProfilePage() {
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section className="box-profile-page__hero">
-        {/* Box image — placeholder until real images are sourced */}
+        {/* Box image — prefers the format-specific image so it updates when switching formats.
+            Falls back to box.imageUrl (box-level CDN image) if the format has none. */}
         <div className="box-profile-page__hero-image">
-          {box.imageUrl ? (
-            <img src={box.imageUrl} alt={box.name} />
+          {(formatData.imageUrl ?? box.imageUrl) ? (
+            <img src={formatData.imageUrl ?? box.imageUrl} alt={`${box.name} ${formatData.label}`} />
           ) : (
             <div className="box-profile-page__image-placeholder" aria-hidden="true">
               <span>No image yet</span>

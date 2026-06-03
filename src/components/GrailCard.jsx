@@ -22,7 +22,7 @@ import { CardBadge } from './CardBadge';
 import './GrailCard.css';
 
 export function GrailCard({ card }) {
-  const { playerName, variationName, rookieCard, isAutograph, printRun, currentValue, circulationStatus } = card;
+  const { playerName, variationName, rookieCard, isAutograph, printRun, currentValue, circulationStatus, imageUrl } = card;
   const { label: badgeLabel } = getCirculationBadgeConfig(circulationStatus);
 
   // Map camelCase mock data shape to the snake_case shape CardBadge expects.
@@ -38,9 +38,12 @@ export function GrailCard({ card }) {
 
   return (
     <div className="grail-card">
-      {/* Card thumbnail — placeholder until real card images are sourced */}
       <div className="grail-card__image">
-        <div className="grail-card__image-placeholder" aria-hidden="true" />
+        {imageUrl ? (
+          <img src={imageUrl} alt={`${playerName} ${variationName}`} />
+        ) : (
+          <div className="grail-card__image-placeholder" aria-hidden="true" />
+        )}
       </div>
 
       {/* Line 1: player name. Line 2: variation + print run. */}
