@@ -64,11 +64,14 @@
   color: var(--color-text-secondary);
 }
 
-/* Attribute badges (Auto, RC, Grail/1of1) via shared CardBadge component */
-.grail-card__badges {
+/* All badge pills in one flex child — CardBadge + circulation badge side by side,
+   wrapping onto a second line inside the group if space is tight. */
+.grail-card__badges-group {
   flex-shrink: 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 4px;
 }
 
 /* ── Circulation status badge ────────────────────────────────────────────── */
@@ -113,4 +116,17 @@
   flex-shrink: 0;
   text-align: right;
   min-width: 80px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .grail-card {
+    gap: 8px;
+  }
+
+  .grail-card__value {
+    min-width: 56px;
+    font-size: 13px;
+  }
 }

@@ -223,6 +223,12 @@ Current 5-tier structure mixes wide value ranges within tiers. See SCHEMA-AND-DA
 Resolved automatically when the mock checklist was regenerated from `scripts/output/cards-rebuilt.csv` (June 2026). The rebuilt CSV includes `print_run: 1` on all Superfractor rows, so CardBadge.jsx now correctly shows the 1/1 badge on those cards in the mock data layer. At database phase, Supabase data must include `print_run = 1` on all Superfractor rows — no code change needed, data-only requirement.
 - **Done when:** all Superfractor rows in cards table have print_run = 1 confirmed. ✅ Confirmed in mock data layer.
 
+### 4.20 Add per-format pull rates to pull_rates.csv — PENDING
+Pull rates in `pull_rates.csv` are currently Hobby-only. All rows are keyed to `2023-topps-chrome-baseball-hobby` with no `box_format` column. Per-format pull rates for Blaster, Mega, Jumbo, and Breaker Delight must be added using odds from the official Topps odds PDF before per-format EV display works correctly.
+- **Why deferred:** Hobby pull rates were the first priority for the POC. Other formats require a dedicated data entry session against the Topps odds PDF.
+- **Done when:** `pull_rates.csv` contains rows for all five formats (Hobby, Jumbo, Blaster, Mega, Breaker Delight) with correct category-level odds from the official Topps source. EV calculation verified per-format on the box profile page.
+- **Blocks:** per-format EV display; accurate pull rate grid when switching formats.
+
 ---
 
 ## 5. Data Seeding

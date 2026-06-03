@@ -51,15 +51,14 @@ export function GrailCard({ card }) {
         <span className="grail-card__variation">{variationName}{printRunDisplay}</span>
       </div>
 
-      {/* Attribute badges (Auto, RC, Grail/1of1) via shared CardBadge component */}
-      <div className="grail-card__badges">
+      {/* All badges in one flex child so they don't compete with the info column.
+          CardBadge handles RC/Auto/Grail/1of1; the span handles circulation status. */}
+      <div className="grail-card__badges-group">
         <CardBadge card={badgeCard} />
+        <span className="grail-card__badge" data-status={circulationStatus}>
+          {badgeLabel}
+        </span>
       </div>
-
-      {/* Circulation status badge — color applied via data-status in GrailCard.css */}
-      <span className="grail-card__badge" data-status={circulationStatus}>
-        {badgeLabel}
-      </span>
 
       <span className="grail-card__value">{currentValue != null ? formatCurrency(currentValue) : '—'}</span>
     </div>
