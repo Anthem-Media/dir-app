@@ -129,4 +129,8 @@
     min-width: 56px;
     font-size: 13px;
   }
+
+  .grail-card__badge[data-status="unknown"] {
+    display: none;
+  }
 }
