@@ -7,16 +7,22 @@
  * restore useState/useEffect, and set isLoading: true until the data arrives.
  *
  * @param {string} boxId - The unique identifier for the box set
- * @returns {{ box, topChases, grailCards, pullRates, priceHistory, checklistTiers, isLoading, error }}
+ * @returns {{ box, topChases, mergedGrails, priceHistory, checklistTiers, isLoading, error }}
  */
 
 import {
   MOCK_BOX,
   MOCK_TOP_CHASES,
   MOCK_GRAIL_CARDS,
+  MOCK_UNPRICEABLE_CHASES,
   MOCK_PRICE_HISTORY,
   MOCK_CHECKLIST_TIERS,
 } from '../utils/boxProfileMockData';
+import { mergeHitsForGrailsTab } from '../utils/grailsUtils';
+
+// Pre-computed once at module load — merging is pure and the mock data never
+// changes, so there is no need to recompute on every hook call.
+const MERGED_GRAILS = mergeHitsForGrailsTab(MOCK_TOP_CHASES, MOCK_GRAIL_CARDS).slice(0, 7);
 
 export function useBoxProfile(boxId) {
   // All mock data is synchronous — return it directly so there is no
@@ -25,8 +31,10 @@ export function useBoxProfile(boxId) {
   // to briefly revert to [] on every re-mount, producing stale-data flicker.
   return {
     box: MOCK_BOX,
-    topChases: MOCK_TOP_CHASES,
-    grailCards: MOCK_GRAIL_CARDS,
+    // Top Chases tab: grail-tier cards with no known sale price.
+    topChases: MOCK_UNPRICEABLE_CHASES,
+    // Grails tab: all priced cards from both arrays, merged and sorted.
+    mergedGrails: MERGED_GRAILS,
     priceHistory: MOCK_PRICE_HISTORY,
     checklistTiers: MOCK_CHECKLIST_TIERS,
     isLoading: false,

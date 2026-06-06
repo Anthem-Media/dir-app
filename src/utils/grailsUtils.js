@@ -42,6 +42,41 @@ export function getCirculationBadgeConfig(status) {
 }
 
 /**
+ * mergeHitsForGrailsTab
+ *
+ * Merges top-chase cards and grail cards into a single deduplicated list
+ * sorted by currentValue descending. Grail cards take precedence when the
+ * same card (matched by playerName + variationName) appears in both arrays.
+ *
+ * Top-chase cards use a `price` field; this function normalises them to the
+ * `currentValue` shape that GrailCard expects before merging.
+ *
+ * @param {Array} topChases  - Cards from MOCK_TOP_CHASES (price field)
+ * @param {Array} grailCards - Cards from MOCK_GRAIL_CARDS (currentValue field)
+ * @returns {Array} Merged, deduplicated cards sorted by currentValue desc
+ */
+export function mergeHitsForGrailsTab(topChases, grailCards) {
+  // Build a key set from grail cards so duplicates from topChases are dropped.
+  const grailKeys = new Set(
+    grailCards.map((c) => `${c.playerName}|${c.variationName}`)
+  );
+
+  // Normalise top-chase cards to the grail-card shape, then exclude any that
+  // already exist in grailCards (grailCards version has more complete data).
+  const uniqueTopChases = topChases
+    .filter((c) => !grailKeys.has(`${c.playerName}|${c.variationName}`))
+    .map((c) => ({
+      ...c,
+      currentValue: c.price ?? null,
+      circulationStatus: 'unknown',
+    }));
+
+  return [...uniqueTopChases, ...grailCards].sort(
+    (a, b) => (b.currentValue ?? 0) - (a.currentValue ?? 0)
+  );
+}
+
+/**
  * formatPrintRun
  *
  * Formats an integer print run as a collector-standard fraction string.

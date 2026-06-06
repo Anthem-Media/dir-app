@@ -27,7 +27,6 @@ import { TierPriceTrendChart } from '../components/TierPriceTrendChart';
 import { DUMMY_FORMAT_DATA, FORMAT_ORDER } from '../utils/formatSwitcherData';
 import { DUMMY_TIER_TREND_DATA } from '../utils/tierPriceTrendData';
 import { formatCurrency, formatPercent, getRoiSentiment } from '../utils/formatters';
-import { filterGrailCards } from '../utils/grailsUtils';
 import { sortTiersByValue } from '../utils/checklistUtils';
 import './BoxProfilePage.css';
 
@@ -111,7 +110,7 @@ export function BoxProfilePage() {
     setTierSearchQueries((prev) => ({ ...prev, [tierId]: query }));
   }
 
-  const { box, topChases, grailCards, priceHistory, checklistTiers, isLoading, error } =
+  const { box, topChases, mergedGrails, priceHistory, checklistTiers, isLoading, error } =
     useBoxProfile(slug);
 
   if (isLoading) {
@@ -134,9 +133,6 @@ export function BoxProfilePage() {
   // Calculated from the selected format's ROI, not the base box data.
   const roiSentiment = getRoiSentiment(formatData.roi);
 
-  // Apply the canonical /10 filter. filterGrailCards is the single source of truth
-  // for which cards qualify as grails — the cutoff must not be re-implemented elsewhere.
-  const grailCardsList = filterGrailCards(grailCards);
 
   // Sort tiers so the most valuable appear first. The schema assigns tier numbers
   // with 1 = Base and 5 = Premium Hits, so descending order gives collectors the
@@ -288,7 +284,7 @@ export function BoxProfilePage() {
             ))}
           </div>
         ) : (
-          <GrailsTab cards={grailCardsList} />
+          <GrailsTab cards={mergedGrails} />
         )}
       </section>
 

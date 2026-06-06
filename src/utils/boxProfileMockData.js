@@ -108,6 +108,19 @@ export const MOCK_TOP_CHASES = [
   },
 ];
 
+// Cards with print_run <= 10 and no known sale price.
+// Used in the Top Chases tab to represent grail-tier cards that have never
+// publicly sold — shown with a "Not in Circulation" badge and no price.
+export const MOCK_UNPRICEABLE_CHASES = [
+  { id: 'uc-001', playerName: 'Jose Abreu',          variationName: 'Red Wave',    printRun: 5, rookieCard: false, isAutograph: false, price: null },
+  { id: 'uc-002', playerName: 'Javier Baez',          variationName: 'Red Wave',    printRun: 5, rookieCard: false, isAutograph: false, price: null },
+  { id: 'uc-003', playerName: 'Jeremy Pena',          variationName: 'Red Wave',    printRun: 5, rookieCard: false, isAutograph: false, price: null },
+  { id: 'uc-004', playerName: 'Eloy Jimenez',         variationName: 'Red Wave',    printRun: 5, rookieCard: false, isAutograph: false, price: null },
+  { id: 'uc-005', playerName: 'Alec Bohm',            variationName: 'Superfractor', printRun: 1, rookieCard: false, isAutograph: false, price: null },
+  { id: 'uc-006', playerName: 'Bo Naylor',            variationName: 'Superfractor', printRun: 1, rookieCard: true,  isAutograph: false, price: null },
+  { id: 'uc-007', playerName: 'Vinnie Pasquantino',   variationName: 'Superfractor', printRun: 1, rookieCard: false, isAutograph: false, price: null },
+];
+
 // Grail cards — print run ≤ 10. These are the rarest cards in the set.
 // Excluded from EV and ROI calculations (see CONTEXT.md for the /10 cutoff rationale).
 // circulationStatus maps to the circulation_status column on the cards table in the

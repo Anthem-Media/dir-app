@@ -17,7 +17,7 @@ import './TopChaseRow.css';
  * @param {boolean}     card.rookieCard    - Whether to show the RC badge
  * @param {boolean}     card.isAutograph   - Whether to show the AUTO badge
  * @param {number|null} card.printRun      - Print run count; null for unlimited
- * @param {number}      card.price         - Market value in USD
+ * @param {number|null} card.price         - Market value in USD; null shows "Not in Circulation" badge
  * @param {string|null} card.imageUrl      - Card image URL (null shows placeholder)
  */
 export function TopChaseRow({ card }) {
@@ -51,7 +51,11 @@ export function TopChaseRow({ card }) {
         <CardBadge card={badgeCard} />
       </div>
 
-      <span className="top-chase-row__price">{formatCurrency(price)}</span>
+      {price != null ? (
+        <span className="top-chase-row__price">{formatCurrency(price)}</span>
+      ) : (
+        <span className="card-badge card-badge--pulled">Not in Circulation</span>
+      )}
     </div>
   );
 }
