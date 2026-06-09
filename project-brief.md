@@ -2,7 +2,7 @@
 
 **Working Name:** DIR (Diamond in the Rough) — used throughout codebase and docs until rename pass. **Final Name:** Ripper. **Domain:** hobbyripper.com (purchased via Cloudflare). Rename pass scheduled before Pro code audit #1.
 **Tagline:** "Think inside the box."
-**Last Updated:** April 24, 2026
+**Last Updated:** June 2026
 
 ---
 
@@ -152,26 +152,34 @@ Both yes  →  show box profile
 
 The full seeding pipeline runs in five steps. This workflow compresses what would be months of manual research into weeks. Do not deviate from this order.
 
-**Step 1 — Build the source document (Cowork)**
-Provide Cowork a list of box set names for a given sport and year. Cowork generates a structured source document — one row per set — with URLs pre-populated for Cardboard Connection, Beckett, Baseballcardpedia, and TCDB. The TCDB link is attached to the set name itself and is the fallback source for release date and MSRP when not found elsewhere. What takes an hour to build manually takes seconds with Cowork. Repeat per sport per year.
+**Step 1 — Build URL lists (manual, Zach)**
+For each sport, compile a list of box set names with source URLs: Cardboard Connection, Beckett, TCDB, and Checklist Insider. One document per sport, organized by year. Basketball, Hockey, and Baseball URL lists are compiled ahead of running the pipeline. Football to follow. These documents are the starting gun for everything downstream. Format: one set per block, four URLs per set.
 
-**Step 2 — Populate the spreadsheet (Cowork)**
-Feed the source document back to Cowork. Cowork visits each URL, extracts checklist data, card numbers, pull rates, box configuration (packs per box, cards per pack), release date, MSRP, and formats everything into spreadsheet rows that match the database schema exactly. Output is one Excel file with one tab per schema table: `box_sets`, `cards`, `pull_rates`. Rules for this step:
-- `current_value` and `image_url` columns are always left blank — filled later by eBay API
-- `circulation_status` defaults to `unknown` for any card with `print_run ≤ 10`
-- Each format (Breaker, Jumbo, Hobby, Mega, Blaster) is a separate row in `box_sets`, linked by a shared slug prefix
-- Pull rates differ per format — Hobby odds ≠ Blaster odds — each format gets its own rows in `pull_rates`
-- Any data not found across all sources gets a "needs review" flag in a dedicated column — it does not block the row from being included
-- Cowork pages with inconsistent formatting (pull rates buried in paragraph text vs. clean tables) may need a human review pass on flagged rows
+**Step 2 — Fetch raw page content (Python / Playwright scraper)**
+A Claude Code-written Playwright scraper visits every URL in the Step 1 lists and saves raw page text to local files. No parsing, no judgment — pure mechanical fetching. Output: one .txt file per set per source, saved to /data/raw/[sport]/[year]/. File naming convention: [year]-[set-slug]-[source].txt (e.g. 2018-19-donruss-basketball-cardboardconnection.txt). The scraper uses page.inner_text() targeting the main content area to strip nav, ads, and footers before saving. Runs in minutes. Rerunnable any time a source page changes.
 
-**Step 3 — Link tables using slugs (Claude Code script)**
-Each `box_sets` row uses a slug as its linking key (e.g. `2024-topps-chrome-baseball-hobby`). The `cards` and `pull_rates` tabs reference this slug rather than a numeric ID. Before import, run a small Claude Code-written script that looks up each slug in Supabase, retrieves its auto-assigned ID, and fills in the `box_set_id` column on `cards` and `pull_rates`. This is the slug-as-bridge approach — cleaner than manually assigning IDs and prevents collision errors on re-import. Claude Code writes this script when the database phase begins — it is not written in advance.
+**Step 3 — Parse raw files into atomic facts docs (Claude agent, source-specific)**
+A separate Claude parsing prompt per source site reads the saved .txt files and extracts structured data into atomic facts documents — one .md file per box set, saved to /data/facts/[sport]/[year]/ (e.g. 2018-19-donruss-basketball.facts.md). Source-specific prompts because CC page structure ≠ Checklist Insider structure ≠ TCDB structure. Four parser prompts total: Cardboard Connection, Checklist Insider, TCDB, Beckett. Each prompt reads its own source's files only. Extracts: card names, card numbers, print runs, pull odds per format, box config (packs per box, cards per pack), release date, MSRP. Flags missing data rather than fabricating. Output is plain-language bullets — no schema assumptions at this layer. Atomic facts docs are the true source of truth and survive schema rebuilds.
 
-**Step 4 — Import to Supabase**
-Export each spreadsheet tab as a CSV file. Import into Supabase using the table editor's CSV import button — no raw SQL required. Import in dependency order: `box_sets` first, then `cards` and `pull_rates` (both reference `box_set_id` and require box_sets rows to exist first). One CSV per table, not one combined file.
+**Step 4 — Merge + shape to schema (Cowork)**
+Feed all atomic facts docs for a set (up to 4 source docs) into Cowork. Cowork merges them, resolves conflicts by flagging disagreements rather than silently choosing one, and outputs schema-ready spreadsheet rows. One Excel file per sport, one tab per schema table: box_sets, cards, pull_rates. Rules for this step:
 
-**Step 5 — eBay API fills pricing**
-After import, the eBay API proof of concept script prices out individual cards by name. The full pipeline automates this at scale with scheduled refresh. `current_value` on `cards` and `current_market_price` on `box_sets` populate automatically. EV and ROI calculate from those values. Do not begin full seeding until the end-to-end pipeline test with 2024 Topps Chrome Baseball passes completely.
+- current_value and image_url columns always left blank — filled later by eBay API
+- circulation_status defaults to unknown for any card with print_run ≤ 10
+- Each format (Breaker, Jumbo, Hobby, Mega, Blaster) is a separate row in box_sets, linked by a shared slug prefix
+- Pull rates differ per format — each format gets its own rows in pull_rates
+- Any data not found across all sources gets a needs_review flag in a dedicated column — does not block the row from being included
+- If two sources disagree on a value (e.g. pull odds), both values are captured in a _source_notes column and the row is flagged for human review
+- _needs_review and _source_notes columns are present on the worksheet but dropped before CSV export
+
+**Step 5 — Link tables using slugs (Claude Code script)**
+Each box_sets row uses a slug as its linking key (e.g. 2024-topps-chrome-baseball-hobby). The cards and pull_rates tabs reference this slug rather than a numeric ID. Before import, run a Claude Code-written script that looks up each slug in Supabase, retrieves its auto-assigned ID, and fills in the box_set_id column on cards and pull_rates. This is the slug-as-bridge approach — prevents collision errors on re-import. Claude Code writes this script when the database phase begins.
+
+**Step 6 — Import to Supabase**
+Export each spreadsheet tab as a CSV file. Import into Supabase using the table editor's CSV import button — no raw SQL required. Import in dependency order: box_sets first, then cards and pull_rates. One CSV per table.
+
+**Step 7 — eBay API fills pricing**
+After import, the eBay API pipeline prices out individual cards by name. current_value on cards and current_market_price on box_sets populate automatically. EV and ROI calculate from those values. Do not begin full seeding until the end-to-end pipeline test with 2023 Topps Chrome Baseball passes completely.
 
 ### Data Entry Maintenance
 - During beta: 5-10 hours/week (Zach only)
@@ -188,6 +196,33 @@ After import, the eBay API proof of concept script prices out individual cards b
 
 ### New Release Handling
 New boxes (release_date within 30 days) will have thin EV coverage as the market develops. This is handled transparently — the box profile page shows a "New Release" badge and an EV coverage meter ("Based on X of Y cards priced — updating as market develops"). Coverage climbs automatically as the eBay API refresh runs. This framing turns sparse early data into a live-updating feature rather than a gap, and creates a return-visit habit loop for users tracking a new release.
+
+### MSRP Automation Workflow
+MSRP is not consistently published in one place. This workflow automates as much coverage as possible and marks the rest NULL — never fabricates.
+
+**Source priority order (automated, in sequence):**
+
+1. **Distributor product pages (primary)** — Dave & Adam's, Blowout Cards, and Steel City list MSRP or original retail price on product pages even for sets they no longer carry. These are scrapeable via the Step 2 Playwright scraper. Add distributor URLs to the Step 1 URL list format for each set alongside Cardboard Connection and Checklist Insider. Covers Hobby, Jumbo, and Breaker Delight formats reliably.
+2. **TCDB (fallback)** — Already in the pipeline as the standard MSRP fallback. Coverage is inconsistent at the format level but good for top-line set MSRP.
+3. **Wayback Machine / Google cache (last resort)** — For dead manufacturer pages, web.archive.org often has a cached version with original MSRP. Not fully automatable — reserved for a targeted manual pass on sets where Sources 1 and 2 both come up empty.
+
+**Retail formats (Blaster, Mega) — hardcoded lookup table:**
+Blaster and Mega MSRPs were fixed by Walmart/Target/Walgreens and were consistent industry-wide by year range and product tier. A hardcoded lookup table covers the majority of these with high confidence. Any value that falls outside the expected range for its year and format gets flagged for manual review. This eliminates the bulk of retail format MSRP manual work.
+
+**Breaker Delight / Case pricing — Cam's lane:**
+Breaker Delight and case pricing varies by configuration and distributor negotiation. Mark as NULL by default. Cam fills these in via his distributor relationships — not a pipeline responsibility.
+
+**Verification:**
+Cross-reference two sources. If values agree within ~5%, accept. If they disagree by more than ~5%, capture both in _source_notes and flag needs_review. Same pattern as the rest of the pipeline.
+
+**Expected automation coverage:** ~80-85% of MSRP fields automated. Remaining ~15% is genuinely missing from the internet — marked NULL, displayed as "Unavailable" in the app. Never estimate or fabricate.
+
+**Step 1 URL list format addition:**
+Each set block in the Step 1 URL lists gains two optional distributor URL fields:
+- Dave & Adam's URL: [url or "not listed"]
+- Blowout Cards URL: [url or "not listed"]
+
+These feed the Step 2 scraper the same way source site URLs do.
 
 ---
 
