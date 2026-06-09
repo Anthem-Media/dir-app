@@ -10,7 +10,7 @@
 
 **Companion document:** EBAY-STRATEGY.md is the canonical source for eBay-specific strategy, License Agreement analysis, and the Five Paths framework. This file (SCHEMA-AND-DATA.md) captures schema and data decisions that flow from those strategic decisions. When eBay strategy changes, schema implications get captured here. Read EBAY-STRATEGY.md first when working through pricing-related schema decisions.
 
-**Last updated:** May 2026 (Stage 1 Step 4 planning session — atomic facts data model, per-printing pricing rows, POC pricing posture)
+**Last updated:** June 2026 (POC complete — pipeline validated, Grails/Top Chases defined, SCP URL collection underway, RLS applied)
 
 ---
 

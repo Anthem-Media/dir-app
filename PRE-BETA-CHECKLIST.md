@@ -169,13 +169,9 @@ users.id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE.
 All four user-FK tables (saved_boxes, price_alerts, user_collection, user_wishlist) flipped to user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE.
 handle_new_user() function (SECURITY DEFINER, SET search_path = public) and on_auth_user_created trigger created on auth.users. End-to-end signup test confirmed the trigger fires and populates public.users correctly.
 
-4.13 Row Level Security policies — ⚠️ NOT APPLIED — new pre-beta task
+4.13 Row Level Security policies — ✅ COMPLETE — June 2026
 
-Status: Not started. Schema applied with RLS disabled per Supabase warning during the May 2026 schema apply.
-Why deferred: Enabling RLS without writing policies is worse than leaving RLS off — every query gets denied. RLS enable + policy writing must be one coordinated task.
-Risk if forgotten: With RLS off, any client using the project's anon key can read/write any user-data table. Not exploitable today (no real users, no real frontend wiring to user-data tables yet) but cannot ship to beta this way.
-Done when: RLS enabled on all four user-data tables (saved_boxes, price_alerts, user_collection, user_wishlist) plus users itself, with policies that enforce user_id = auth.uid() on read/write. Tested with two test accounts to confirm one can't see the other's data.
-Timing: Before beta launch. Should land before any user-data table starts getting wired into the frontend.
+RLS enabled on all five user-data tables (users, saved_boxes, price_alerts, user_collection, user_wishlist). Policies enforce user_id = auth.uid() for SELECT, INSERT, UPDATE, and DELETE as applicable per table. Applied via SQL Editor in Supabase dashboard. Does not break any existing code — no user-data tables are wired to the frontend yet.
 
 4.14 Add box_guarantees table for guaranteed pulls per box — PENDING
 
@@ -528,6 +524,16 @@ SportsCardsPro blocks automated HTTP requests (bot detection). Manual download i
 ### 16.3 Add .~lock ODS files to .gitignore — OPEN
 OpenOffice creates lock files (e.g. .~lock.2023-topps-chrome-baseball_rebuilt.ods#) when files are open. These were committed accidentally. Add pattern to .gitignore.
 - **Done when:** .gitignore updated, lock file removed from repo history.
+
+### 16.4 Install @vercel/analytics before beta launch — OPEN
+`@vercel/analytics` is not yet installed. Real visitor and page view data will not be captured from day one without it. Vercel's built-in traffic dashboard shows bot traffic but does not replace the analytics package for real user behavior.
+- **Done when:** `@vercel/analytics` installed as a dependency, `<Analytics />` component added to App.jsx or the root layout. Verified in Vercel dashboard showing real page view events.
+- **Blocks:** Having accurate user data from the moment beta opens.
+
+### 16.5 SCP URL collection — remaining 83 baseball URLs — OPEN
+378/460 baseball box set SCP download URLs collected via Playwright scraper (`scripts/scrape_scp_download_urls.py`). 83 remain as a manual research list organized by year. Football, Basketball, and Hockey URL collection not yet started (~2 days per sport estimated).
+- **Done when:** All baseball URLs collected manually, and Football/Basketball/Hockey URL collection sessions completed.
+- **Blocks:** Efficient full seed workflow for those remaining sets.
 
 ---
 

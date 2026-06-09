@@ -63,6 +63,7 @@ Dark mode. All colors defined as CSS variables in index.css — never hardcode h
 - Primary text: `--color-text-primary` (#f0f0f0)
 - Secondary text: `--color-text-secondary` (#777777)
 - Accent: `--color-accent` (#7c6fff)
+- ⚠️ Note: legacy CSS variables --color-green, --color-green-bg, --color-green-border, --color-green-dark still exist by name but their values were updated to red/accent values in May 2026 when the accent color changed. Rename deferred to UI redesign milestone (PRE-BETA-CHECKLIST #15.1). Do not reference these variables by name in new code.
 - Accent background: `--color-accent-bg` (#2a2560)
 - Accent text: `--color-accent-text` (#a89fff)
 - Positive financial indicators: `--color-positive` (#16a34a) — intentionally green, do not change to accent purple
@@ -156,7 +157,7 @@ Two charts:
 Both charts use `--color-positive` (#16a34a) for the trend line. Built with dummy data — wire to real data via `price_history` and `box_price_history` tables during database phase.
 
 ### Checklist Expand/Collapse
-Tiers are collapsed by default — no cards visible until the tier header is clicked. Clicking the tier header toggles it open or closed (accordion pattern). When open: search bar appears at top, first 5 cards are shown, "Show more" button appears at the bottom if the tier has more than 5 cards. "Show more" reveals the complete remaining card list — no secondary limit. Tiers display in descending value order: Premium Hits first, Base last. Sort handled by `sortTiersByValue` in `checklistUtils.js`. Search resets when a tier is collapsed.
+Tiers are collapsed by default — no cards visible until the tier header is clicked. Clicking the tier header toggles it open or closed (accordion pattern). When open: search bar appears at top, first 5 cards are shown, "Show more" button appears at the bottom if the tier has more than 5 cards. "Show more" reveals 25 more cards per click. "Show less" removes 25 cards per click with a floor of 5 visible. Tiers display in descending value order: Premium Hits first, Base last. Sort handled by `sortTiersByValue` in `checklistUtils.js`. Search resets when a tier is collapsed.
 
 ### Card Search Within Tiers
 Each expanded tier has a lightweight search input at the top. Filters cards in real time as the user types. Searches player name and card number. Only visible when the tier is expanded. Scoped to the current box only. Works on both web and mobile.
