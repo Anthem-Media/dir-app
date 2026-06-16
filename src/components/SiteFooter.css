@@ -23,11 +23,23 @@
   gap: 6px;
 }
 
-.site-footer__logo {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--color-text-primary);
+.site-footer__logo-img {
+  height: 24px;
+  width: auto;
+  display: block;
+}
+
+/* Dark mode (default): show white logo, hide black */
+.site-footer__logo-img--light {
+  display: none;
+}
+
+/* Light mode: show black logo, hide white */
+[data-theme="light"] .site-footer__logo-img--dark {
+  display: none;
+}
+[data-theme="light"] .site-footer__logo-img--light {
+  display: block;
 }
 
 .site-footer__tagline {

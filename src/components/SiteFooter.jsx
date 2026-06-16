@@ -16,7 +16,8 @@ export function SiteFooter() {
 
         {/* Left — brand */}
         <div className="site-footer__brand">
-          <span className="site-footer__logo">Ripper.</span>
+          <img src="/logo_ripper-white.svg" alt="Ripper" className="site-footer__logo-img site-footer__logo-img--dark" />
+          <img src="/logo_ripper-black.svg" alt="Ripper" className="site-footer__logo-img site-footer__logo-img--light" />
           <p className="site-footer__tagline">Think inside the box.</p>
           <p className="site-footer__copyright">
             &copy; {new Date().getFullYear()} Ripper

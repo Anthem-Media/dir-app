@@ -61,7 +61,8 @@ export function AppNav() {
 
           {/* Left — brand (links to homepage) */}
           <Link to="/" className="site-top-bar__brand">
-            <span className="site-top-bar__logo">Ripper.</span>
+            <img src="/logo_ripper-white.svg" alt="Ripper" className="site-top-bar__logo-img site-top-bar__logo-img--dark" />
+            <img src="/logo_ripper-black.svg" alt="Ripper" className="site-top-bar__logo-img site-top-bar__logo-img--light" />
             <span className="site-top-bar__logo-name">think inside the box</span>
           </Link>
 

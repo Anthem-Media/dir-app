@@ -29,18 +29,31 @@
 
 .site-top-bar__brand {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   white-space: nowrap;
   text-decoration: none; /* reset <a> underline */
   cursor: pointer;
 }
 
-.site-top-bar__logo {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--color-text-primary);
+.site-top-bar__logo-img {
+  height: 28px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Dark mode (default): show white logo, hide black */
+.site-top-bar__logo-img--light {
+  display: none;
+}
+
+/* Light mode: show black logo, hide white */
+[data-theme="light"] .site-top-bar__logo-img--dark {
+  display: none;
+}
+[data-theme="light"] .site-top-bar__logo-img--light {
+  display: block;
 }
 
 .site-top-bar__logo-name {
