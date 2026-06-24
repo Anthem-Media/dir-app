@@ -530,10 +530,20 @@ OpenOffice creates lock files (e.g. .~lock.2023-topps-chrome-baseball_rebuilt.od
 - **Done when:** `@vercel/analytics` installed as a dependency, `<Analytics />` component added to App.jsx or the root layout. Verified in Vercel dashboard showing real page view events.
 - **Blocks:** Having accurate user data from the moment beta opens.
 
-### 16.5 SCP URL collection — remaining 83 baseball URLs — OPEN
-378/460 baseball box set SCP download URLs collected via Playwright scraper (`scripts/scrape_scp_download_urls.py`). 83 remain as a manual research list organized by year. Football, Basketball, and Hockey URL collection not yet started (~2 days per sport estimated).
-- **Done when:** All baseball URLs collected manually, and Football/Basketball/Hockey URL collection sessions completed.
-- **Blocks:** Efficient full seed workflow for those remaining sets.
+### 16.5 SCP URL collection — PARTIALLY COMPLETE
+SCP download URL collection extended to all 4 launch sports (June 2026). Current coverage: Baseball 372/455, Football 281/302, Hockey 153/179, Basketball 209/230. Total: 1,004/1,150 (87%). 147 missing sets documented in `data/scp-url-lists/missing-download-urls.md` — most are premium/niche sets SCP doesn't offer download pricing for. Master spreadsheets at `data/{sport}_scp_master.xlsx`.
+- **Done when:** Remaining 146 manually resolved or confirmed as permanent dead ends (no SCP download available).
+- **Blocks:** Full seed workflow for those sets — they'll need an alternate pricing source.
+
+### 16.6 MSRP collection — OPEN
+MSRP data needed for all ~1,150 box sets before database seeding. Sources: distributor sites (Dave & Adam's, Blowout Cards) for current/recent sets; TCDB as fallback for older sets. Approach not yet decided (distributor scrape vs TCDB scrape vs manual).
+- **Done when:** MSRP populated for all box sets in the seeding spreadsheets.
+- **Blocks:** `box_sets` table seeding, EV/ROI calculations, format switcher display.
+
+### 16.7 Box image collection — OPEN
+Box art images needed for all ~1,150 box sets. Primary source: distributor product feeds (Dave & Adam's, Blowout Cards, Steel City) — same method as Waxstat. Semi-automated image review tool (#11.1) is the planned approach at scale. Approach not yet decided.
+- **Done when:** `image_url` populated for all box sets in Supabase.
+- **Blocks:** Box profile pages displaying real box art, homepage featured set images.
 
 ---
 
