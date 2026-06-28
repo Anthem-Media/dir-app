@@ -21,6 +21,7 @@ import { PullRateCard } from '../components/PullRateCard';
 import { PriceTrendChart } from '../components/PriceTrendChart';
 import { TierPriceTrendChart } from '../components/TierPriceTrendChart';
 import { ChecklistTier } from '../components/ChecklistTier';
+import { InsertSetsSection } from '../components/InsertSetsSection';
 import { DUMMY_FORMAT_DATA, FORMAT_ORDER } from '../utils/formatSwitcherData';
 import { GRANULAR_PULL_RATES } from '../utils/granularPullRates';
 import { DUMMY_GRAIL_PRICE_TREND } from '../utils/tierPriceTrendData';
@@ -251,6 +252,19 @@ export function BoxProfilePageV2() {
             <PullRateCard key={rate.category} pullRate={rate} />
           ))}
         </div>
+      </section>
+
+      {/* ── INSERTS ──────────────────────────────────────────────────────── */}
+      <section className="box-profile-page__section">
+        <div className="box-profile-page__section-header">
+          <h2 className="box-profile-page__section-title">Inserts</h2>
+          <p className="box-profile-page__section-subtitle">
+            All insert sets in this release.
+          </p>
+        </div>
+        <InsertSetsSection
+          cards={checklistTiers.find((t) => t.id === 'tier-2')?.cards ?? []}
+        />
       </section>
 
       {/* ── PRICE TRENDS (switchable: Box Price | Grailed) ───────────────── */}

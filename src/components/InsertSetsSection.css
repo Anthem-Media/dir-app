@@ -1,0 +1,121 @@
+.insert-sets {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.insert-sets__set {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.insert-sets__set:last-child {
+  border-bottom: none;
+}
+
+.insert-sets__header {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 20px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--color-background-secondary);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.insert-sets__header:hover {
+  background: var(--color-background-tertiary);
+}
+
+.insert-sets__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.insert-sets__count {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.insert-sets__chevron {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  transform: rotate(0deg);
+}
+
+.insert-sets__chevron--open {
+  transform: rotate(90deg);
+}
+
+/* ── Expanded body ───────────────────────────────────────────────────────── */
+
+.insert-sets__body {
+  background: var(--color-background-primary);
+  border-top: 1px solid var(--color-border);
+}
+
+.insert-sets__parallels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.insert-sets__parallel-tag {
+  font-size: 11px;
+  color: var(--color-accent-text);
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-accent);
+  border-radius: 4px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.insert-sets__parallel-tag--more {
+  color: var(--color-text-secondary);
+  background: transparent;
+  border-color: var(--color-border);
+}
+
+.insert-sets__players {
+  display: flex;
+  flex-direction: column;
+}
+
+.insert-sets__player-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.insert-sets__player-row:last-child {
+  border-bottom: none;
+}
+
+.insert-sets__player-row:nth-child(even) {
+  background: var(--color-background-secondary);
+}
+
+.insert-sets__player-name {
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+.insert-sets__card-number {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
