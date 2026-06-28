@@ -263,19 +263,6 @@ export function BoxProfilePageV2() {
         <PriceTrendChart data={priceHistory} />
       </section>
 
-      {/* ── GRAILED PRICES ───────────────────────────────────────────────── */}
-      {/* Replaces Card Value Trends. Known prices on the rarest cards
-          in the set — more actionable than abstract tier averages. */}
-      <section className="box-profile-page__section">
-        <div className="box-profile-page__section-header">
-          <h2 className="box-profile-page__section-title">Grailed prices</h2>
-          <p className="box-profile-page__section-subtitle">
-            Known market prices on the rarest cards in this set.
-          </p>
-        </div>
-        <GrailsTab cards={mergedGrails} />
-      </section>
-
       {/* ── GRAILED AVERAGE TREND ────────────────────────────────────────── */}
       {/* Average market price of the top grailed cards (print run ≤ 10) over time.
           No tier tabs — one line tracking all grails as a single market signal. */}
