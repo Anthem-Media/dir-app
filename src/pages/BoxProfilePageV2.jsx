@@ -19,12 +19,11 @@ import { TopPullsTab } from '../components/TopPullsTab';
 import { GrailsTab } from '../components/GrailsTab';
 import { PullRateCard } from '../components/PullRateCard';
 import { PriceTrendChart } from '../components/PriceTrendChart';
-import { TierTrendTabs } from '../components/TierTrendTabs';
 import { TierPriceTrendChart } from '../components/TierPriceTrendChart';
 import { ChecklistTier } from '../components/ChecklistTier';
 import { DUMMY_FORMAT_DATA, FORMAT_ORDER } from '../utils/formatSwitcherData';
 import { GRANULAR_PULL_RATES } from '../utils/granularPullRates';
-import { DUMMY_TIER_TREND_DATA } from '../utils/tierPriceTrendData';
+import { DUMMY_GRAIL_PRICE_TREND } from '../utils/tierPriceTrendData';
 import { MOCK_TOP_CHASE_PLAYERS } from '../utils/boxProfileMockData';
 import { formatCurrency, formatPercent, getRoiSentiment } from '../utils/formatters';
 import { sortTiersByValue } from '../utils/checklistUtils';
@@ -32,7 +31,7 @@ import './BoxProfilePageV2.css';
 
 const CHASE_TABS = [
   { key: 'players', label: 'Top Players' },
-  { key: 'pulls',   label: 'Top Pulls' },
+  { key: 'pulls',   label: 'Top Parallels' },
 ];
 
 export function BoxProfilePageV2() {
@@ -48,8 +47,6 @@ export function BoxProfilePageV2() {
   }
 
   const [activeChaseTab, setActiveChaseTab] = useState('players');
-  const [activeTierTab, setActiveTierTab] = useState('base');
-
   const [expandedTiers, setExpandedTiers] = useState(new Set());
   const [shownCounts, setShownCounts] = useState({});
   const [tierSearchQueries, setTierSearchQueries] = useState({});
@@ -175,7 +172,7 @@ export function BoxProfilePageV2() {
               value={formatCurrency(formatData.msrp)}
             />
             <MetricCard
-              label="Real ROI"
+              label="ROI"
               value={formatPercent(realRoi)}
               sentiment={roiSentiment}
               subtext="Market vs MSRP"
@@ -194,7 +191,7 @@ export function BoxProfilePageV2() {
         </div>
       </section>
 
-      {/* ── TOP CHASES (2 tabs: Top Players | Top Pulls) ─────────────────── */}
+      {/* ── TOP CHASES (2 tabs: Top Players | Top Parallels) ────────────── */}
       <section className="box-profile-page__section">
         <div className="box-profile-page__section-header">
           <h2 className="box-profile-page__section-title">Top chases</h2>
@@ -279,21 +276,19 @@ export function BoxProfilePageV2() {
         <GrailsTab cards={mergedGrails} />
       </section>
 
-      {/* ── CARD VALUE TRENDS ────────────────────────────────────────────── */}
+      {/* ── GRAILED AVERAGE TREND ────────────────────────────────────────── */}
+      {/* Average market price of the top grailed cards (print run ≤ 10) over time.
+          No tier tabs — one line tracking all grails as a single market signal. */}
       <section className="box-profile-page__section">
         <div className="box-profile-page__section-header">
-          <h2 className="box-profile-page__section-title">Card value trends</h2>
+          <h2 className="box-profile-page__section-title">Grailed</h2>
           <p className="box-profile-page__section-subtitle">
-            Average sale price by tier over the past 8 weeks.
+            Average market price of grailed cards over the past 8 weeks.
           </p>
         </div>
-        <TierTrendTabs
-          activeTier={activeTierTab}
-          onTierChange={setActiveTierTab}
-        />
         <TierPriceTrendChart
-          data={DUMMY_TIER_TREND_DATA[activeTierTab]}
-          activeTier={activeTierTab}
+          data={DUMMY_GRAIL_PRICE_TREND}
+          activeTier="patchAutos"
         />
       </section>
 

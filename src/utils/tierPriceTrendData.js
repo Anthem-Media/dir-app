@@ -20,6 +20,23 @@
  * This file does one job: export dummy data. No logic, no calculations.
  */
 
+/**
+ * Grailed card average price trend for BoxProfilePageV2.
+ * Represents average market price of the top 10 grailed cards (print run ≤ 10)
+ * over 8 weeks. Values derived from SCP pricing data for 2023 Topps Chrome.
+ * Replace with real data from price_history table at database phase.
+ */
+export const DUMMY_GRAIL_PRICE_TREND = [
+  { date: 'Week 1', avgPrice: 3800.00 },
+  { date: 'Week 2', avgPrice: 4150.00 },
+  { date: 'Week 3', avgPrice: 3950.00 },
+  { date: 'Week 4', avgPrice: 4300.00 },
+  { date: 'Week 5', avgPrice: 4520.00 },
+  { date: 'Week 6', avgPrice: 4200.00 },
+  { date: 'Week 7', avgPrice: 4680.00 },
+  { date: 'Week 8', avgPrice: 4840.00 },
+];
+
 export const DUMMY_TIER_TREND_DATA = {
   base: [
     { date: 'Week 1', avgPrice: 5.20 },
