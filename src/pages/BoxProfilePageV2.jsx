@@ -47,6 +47,7 @@ export function BoxProfilePageV2() {
   }
 
   const [activeChaseTab, setActiveChaseTab] = useState('players');
+  const [activeChartTab, setActiveChartTab] = useState('box');
   const [expandedTiers, setExpandedTiers] = useState(new Set());
   const [shownCounts, setShownCounts] = useState({});
   const [tierSearchQueries, setTierSearchQueries] = useState({});
@@ -252,31 +253,41 @@ export function BoxProfilePageV2() {
         </div>
       </section>
 
-      {/* ── PRICE TREND ──────────────────────────────────────────────────── */}
+      {/* ── PRICE TRENDS (switchable: Box Price | Grailed) ───────────────── */}
       <section className="box-profile-page__section">
         <div className="box-profile-page__section-header">
-          <h2 className="box-profile-page__section-title">Price trend</h2>
+          <h2 className="box-profile-page__section-title">Price trends</h2>
           <p className="box-profile-page__section-subtitle">
-            Sealed box market price over time.
+            {activeChartTab === 'box'
+              ? 'Sealed box market price over time.'
+              : 'Average market price of grailed cards over the past 8 weeks.'}
           </p>
         </div>
-        <PriceTrendChart data={priceHistory} />
-      </section>
-
-      {/* ── GRAILED AVERAGE TREND ────────────────────────────────────────── */}
-      {/* Average market price of the top grailed cards (print run ≤ 10) over time.
-          No tier tabs — one line tracking all grails as a single market signal. */}
-      <section className="box-profile-page__section">
-        <div className="box-profile-page__section-header">
-          <h2 className="box-profile-page__section-title">Grailed</h2>
-          <p className="box-profile-page__section-subtitle">
-            Average market price of grailed cards over the past 8 weeks.
-          </p>
+        <div className="hits-tabs" role="tablist" aria-label="Price trend type">
+          <button
+            role="tab"
+            aria-selected={activeChartTab === 'box'}
+            className={`hits-tabs__tab${activeChartTab === 'box' ? ' hits-tabs__tab--active' : ''}`}
+            onClick={() => setActiveChartTab('box')}
+          >
+            Box price
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeChartTab === 'grailed'}
+            className={`hits-tabs__tab${activeChartTab === 'grailed' ? ' hits-tabs__tab--active' : ''}`}
+            onClick={() => setActiveChartTab('grailed')}
+          >
+            Grailed
+          </button>
         </div>
-        <TierPriceTrendChart
-          data={DUMMY_GRAIL_PRICE_TREND}
-          activeTier="patchAutos"
-        />
+        {activeChartTab === 'box' && <PriceTrendChart data={priceHistory} />}
+        {activeChartTab === 'grailed' && (
+          <TierPriceTrendChart
+            data={DUMMY_GRAIL_PRICE_TREND}
+            activeTier="patchAutos"
+          />
+        )}
       </section>
 
       {/* ── FULL CHECKLIST ───────────────────────────────────────────────── */}
