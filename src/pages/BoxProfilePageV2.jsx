@@ -19,9 +19,12 @@ import { TopPullsTab } from '../components/TopPullsTab';
 import { GrailsTab } from '../components/GrailsTab';
 import { PullRateCard } from '../components/PullRateCard';
 import { PriceTrendChart } from '../components/PriceTrendChart';
+import { TierTrendTabs } from '../components/TierTrendTabs';
+import { TierPriceTrendChart } from '../components/TierPriceTrendChart';
 import { ChecklistTier } from '../components/ChecklistTier';
 import { DUMMY_FORMAT_DATA, FORMAT_ORDER } from '../utils/formatSwitcherData';
 import { GRANULAR_PULL_RATES } from '../utils/granularPullRates';
+import { DUMMY_TIER_TREND_DATA } from '../utils/tierPriceTrendData';
 import { MOCK_TOP_CHASE_PLAYERS } from '../utils/boxProfileMockData';
 import { formatCurrency, formatPercent, getRoiSentiment } from '../utils/formatters';
 import { sortTiersByValue } from '../utils/checklistUtils';
@@ -45,6 +48,7 @@ export function BoxProfilePageV2() {
   }
 
   const [activeChaseTab, setActiveChaseTab] = useState('players');
+  const [activeTierTab, setActiveTierTab] = useState('base');
 
   const [expandedTiers, setExpandedTiers] = useState(new Set());
   const [shownCounts, setShownCounts] = useState({});
@@ -193,9 +197,7 @@ export function BoxProfilePageV2() {
       {/* ── TOP CHASES (2 tabs: Top Players | Top Pulls) ─────────────────── */}
       <section className="box-profile-page__section">
         <div className="box-profile-page__section-header">
-          <h2 className="box-profile-page__section-title">
-            {activeChaseTab === 'players' ? 'Top players' : 'Top pulls'}
-          </h2>
+          <h2 className="box-profile-page__section-title">Top chases</h2>
           <p className="box-profile-page__section-subtitle">
             {activeChaseTab === 'players'
               ? 'The most sought-after names in this set.'
@@ -275,6 +277,24 @@ export function BoxProfilePageV2() {
           </p>
         </div>
         <GrailsTab cards={mergedGrails} />
+      </section>
+
+      {/* ── CARD VALUE TRENDS ────────────────────────────────────────────── */}
+      <section className="box-profile-page__section">
+        <div className="box-profile-page__section-header">
+          <h2 className="box-profile-page__section-title">Card value trends</h2>
+          <p className="box-profile-page__section-subtitle">
+            Average sale price by tier over the past 8 weeks.
+          </p>
+        </div>
+        <TierTrendTabs
+          activeTier={activeTierTab}
+          onTierChange={setActiveTierTab}
+        />
+        <TierPriceTrendChart
+          data={DUMMY_TIER_TREND_DATA[activeTierTab]}
+          activeTier={activeTierTab}
+        />
       </section>
 
       {/* ── FULL CHECKLIST ───────────────────────────────────────────────── */}

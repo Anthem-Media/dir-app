@@ -10,10 +10,14 @@
 
 import './TopPullsTab.css';
 
-function formatOdds(probability) {
-  if (!probability || probability <= 0) return '—';
-  const denominator = Math.round(1 / probability);
-  return `1 in ${denominator.toLocaleString()}`;
+function formatOdds(rate) {
+  // Use the exact denominator from the source data when available.
+  // Avoids rounding errors from inverting an already-rounded probability float.
+  if (rate.oddsDenominator != null) {
+    return `1 in ${Math.round(rate.oddsDenominator).toLocaleString()}`;
+  }
+  if (!rate.probability || rate.probability <= 0) return '—';
+  return `1 in ${Math.round(1 / rate.probability).toLocaleString()}`;
 }
 
 export function TopPullsTab({ pullRates }) {
@@ -30,7 +34,7 @@ export function TopPullsTab({ pullRates }) {
         <div key={rate.category} className="top-pulls-tab__row">
           <span className="top-pulls-tab__rank">{index + 1}</span>
           <span className="top-pulls-tab__category">{rate.category}</span>
-          <span className="top-pulls-tab__odds">{formatOdds(rate.probability)}</span>
+          <span className="top-pulls-tab__odds">{formatOdds(rate)}</span>
         </div>
       ))}
     </div>
