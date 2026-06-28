@@ -39,6 +39,7 @@ export function ChecklistTier({
   onShowMore,
   searchQuery,
   onSearchChange,
+  showPricing = true,
 }) {
   const { label, cardCount, avgValue, cards } = tier;
 
@@ -137,11 +138,13 @@ export function ChecklistTier({
                 <div className="checklist-tier__card-badges">
                   <CardBadge card={card} />
                 </div>
-                <span className="checklist-tier__card-value">
-                  {(card.current_value ?? card.value) != null
-                    ? formatCurrency(card.current_value ?? card.value)
-                    : ''}
-                </span>
+                {showPricing && (
+                  <span className="checklist-tier__card-value">
+                    {(card.current_value ?? card.value) != null
+                      ? formatCurrency(card.current_value ?? card.value)
+                      : ''}
+                  </span>
+                )}
               </div>
             ))
           ) : (

@@ -59,7 +59,8 @@ const TAB_LINKS = {
   Football:   '/browse?sport=Football',
   Basketball: '/browse?sport=Basketball',
   Hockey:     '/browse?sport=Hockey',
-  Soccer:     '/browse?sport=Soccer',
+  Soccer:       '/browse?sport=Soccer',
+  'V2 Preview': '/box-v2/2023-topps-chrome-baseball',
 };
 
 export function SiteNavBar({ tabs }) {

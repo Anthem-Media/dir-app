@@ -8775,3 +8775,16 @@ export const MOCK_CHECKLIST_TIERS = [
     ],
   }
 ];
+
+export const MOCK_TOP_CHASE_PLAYERS = [
+  { id: 'player-corbin-carroll',      name: 'Corbin Carroll',      teamAbbr: 'ARI', position: 'OF',    isRookie: true,  baseAutoPrice: 120 },
+  { id: 'player-gunnar-henderson',    name: 'Gunnar Henderson',    teamAbbr: 'BAL', position: 'SS',    isRookie: true,  baseAutoPrice: 95  },
+  { id: 'player-francisco-alvarez',   name: 'Francisco Alvarez',   teamAbbr: 'NYM', position: 'C',     isRookie: true,  baseAutoPrice: 75  },
+  { id: 'player-adley-rutschman',     name: 'Adley Rutschman',     teamAbbr: 'BAL', position: 'C',     isRookie: false, baseAutoPrice: 85  },
+  { id: 'player-shohei-ohtani',       name: 'Shohei Ohtani',       teamAbbr: 'LAA', position: 'SP/DH', isRookie: false, baseAutoPrice: 450 },
+  { id: 'player-aaron-judge',         name: 'Aaron Judge',         teamAbbr: 'NYY', position: 'OF',    isRookie: false, baseAutoPrice: 380 },
+  { id: 'player-bobby-witt-jr',       name: 'Bobby Witt Jr.',      teamAbbr: 'KC',  position: 'SS',    isRookie: false, baseAutoPrice: 130 },
+  { id: 'player-ronald-acuna',        name: 'Ronald Acuña Jr.',    teamAbbr: 'ATL', position: 'OF',    isRookie: false, baseAutoPrice: 240 },
+  { id: 'player-julio-rodriguez',     name: 'Julio Rodríguez',     teamAbbr: 'SEA', position: 'OF',    isRookie: false, baseAutoPrice: 160 },
+  { id: 'player-jackson-holliday',    name: 'Jackson Holliday',    teamAbbr: 'BAL', position: 'SS',    isRookie: true,  baseAutoPrice: 55  },
+];

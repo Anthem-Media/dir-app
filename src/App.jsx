@@ -29,7 +29,8 @@ import { ScrollToTop }  from './components/ScrollToTop';
 
 import { HomePage }       from './pages/HomePage';
 import { BrowsePage }     from './pages/BrowsePage';
-import { BoxProfilePage } from './pages/BoxProfilePage';
+import { BoxProfilePage }   from './pages/BoxProfilePage';
+import { BoxProfilePageV2 } from './pages/BoxProfilePageV2';
 import { AboutPage }      from './pages/AboutPage';
 import { NewsPage }       from './pages/NewsPage';
 import { ContactPage }    from './pages/ContactPage';
@@ -53,7 +54,8 @@ function App() {
         <Routes>
           <Route path="/"          element={<HomePage />} />
           <Route path="/browse"    element={<BrowsePage />} />
-          <Route path="/box/:slug" element={<BoxProfilePage />} />
+          <Route path="/box/:slug"    element={<BoxProfilePage />} />
+          <Route path="/box-v2/:slug" element={<BoxProfilePageV2 />} />
           <Route path="/about"     element={<AboutPage />} />
           <Route path="/news"      element={<NewsPage />} />
           <Route path="/contact"   element={<ContactPage />} />
