@@ -1,0 +1,9 @@
+box_set_slug,category_name,card_number,player_name,rookie_card,variation_name,print_run,is_numbered,is_autograph,is_relic,is_case_hit,insert_set_name,circulation_status,current_value,value_source,image_url,notes,_needs_review,_source_notes
+2023-topps-chrome-baseball,Refractor,92,Andrew McCutchen,TRUE,Silver  Wave,,FALSE,FALSE,FALSE,FALSE,,,54.99,sportscardspro,,,TRUE,2023_Topps_Chrome.csv
+2023-topps-chrome-baseball,Refractor,52-2,Anthony Volpe,TRUE,Autograph,,FALSE,FALSE,FALSE,FALSE,,,2.05,sportscardspro,,,TRUE,2023_Topps_Chrome.csv
+2023-topps-chrome-baseball,Refractor,460,Anthony Volpe,TRUE,Chrome Refractor,,FALSE,FALSE,FALSE,FALSE,,,14.99,sportscardspro,,,TRUE,2023_Topps_Chrome.csv
+2023-topps-chrome-baseball,Refractor,54CV-13,Chipper Jones,FALSE,Refractor Autograph,,FALSE,FALSE,FALSE,FALSE,,,149.95,sportscardspro,,,TRUE,2023_Topps_Chrome.csv
+2023-topps-chrome-baseball,Refractor,10,DL Hall,TRUE,Frozen Refractor,,FALSE,FALSE,FALSE,FALSE,,,105.00,sportscardspro,,,TRUE,2023_Topps_Chrome.csv
+2023-topps-chrome-baseball,Refractor,CGA-MVA,Miguel Vargas,TRUE,Yellow Refractor Autograph,,FALSE,FALSE,FALSE,FALSE,,,39.88,sportscardspro,,,TRUE,2023_Topps_Chrome.csv
+2023-topps-chrome-baseball,Refractor,VP,Vinnie Pasquantino,TRUE,Black Autograph,,FALSE,FALSE,FALSE,FALSE,,,100.00,sportscardspro,,,TRUE,2023_Topps_Chrome.csv
+2023-topps-chrome-baseball,Base Auto,RA-MLI,Matthew Liberatore,TRUE,Rookie Autographs Mojo,,FALSE,TRUE,FALSE,FALSE,,,11.00,sportscardspro,,,TRUE,2023_Topps_Chrome_Rookie_Autographs.csv

@@ -545,6 +545,42 @@ Box art images needed for all ~1,150 box sets. Primary source: distributor produ
 - **Done when:** `image_url` populated for all box sets in Supabase.
 - **Blocks:** Box profile pages displaying real box art, homepage featured set images.
 
+### 16.8 Insert pricing pipeline — IN PROGRESS (Baseball POC only)
+Insert sets (1988 design, Future Stars, TacoFractor, Exposé, etc.) are separate SCP console pages from the main set. They each have unique download URLs and their own pricing CSVs. These need to be downloaded and merged into the seed spreadsheet to give insert cards real `current_value` data.
+
+Full seven-step pipeline:
+1. **Research inserts per box** — Beckett, TCDB, Cardboard Connection identify which insert sets belong to which box set + year (Cowork job). Output: master insert reference list with `box_set_name | year | sport | insert_name`.
+2. **Match inserts to SCP URLs** — ~2k SCP insert page URLs fuzzy-matched to the correct box set + year by URL slug prefix. Script auto-maps most; exceptions flagged for manual review.
+3. **Scrape SCP download URLs** — existing `scrape_scp_download_urls.py` retargeted at the master insert spreadsheet. Populates Column C (download URL) for each insert.
+4. **Download all CSVs** — existing `download_insert_csvs.py` retargeted at the master spreadsheet. Rate-limited to 1 per 5 minutes, skips already-downloaded files, saves to organized folders by sport/year/box.
+5. **Parse/normalize CSVs** — new script splits SCP `product-name` field into `player_name`, `parallel`, and `card_number` columns. See #16.9.
+6. **Match to seed spreadsheet** — normalized rows matched to existing cards by player + parallel + card number. Requires fuzzy matching — SCP bracket names may not exactly match seed spreadsheet parallel names. See #16.9.
+7. **Write pricing** — `loose-price` written into `current_value` on matched rows. Finished spreadsheet ready for Supabase import.
+
+Current status: Baseball POC pipeline (2023 Topps Chrome Baseball, 20 insert sets) completed through step 4. Scripts at `scripts/scrape_inserts_download_urls.py` and `scripts/download_insert_csvs.py`. CSVs in `~/Documents/Ripper Data/2023 Topps Chrome Inserts/`. Steps 5–7 not yet built.
+
+- **Done when (Baseball POC):** All 7 steps complete for 2023 Topps Chrome Baseball. Insert card prices visible in the seed spreadsheet.
+- **Done when (full):** Pipeline runs end-to-end for all four launch sports. Finish Baseball POC first, then expand.
+- **Blocks:** Insert card `current_value` data in the seed spreadsheet; accurate EV calculations for sets with valuable insert runs.
+
+### 16.9 SCP CSV normalization and seed-merge script — OPEN
+SCP's `product-name` CSV column combines player name, parallel, and card number in a single text block. Must be parsed before the data can be matched against the seed spreadsheet.
+
+**SCP format (consistent across all insert CSVs):**
+- Base card: `Aaron Judge #88BC-1`
+- Parallel: `Aaron Judge [Gold] #88BC-1`
+- Dual players: `Corbin Carroll, Riley Greene #DRA-GC`
+- Named parallel: `Adley Rutschman [Blue Logofractor] #FS-1`
+
+Structure is always: `Player Name [Parallel] #CardNumber`. Parallel is in square brackets and absent for base cards.
+
+**Normalization script** (to build): reads each downloaded CSV, applies regex to extract `player_name` (everything before `[` or `#`), `parallel` (text inside `[...]`, defaulting to `"Base"` if absent), and `card_number` (everything after `#`). Outputs normalized rows ready for matching.
+
+**Fuzzy matching risk**: SCP bracket names and seed spreadsheet parallel names will not always match exactly (e.g. SCP `[Gold]` vs seed `Gold Refractor`). A normalization map or fuzzy-match strategy must be designed before the merge script is built. This is the highest-risk step in the pipeline — plan for manual review of unmatched rows.
+
+- **Done when:** Script parses all downloaded CSVs into normalized columns without data loss. Merge script successfully writes `loose-price` into `current_value` on matched rows. Unmatched rows are flagged in a review file, not silently dropped. Baseball POC validated first.
+- **Blocks:** Step 5–7 of the insert pricing pipeline (#16.8); accurate insert card pricing in the seed spreadsheet.
+
 ---
 
 ## How this list gets maintained

@@ -447,20 +447,28 @@ Current pull_rates table has one row per category per format. For accurate EV ma
 - Each with its own Hobby/Jumbo/Blaster/Mega/Breaker odds from the official Topps PDF
 - cards table variation_name must match pull_rates variation_name exactly for the join to work
 
-- Depends on: schema migration
+**Related — pull rate display granularity (pending decision with Cam, June 2026):** The box profile pull rates grid currently shows 7-11 summary categories (e.g. "Numbered Refractor: 1 in 96"). The full Baseballcardpedia odds table has 100+ rows per set covering every specific parallel. Whether the pull rates grid should show summarized categories, full parallel-level detail, or a hybrid (summary tiers with expandable per-parallel rows) is a product display question that directly affects how granular the pull_rates table needs to be. If the display stays summarized, category-level schema is sufficient for display (though not for EV accuracy). If the display goes parallel-level, the schema redesign must also go parallel-level. Decide display approach before designing the schema amendment.
+
+- Depends on: schema migration, display decision with Cam
 - Affects: EV model, pull rates display, checklist tier structure
 - Blocks: full seed
 
-### Checklist tier restructure — must resolve before full seed
+### Checklist tier restructure — pending decision with Cam, must resolve before full seed
 
-Current 5-tier structure puts Numbered Refractors ($10-$11,998) and plain Refractors ($2-$50) in the same Tier 3. This is confusing for users. Proposed restructure:
+Current 5-tier structure puts Numbered Refractors ($10-$11,998) and plain Refractors ($2-$50) in the same Tier 3. This is confusing for users.
+
+**Status (June 2026):** A 5-tier split was drafted as a candidate fix (see below), but the final decision — including how granular the auto sub-categories should be (see open question 10a) — is being made jointly with Cam. Not yet locked.
+
+Candidate restructure under discussion:
 - Tier 1: Premium Hits (Superfractor, Memorabilia/Relic, print_run ≤ 10)
 - Tier 2: Autographs (Base Auto, Refractor Auto, Numbered Autograph)
 - Tier 3: Numbered Parallels (Numbered Refractor, Numbered Rookie Refractor)
 - Tier 4: Refractors (plain Refractor, Rookie Refractor, Insert, Short Print)
 - Tier 5: Base & Rookies (Base, Base Rookie)
 
-- Depends on: pull rates schema redesign
+This candidate structure is linked to the open auto sub-category granularity question (10a below) — the tier count and the sub-category count should be decided together, not separately, since both affect how finely pull rates need to be split.
+
+- Depends on: pull rates schema redesign, decision with Cam on granularity
 - Affects: checklist display, EV tier grouping, card_categories table
 - Blocks: full seed
 
