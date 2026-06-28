@@ -16,8 +16,8 @@ import {
   MOCK_GRAIL_CARDS,
   MOCK_UNPRICEABLE_CHASES,
   MOCK_PRICE_HISTORY,
-  MOCK_CHECKLIST_TIERS,
 } from '../utils/boxProfileMockData';
+import { MOCK_CHECKLIST_TIERS } from '../utils/checklistTiers2023ToppsChrome';
 import { mergeHitsForGrailsTab } from '../utils/grailsUtils';
 
 // Pre-computed once at module load — merging is pure and the mock data never
