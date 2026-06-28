@@ -41,7 +41,7 @@ export function ChecklistTier({
   onSearchChange,
   showPricing = true,
 }) {
-  const { label, cardCount, avgValue, cards } = tier;
+  const { label, cardCount, cards } = tier;
 
   // Apply the search filter first (no-op when query is blank).
   const filteredCards = filterCardsByQuery(cards, searchQuery);
@@ -85,7 +85,6 @@ export function ChecklistTier({
         <span className="checklist-tier__label">{label}</span>
         <span className="checklist-tier__meta">
           <span className="checklist-tier__count">{cardCount} cards</span>
-          <span className="checklist-tier__avg">avg {formatCurrency(avgValue)}</span>
         </span>
         {/* Rotates 90° when open to point downward */}
         <span

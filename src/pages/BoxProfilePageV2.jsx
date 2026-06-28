@@ -19,9 +19,9 @@ import { TopPullsTab } from '../components/TopPullsTab';
 import { GrailsTab } from '../components/GrailsTab';
 import { PullRateCard } from '../components/PullRateCard';
 import { PriceTrendChart } from '../components/PriceTrendChart';
-import { GrailedPrices } from '../components/GrailedPrices';
 import { ChecklistTier } from '../components/ChecklistTier';
 import { DUMMY_FORMAT_DATA, FORMAT_ORDER } from '../utils/formatSwitcherData';
+import { GRANULAR_PULL_RATES } from '../utils/granularPullRates';
 import { MOCK_TOP_CHASE_PLAYERS } from '../utils/boxProfileMockData';
 import { formatCurrency, formatPercent, getRoiSentiment } from '../utils/formatters';
 import { sortTiersByValue } from '../utils/checklistUtils';
@@ -221,7 +221,7 @@ export function BoxProfilePageV2() {
           <TopPlayersTab players={MOCK_TOP_CHASE_PLAYERS} />
         )}
         {activeChaseTab === 'pulls' && (
-          <TopPullsTab pullRates={formatData.pullRates} />
+          <TopPullsTab pullRates={GRANULAR_PULL_RATES[selectedFormat] ?? []} />
         )}
       </section>
 
@@ -274,7 +274,7 @@ export function BoxProfilePageV2() {
             Known market prices on the rarest cards in this set.
           </p>
         </div>
-        <GrailedPrices cards={mergedGrails} />
+        <GrailsTab cards={mergedGrails} />
       </section>
 
       {/* ── FULL CHECKLIST ───────────────────────────────────────────────── */}
