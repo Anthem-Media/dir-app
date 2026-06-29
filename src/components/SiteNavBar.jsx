@@ -586,10 +586,12 @@ export function SiteNavBar({ tabs }) {
               wasTouchTapRef.current = false;
 
               if (isMobileTap) {
-                // Mobile tap: toggle the dropdown only. Do NOT navigate away —
-                // the user needs to see the dropdown and tap a specific option
-                // (e.g. a year or brand) before navigation should occur.
-                if (openTab === tab) {
+                // Mobile tap: if this tab has no dropdown, navigate immediately
+                // (same as desktop). Otherwise toggle the dropdown so the user
+                // can pick a specific option before navigating.
+                if (!NAV_DROPDOWN_DATA[tab]) {
+                  handleTabClick(tab);
+                } else if (openTab === tab) {
                   closeDropdown();
                 } else {
                   openDropdown(tab);
