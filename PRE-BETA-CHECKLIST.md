@@ -581,6 +581,18 @@ Structure is always: `Player Name [Parallel] #CardNumber`. Parallel is in square
 - **Done when:** Script parses all downloaded CSVs into normalized columns without data loss. Merge script successfully writes `loose-price` into `current_value` on matched rows. Unmatched rows are flagged in a review file, not silently dropped. Baseball POC validated first.
 - **Blocks:** Step 5–7 of the insert pricing pipeline (#16.8); accurate insert card pricing in the seed spreadsheet.
 
+### 16.10 Delete dead code: GrailedPrices.jsx + GrailedPrices.css — OPEN
+`src/components/GrailedPrices.jsx` and `src/components/GrailedPrices.css` are unused. They were created early in the BoxProfilePageV2 build and were replaced by GrailsTab (for displaying grail cards) and the combined Price Trends section (for the trend chart). Neither file is imported anywhere.
+- **Done when:** Both files deleted, confirmed no imports reference them (`grep -r "GrailedPrices" src/` returns empty).
+- **Blocks:** Nothing. Clean up before Pro audit #1.
+
+### 16.11 Bundle size — checklistTiers2023ToppsChrome.js (3.6MB) — DEFERRED
+The full 2023 Topps Chrome Baseball checklist (12,657 cards) is a 3.6MB JS file imported at the top of `useBoxProfile.js`. Vite emits a "chunk larger than 500 kB" warning at build time. The current bundle is 3.9MB minified / 461KB gzipped.
+- **Current status:** Acceptable for the POC and internal beta (only Zach and Cam are using the app). Gzip brings it to 461KB which is reasonable. Not a user-facing problem today.
+- **Long-term fix:** At database phase this entire file goes away — `useBoxProfile` fetches checklist data from Supabase instead. The bundle size issue resolves itself automatically.
+- **Done when:** Database phase is complete and `checklistTiers2023ToppsChrome.js` is deleted. No action needed before then.
+- **Blocks:** Nothing pre-beta.
+
 ---
 
 ## How this list gets maintained
