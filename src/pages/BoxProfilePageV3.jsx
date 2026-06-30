@@ -15,7 +15,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { useBoxProfile } from '../hooks/useBoxProfile';
 import { FormatSwitcher } from '../components/FormatSwitcher';
 import { MetricCard } from '../components/MetricCard';
-import { TopChaseRow } from '../components/TopChaseRow';
+import { TopChaseRowV3 } from '../components/TopChaseRowV3';
 import { MOCK_V3_TOP_CHASES } from '../utils/boxProfileMockData';
 import { GrailsTab } from '../components/GrailsTab';
 import { PullRateCard } from '../components/PullRateCard';
@@ -225,7 +225,7 @@ export function BoxProfilePageV3() {
         {activeHitsTab === 'topChases' ? (
           <div className="box-profile-page__card-list">
             {MOCK_V3_TOP_CHASES.map((card) => (
-              <TopChaseRow key={card.id} card={card} />
+              <TopChaseRowV3 key={card.id} card={card} />
             ))}
           </div>
         ) : (
