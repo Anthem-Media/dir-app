@@ -16,7 +16,8 @@ import { useBoxProfile } from '../hooks/useBoxProfile';
 import { FormatSwitcher } from '../components/FormatSwitcher';
 import { MetricCard } from '../components/MetricCard';
 import { TopChaseRowV3 } from '../components/TopChaseRowV3';
-import { MOCK_V3_TOP_CHASES } from '../utils/boxProfileMockData';
+import { PullRatesDrawer } from '../components/PullRatesDrawer';
+import { MOCK_V3_TOP_CHASES, MOCK_GRANULAR_PULL_RATES } from '../utils/boxProfileMockData';
 import { GrailsTab } from '../components/GrailsTab';
 import { PullRateCard } from '../components/PullRateCard';
 import { PriceTrendChart } from '../components/PriceTrendChart';
@@ -43,6 +44,7 @@ export function BoxProfilePageV3() {
 
   // V1-style combined Top Chases / Grails tab state
   const [activeHitsTab, setActiveHitsTab] = useState('topChases');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeChartTab, setActiveChartTab] = useState('box');
   const [expandedTiers, setExpandedTiers] = useState(new Set());
   const [shownCounts, setShownCounts] = useState({});
@@ -162,7 +164,7 @@ export function BoxProfilePageV3() {
             <MetricCard
               label="Market Price"
               value={formatCurrency(formatData.marketPrice)}
-              subtext="eBay sold avg"
+              subtext="Sealed box sales"
             />
             <MetricCard
               label="MSRP"
@@ -188,6 +190,43 @@ export function BoxProfilePageV3() {
         </div>
       </section>
 
+      {/* ── PRICE TRENDS (switchable: Box Price | Grailed) ───────────────── */}
+      <section className="box-profile-page__section">
+        <div className="box-profile-page__section-header">
+          <h2 className="box-profile-page__section-title">Price trends</h2>
+          <p className="box-profile-page__section-subtitle">
+            {activeChartTab === 'box'
+              ? 'Sealed box market price over time.'
+              : 'Average market price of grailed cards over the past 8 weeks.'}
+          </p>
+        </div>
+        <div className="hits-tabs" role="tablist" aria-label="Price trend type">
+          <button
+            role="tab"
+            aria-selected={activeChartTab === 'box'}
+            className={`hits-tabs__tab${activeChartTab === 'box' ? ' hits-tabs__tab--active' : ''}`}
+            onClick={() => setActiveChartTab('box')}
+          >
+            Box price
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeChartTab === 'grailed'}
+            className={`hits-tabs__tab${activeChartTab === 'grailed' ? ' hits-tabs__tab--active' : ''}`}
+            onClick={() => setActiveChartTab('grailed')}
+          >
+            Grailed
+          </button>
+        </div>
+        {activeChartTab === 'box' && <PriceTrendChart data={priceHistory} />}
+        {activeChartTab === 'grailed' && (
+          <TierPriceTrendChart
+            data={DUMMY_GRAIL_PRICE_TREND}
+            activeTier="patchAutos"
+          />
+        )}
+      </section>
+
       {/* ── TOP CHASES / GRAILS (V1-style: two tabs, one section) ────────── */}
       {/* Reverts V2's split layout back to V1's combined tab pattern.
           Top Chases = pullable cards. Grails = print run ≤ 10 (excluded from EV). */}
@@ -198,8 +237,8 @@ export function BoxProfilePageV3() {
           </h2>
           <p className="box-profile-page__section-subtitle">
             {activeHitsTab === 'topChases'
-              ? 'Highest value cards in this set.'
-              : 'The rarest cards in this set — print run ≤ 10.'}
+              ? 'Rarest unpulled cards from this set.'
+              : 'Highest value cards in this set.'}
           </p>
         </div>
 
@@ -246,7 +285,20 @@ export function BoxProfilePageV3() {
             <PullRateCard key={rate.category} pullRate={rate} />
           ))}
         </div>
+        <button
+          className="pull-rates-drawer__trigger"
+          onClick={() => setIsDrawerOpen(true)}
+        >
+          See detailed odds →
+        </button>
       </section>
+
+      <PullRatesDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        format={selectedFormat}
+        rates={MOCK_GRANULAR_PULL_RATES}
+      />
 
       {/* ── INSERTS ──────────────────────────────────────────────────────── */}
       <section className="box-profile-page__section">
@@ -259,43 +311,6 @@ export function BoxProfilePageV3() {
         <InsertSetsSection
           cards={checklistTiers.find((t) => t.id === 'tier-2')?.cards ?? []}
         />
-      </section>
-
-      {/* ── PRICE TRENDS (switchable: Box Price | Grailed) ───────────────── */}
-      <section className="box-profile-page__section">
-        <div className="box-profile-page__section-header">
-          <h2 className="box-profile-page__section-title">Price trends</h2>
-          <p className="box-profile-page__section-subtitle">
-            {activeChartTab === 'box'
-              ? 'Sealed box market price over time.'
-              : 'Average market price of grailed cards over the past 8 weeks.'}
-          </p>
-        </div>
-        <div className="hits-tabs" role="tablist" aria-label="Price trend type">
-          <button
-            role="tab"
-            aria-selected={activeChartTab === 'box'}
-            className={`hits-tabs__tab${activeChartTab === 'box' ? ' hits-tabs__tab--active' : ''}`}
-            onClick={() => setActiveChartTab('box')}
-          >
-            Box price
-          </button>
-          <button
-            role="tab"
-            aria-selected={activeChartTab === 'grailed'}
-            className={`hits-tabs__tab${activeChartTab === 'grailed' ? ' hits-tabs__tab--active' : ''}`}
-            onClick={() => setActiveChartTab('grailed')}
-          >
-            Grailed
-          </button>
-        </div>
-        {activeChartTab === 'box' && <PriceTrendChart data={priceHistory} />}
-        {activeChartTab === 'grailed' && (
-          <TierPriceTrendChart
-            data={DUMMY_GRAIL_PRICE_TREND}
-            activeTier="patchAutos"
-          />
-        )}
       </section>
 
       {/* ── FULL CHECKLIST ───────────────────────────────────────────────── */}
