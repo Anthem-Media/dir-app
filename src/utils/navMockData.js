@@ -55,7 +55,9 @@ const YEAR_TAB_ITEMS = [
 export const NAV_TABS = [
   'All', 'Trending', 'Brands', 'Sports', 'Year',
   'Baseball', 'Football', 'Basketball', 'Hockey', 'Soccer',
+  'V1 Preview',
   'V2 Preview',
+  'V3 Preview',
 ];
 
 // ─── Dropdown content ──────────────────────────────────────────────────────

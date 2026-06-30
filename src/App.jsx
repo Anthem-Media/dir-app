@@ -7,7 +7,9 @@
  * Route map:
  *   /                 → HomePage
  *   /browse           → BrowsePage
- *   /box/:slug        → BoxProfilePage  (slug matches the box id, e.g. topps-chrome-2024-hobby)
+ *   /box/:slug        → BoxProfilePageV3 (default box profile — all site links use this)
+ *   /box-v1/:slug     → BoxProfilePage   (V1 — accessible via "V1 Preview" nav tab)
+ *   /box-v2/:slug     → BoxProfilePageV2 (V2 POC — accessible via "V2 Preview" nav tab)
  *   /about            → AboutPage
  *   /news             → NewsPage
  *   /contact          → ContactPage
@@ -31,6 +33,7 @@ import { HomePage }       from './pages/HomePage';
 import { BrowsePage }     from './pages/BrowsePage';
 import { BoxProfilePage }   from './pages/BoxProfilePage';
 import { BoxProfilePageV2 } from './pages/BoxProfilePageV2';
+import { BoxProfilePageV3 } from './pages/BoxProfilePageV3';
 import { AboutPage }      from './pages/AboutPage';
 import { NewsPage }       from './pages/NewsPage';
 import { ContactPage }    from './pages/ContactPage';
@@ -54,8 +57,10 @@ function App() {
         <Routes>
           <Route path="/"          element={<HomePage />} />
           <Route path="/browse"    element={<BrowsePage />} />
-          <Route path="/box/:slug"    element={<BoxProfilePage />} />
+          <Route path="/box/:slug"     element={<BoxProfilePageV3 />} />
+          <Route path="/box-v1/:slug" element={<BoxProfilePage />} />
           <Route path="/box-v2/:slug" element={<BoxProfilePageV2 />} />
+          <Route path="/box-v3/:slug" element={<BoxProfilePageV3 />} />
           <Route path="/about"     element={<AboutPage />} />
           <Route path="/news"      element={<NewsPage />} />
           <Route path="/contact"   element={<ContactPage />} />

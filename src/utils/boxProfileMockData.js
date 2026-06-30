@@ -121,6 +121,20 @@ export const MOCK_UNPRICEABLE_CHASES = [
   { id: 'uc-007', playerName: 'Vinnie Pasquantino',   variationName: 'Superfractor', printRun: 1, rookieCard: false, isAutograph: false, price: null },
 ];
 
+// V3 Top Chases — top 7 rarest unpriced cards from the ODS source of truth.
+// All are Future Stars Autographs SuperFractors /1 (1 in 2,472,912 hobby odds — rarest pull in the set).
+// Shape matches TopChaseRow. variationName carries card# + insert set for display.
+// price: null → "Not in Circulation" badge. imageUrl omitted → placeholder image.
+export const MOCK_V3_TOP_CHASES = [
+  { id: 'v3-001', playerName: 'Brett Baty',        variationName: '#FSA-BB · Future Stars Autographs', printRun: 1, rookieCard: true,  isAutograph: true, price: null },
+  { id: 'v3-002', playerName: 'Corbin Carroll',    variationName: '#FSA-CC · Future Stars Autographs', printRun: 1, rookieCard: true,  isAutograph: true, price: null },
+  { id: 'v3-003', playerName: 'Ezequiel Tovar',    variationName: '#FSA-ET · Future Stars Autographs', printRun: 1, rookieCard: true,  isAutograph: true, price: null },
+  { id: 'v3-004', playerName: 'Francisco Alvarez', variationName: '#FSA-FA · Future Stars Autographs', printRun: 1, rookieCard: true,  isAutograph: true, price: null },
+  { id: 'v3-005', playerName: 'Gabriel Moreno',    variationName: '#FSA-GM · Future Stars Autographs', printRun: 1, rookieCard: true,  isAutograph: true, price: null },
+  { id: 'v3-006', playerName: 'Josh Jung',         variationName: '#FSA-JJ · Future Stars Autographs', printRun: 1, rookieCard: true,  isAutograph: true, price: null },
+  { id: 'v3-007', playerName: 'Nolan Jones',       variationName: '#FSA-NJ · Future Stars Autographs', printRun: 1, rookieCard: true,  isAutograph: true, price: null },
+];
+
 // Grail cards — print run ≤ 10. These are the rarest cards in the set.
 // Excluded from EV and ROI calculations (see CONTEXT.md for the /10 cutoff rationale).
 // circulationStatus maps to the circulation_status column on the cards table in the
