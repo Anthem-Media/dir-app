@@ -167,7 +167,10 @@ Each expanded tier has a lightweight search input at the top. Filters cards in r
 React Router handles all navigation. Routes defined in App.jsx:
 - `/` — Homepage
 - `/browse` — Browse page (filter sidebar + results grid)
-- `/box/:slug` — Box profile page (slug from box_sets table)
+- `/box/:slug` — Box profile page (default — renders BoxProfilePageV3)
+- `/box-v1/:slug` — V1 box profile (accessible via "V1 Preview" nav tab)
+- `/box-v2/:slug` — V2 box profile POC (accessible via "V2 Preview" nav tab)
+- `/box-v3/:slug` — V3 box profile (same as `/box/:slug` — accessible via "V3 Preview" nav tab)
 - `/about`, `/news`, `/contact`, `/help` — Landing pages
 - `/signin`, `/signup` — Auth pages
 - `/check-email` — Post-signup confirmation destination (not in header nav — it's a flow state)
